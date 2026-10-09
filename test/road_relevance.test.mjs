@@ -47,3 +47,11 @@ test('a fresh Illinois published window can be compared beyond the Caltrans seve
   assert.equal(result.records[0].overlaps,true);
   assert.equal(selectRoadContext(chicago,{...data,builtAt:'2026-10-08T00:00:00Z'},now).overlapCount,0);
 });
+
+test('Tennessee source-listed events cannot become kickoff time overlaps',()=>{
+  const data={...snapshot,timedCoverageByVenue:{stadium:{from:null,through:null,sourceListedOnly:true}},byVenue:{stadium:[{id:'tdot-1',agency:'Tennessee DOT SmartWay',distanceKm:3,startAt:null,endAt:null,timingPolicy:'source_listed_only'}]}};
+  const result=selectRoadContext(game,data,now);
+  assert.equal(result.timingState,'source_listed_only');
+  assert.equal(result.overlapCount,0);
+  assert.equal(result.records[0].timed,false);
+});
