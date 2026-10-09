@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 import {parseLouisianaRoadEvents} from '../lib/louisiana_road_events.mjs';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from '../site/tennessee_road_events.js';
+import {parseWzdxNearVenue} from '../lib/wzdx_road_events.mjs';
 const schedule=JSON.parse(await fs.readFile('site/nfl.json','utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|LA|TN), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|LA|TN|NJ|NC|MO), USA$/.test(venue.address));
 const km=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
 const now=Date.now(),horizon=now+7*86400000,seasonEnd=Math.max(...schedule.games.map(game=>Date.parse(game.kickoff)).filter(Number.isFinite)),records=[],sources=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-conditions'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -111,14 +112,33 @@ try{
   records.push(...parsed);
   sources.push({id:'tdot-smartway-nashville',url:tennesseeRoadLayer,status:'ok',records:parsed.length,dateSemantics:'Numeric date fields are used only as conservative inclusion filters; their time zone is not verified.'});
 }catch(error){sources.push({id:'tdot-smartway-nashville',url:tennesseeRoadLayer,status:'failed',error:String(error)})}
+const wzdxByVenue={};
+for(const feed of [
+  {state:'NJ',id:'njit-transcom-wzdx',agency:'NJIT / TRANSCOM WZDx',url:'https://smartworkzones.njit.edu/nj/wzdx'},
+  {state:'NC',id:'ncdot-drivenc-wzdx',agency:'DriveNC WZDx',url:'https://drivenc.gov/api/wzdx'},
+  {state:'MO',id:'modot-wzdx',agency:'Missouri DOT WZDx',url:'https://traveler.modot.org/timconfig/feed/desktop/mo_wzdx.json'}
+]){
+  try{
+    const data=await get(feed.url);
+    if(data.features?.length>10000)throw Error('WZDx feed exceeds bounded record limit');
+    let near=0;
+    for(const venue of venues.filter(venue=>venue.address.endsWith(`${feed.state}, USA`))){
+      const parsed=parseWzdxNearVenue(data,venue,now,seasonEnd,{agency:feed.agency,sourceUrl:feed.url});
+      wzdxByVenue[venue.id]=parsed;near+=parsed.length;
+    }
+    sources.push({id:feed.id,url:feed.url,status:'ok',records:near,sourceUpdatedAt:new Date(Date.parse(data.feed_info.update_date)).toISOString(),sourceFeatures:data.features.length});
+  }catch(error){sources.push({id:feed.id,url:feed.url,status:'failed',error:String(error)})}
+}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public road condition source failed');
 const available=new Set(sources.filter(source=>source.status==='ok').map(source=>source.id));
-const byVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('CA, USA')?available.has('caltrans-lcs-d4')||available.has('caltrans-lcs-d7'):venue.address.includes('WA, USA')?available.has('wsdot-road-alerts'):venue.address.includes('MD, USA')?available.has('md-chart-incidents')||available.has('md-chart-closures'):venue.address.includes('WI, USA')?available.has('wisdot-511-events-green-bay'):venue.address.includes('LA, USA')?available.has('ladotd-511-new-orleans'):venue.address.includes('TN, USA')?available.has('tdot-smartway-nashville'):available.has('idot-closure-incidents')).map(venue=>{
+const byVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('CA, USA')?available.has('caltrans-lcs-d4')||available.has('caltrans-lcs-d7'):venue.address.includes('WA, USA')?available.has('wsdot-road-alerts'):venue.address.includes('MD, USA')?available.has('md-chart-incidents')||available.has('md-chart-closures'):venue.address.includes('WI, USA')?available.has('wisdot-511-events-green-bay'):venue.address.includes('LA, USA')?available.has('ladotd-511-new-orleans'):venue.address.includes('TN, USA')?available.has('tdot-smartway-nashville'):venue.address.includes('NJ, USA')?available.has('njit-transcom-wzdx'):venue.address.includes('NC, USA')?available.has('ncdot-drivenc-wzdx'):venue.address.includes('MO, USA')?available.has('modot-wzdx'):available.has('idot-closure-incidents')).map(venue=>{
+  if(Object.hasOwn(wzdxByVenue,venue.id))return [venue.id,wzdxByVenue[venue.id]];
   const agency=venue.address.includes('CA, USA')?'Caltrans':venue.address.includes('WA, USA')?'WSDOT':venue.address.includes('MD, USA')?'Maryland CHART':venue.address.includes('WI, USA')?'WisDOT 511':venue.address.includes('LA, USA')?'Louisiana DOTD 511':venue.address.includes('TN, USA')?'Tennessee DOT SmartWay':'Illinois DOT';
   return [venue.id,records.filter(record=>record.agency===agency).map(record=>({...record,distanceKm:Math.round(km(venue.lat,venue.lon,record.lat,record.lon)*10)/10})).filter(record=>record.distanceKm<=10).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,50)];
 }));
 const timedCoverageByVenue=Object.fromEntries(venues.filter(venue=>/\b(IL|WI), USA$/.test(venue.address)&&Object.hasOwn(byVenue,venue.id)).map(venue=>[venue.id,{from:new Date(now).toISOString(),through:new Date(seasonEnd).toISOString(),basis:'Illinois DOT or WisDOT published event windows from a layer updated within 24 hours; each record remains unverified for venue impact. Described recurrences are not expanded beyond the structured source window.'}]));
 for(const venue of venues.filter(venue=>venue.address.endsWith('LA, USA')&&Object.hasOwn(byVenue,venue.id)))timedCoverageByVenue[venue.id]={from:new Date(now).toISOString(),through:new Date(horizon).toISOString(),basis:'Louisiana DOTD 511 published event windows with a service update within 24 hours and record update within seven days; time overlap does not verify route impact.'};
 for(const venue of venues.filter(venue=>venue.address.endsWith('TN, USA')&&Object.hasOwn(byVenue,venue.id)))timedCoverageByVenue[venue.id]={from:null,through:null,sourceListedOnly:true,basis:'Tennessee SmartWay incidents and operations are recent source-listed context; open-ended and recurring schedules are not compared with NFL kickoff.'};
-await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),coverageFrom:new Date(now).toISOString(),coverageThrough:new Date(horizon).toISOString(),timedCoverageByVenue,basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; Caltrans and Louisiana DOTD published windows are compared for kickoffs within the next seven days, and Illinois DOT and WisDOT published windows through the listed NFL season when each layer edit is within 24 hours. Maryland CHART, WSDOT, and Tennessee SmartWay entries are source-listed observations or plans without a reliable event-time window. WisDOT and Tennessee recurrence text is displayed, not expanded into unstructured future dates. Proximity or time overlap does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
+for(const venue of venues.filter(venue=>/\b(NJ|NC|MO), USA$/.test(venue.address)&&Object.hasOwn(byVenue,venue.id)))timedCoverageByVenue[venue.id]={from:null,through:null,sourceListedOnly:true,basis:'WZDx publisher-listed work zones are spatial context only; published start/end dates are not independently verified as active work at NFL kickoff.'};
+await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),coverageFrom:new Date(now).toISOString(),coverageThrough:new Date(horizon).toISOString(),timedCoverageByVenue,basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; Caltrans and Louisiana DOTD published windows are compared for kickoffs within the next seven days, and Illinois DOT and WisDOT published windows through the listed NFL season when each layer edit is within 24 hours. Maryland CHART, WSDOT, Tennessee SmartWay, and WZDx work zones are source-listed context without a reliable event-time window. Work-zone line geometry uses the nearest published segment to the venue point; proximity does not establish route impact. WisDOT and Tennessee recurrence text is displayed, not expanded into unstructured future dates. Proximity or time overlap does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
 console.log('Road condition sources:',sources.map(source=>`${source.id} ${source.status} ${source.records||0}`).join(', '),'venue matches:',Object.values(byVenue).map(items=>items.length).join(','));

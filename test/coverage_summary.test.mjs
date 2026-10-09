@@ -48,3 +48,9 @@ test('Maryland fallback inventory is connected despite primary feed failure',()=
   assert.equal(result.rows[0].camera,'connected');
   assert.equal(result.cameras,1);
 });
+
+test('WZDx road source failure stays visible for its stadium',()=>{
+  const stadium=[{venue:{id:'nj',name:'MetLife Stadium',address:'East Rutherford, NJ, USA',lat:40.8,lon:-74.07}}];
+  const road={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'njit-transcom-wzdx',status:'failed'}],byVenue:{}};
+  assert.equal(summarizeCoverage(stadium,null,road,now).rows[0].road,'source_failed');
+});
