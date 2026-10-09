@@ -1,6 +1,6 @@
 import {selectRoadContext} from './road_relevance.js?v=20261009-2';
 import {selectWeatherContext} from './weather_relevance.js';
-import {summarizeCoverage} from './coverage_summary.js?v=20261009-1';
+import {summarizeCoverage} from './coverage_summary.js?v=20261009-2';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
@@ -31,7 +31,7 @@ function renderCoverage(){
   const target=$('coverage');
   if(!target||!snapshot)return;
   const result=summarizeCoverage(snapshot.games,cameraSnapshot,roadSnapshot);
-  const label={connected:'Connected snapshot',not_connected:'No connector',stale:'Stale snapshot',unavailable:'Unavailable',candidate:'Unreviewed point',unmapped:'No point'};
+  const label={connected:'Connected snapshot',not_connected:'No connector',source_failed:'Configured source failed',stale:'Stale snapshot',unavailable:'Unavailable',candidate:'Unreviewed point',unmapped:'No point'};
   target.innerHTML=`<div class="coverage-totals"><div><strong>${result.points}/${result.total}</strong><span>VENUE POINT CANDIDATES</span></div><div><strong>${result.cameras}/${result.total}</strong><span>CAMERA METADATA FEEDS</span></div><div><strong>${result.roads}/${result.total}</strong><span>ROAD CONDITION FEEDS</span></div></div>`+
     `<p>Counts require a source snapshot built within 12 hours. A connected feed does not verify camera video, a venue view, road impact, or completeness. ${!cameraSnapshot||!roadSnapshot?'Some snapshots are still loading or unavailable.':''}</p>`+
     `<details><summary>Inspect coverage for all ${result.total} venues</summary><div class="coverage-scroll"><table class="coverage-table"><thead><tr><th scope="col">Venue</th><th scope="col">Map point</th><th scope="col">Camera metadata</th><th scope="col">Road conditions</th></tr></thead><tbody>${result.rows.map(row=>`<tr><th scope="row">${esc(row.name)}<small>${esc(row.address)}</small></th><td>${esc(label[row.point])}</td><td>${esc(label[row.camera])}</td><td>${esc(label[row.road])}</td></tr>`).join('')}</tbody></table></div></details>`+

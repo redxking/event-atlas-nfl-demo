@@ -29,3 +29,14 @@ test('stale and unavailable snapshots never count as current coverage',()=>{
   assert.equal(result.roads,0);
   assert.ok(result.rows.every(row=>row.camera==='stale'&&row.road==='unavailable'));
 });
+
+test('a configured but failed Maryland source is not mislabeled as no connector',()=>{
+  const maryland=[{venue:{id:'md',name:'Maryland Field',address:'Baltimore, MD, USA',lat:39,lon:-76}}];
+  const camera={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'md-chart-cameras',status:'failed'}],byVenue:{}};
+  const road={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'md-chart-incidents',status:'failed'},{id:'md-chart-closures',status:'failed'}],byVenue:{}};
+  const result=summarizeCoverage(maryland,camera,road,now);
+  assert.equal(result.rows[0].camera,'source_failed');
+  assert.equal(result.rows[0].road,'source_failed');
+  assert.equal(result.cameras,0);
+  assert.equal(result.roads,0);
+});
