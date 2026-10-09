@@ -57,6 +57,25 @@ try{
   }
   sources.push({id:'md-chart-cameras',url:mdUrl,status:'ok',records:count});
 }catch(error){sources.push({id:'md-chart-cameras',url:mdUrl,status:'failed',error:String(error)})}
+if(sources.find(source=>source.id==='md-chart-cameras')?.status==='failed'){
+  const imap='https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0';
+  try{
+    const params=new URLSearchParams({where:'1=1',outFields:'OBJECTID,location,county,feedID,url,lat,long',returnGeometry:'false',f:'json',resultRecordCount:'550'});
+    const data=await get(`${imap}/query?${params}`);
+    if(!Array.isArray(data.features)||data.features.length<300||data.error||data.exceededTransferLimit)throw Error('Incomplete Maryland iMAP camera inventory');
+    let count=0;
+    for(const feature of data.features){
+      const item=feature.attributes||{},lat=Number(item.lat),lon=Number(item.long);
+      if(!Number.isInteger(item.OBJECTID)||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<37.8||lat>39.8||lon< -79.6||lon> -75||!/^[a-f0-9]{32}$/i.test(item.feedID||''))continue;
+      const viewerUrl=item.url;
+      if(typeof viewerUrl!=='string'||!new RegExp(`^https://chart\\.maryland\\.gov/video/video\\.php\\?feed=${item.feedID}$`,'i').test(viewerUrl))continue;
+      cameras.push({id:`md-imap-${item.OBJECTID}`,agency:'Maryland CHART',name:item.location||'Road camera',lat,lon,route:null,inService:null,operationalStatus:'Agency inventory; live status unverified',statusAsOf:null,metadataDate:null,sourceUrl:imap,viewerUrl});
+      count++;
+    }
+    if(count<300)throw Error('Insufficient valid Maryland iMAP camera records');
+    sources.push({id:'md-imap-cameras',url:imap,status:'ok',records:count,upstreamFreshness:'unknown'});
+  }catch(error){sources.push({id:'md-imap-cameras',url:imap,status:'failed',error:String(error)})}
+}
 const ilLayer='https://services2.arcgis.com/aIrBD8yn1TDTEXoz/arcgis/rest/services/TrafficCamerasTM_Public/FeatureServer/0';
 try{
   const params=new URLSearchParams({where:'1=1',geometry:'-87.9,41.65,-87.45,42.1',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,CameraLocation,CameraDirection,ImgPath',returnGeometry:'true',f:'json',resultRecordCount:'1000'});

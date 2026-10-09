@@ -1,6 +1,6 @@
 import {selectRoadContext} from './road_relevance.js?v=20261009-2';
 import {selectWeatherContext} from './weather_relevance.js';
-import {summarizeCoverage} from './coverage_summary.js?v=20261009-2';
+import {summarizeCoverage} from './coverage_summary.js?v=20261009-3';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});

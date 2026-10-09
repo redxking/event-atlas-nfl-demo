@@ -40,3 +40,11 @@ test('a configured but failed Maryland source is not mislabeled as no connector'
   assert.equal(result.cameras,0);
   assert.equal(result.roads,0);
 });
+
+test('Maryland fallback inventory is connected despite primary feed failure',()=>{
+  const maryland=[{venue:{id:'md',name:'Maryland Field',address:'Baltimore, MD, USA',lat:39,lon:-76}}];
+  const camera={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'md-chart-cameras',status:'failed'},{id:'md-imap-cameras',status:'ok'}],byVenue:{md:[]}};
+  const result=summarizeCoverage(maryland,camera,null,now);
+  assert.equal(result.rows[0].camera,'connected');
+  assert.equal(result.cameras,1);
+});

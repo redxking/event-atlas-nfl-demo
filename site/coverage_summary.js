@@ -1,6 +1,6 @@
 const HOUR=3600000;
 const configuredSources={
-  camera:{CA:['caltrans-d4','caltrans-d7'],WA:['wsdot-seattle'],MD:['md-chart-cameras'],IL:['idot-gateway-chicago'],WI:['wisdot-511-green-bay'],PA:['penndot-camera-inventory']},
+  camera:{CA:['caltrans-d4','caltrans-d7'],WA:['wsdot-seattle'],MD:['md-chart-cameras','md-imap-cameras'],IL:['idot-gateway-chicago'],WI:['wisdot-511-green-bay'],PA:['penndot-camera-inventory']},
   road:{CA:['caltrans-lcs-d4','caltrans-lcs-d7'],WA:['wsdot-road-alerts'],MD:['md-chart-incidents','md-chart-closures'],IL:['idot-closure-incidents'],WI:['wisdot-511-events-green-bay']}
 };
 
@@ -12,7 +12,7 @@ function feedState(venue,snapshot,kind,now){
   const state=venue.address?.match(/\b([A-Z]{2}), USA$/)?.[1];
   const expected=configuredSources[kind][state]||[];
   const sourceStatus=new Map((snapshot.sources||[]).map(source=>[source.id,source.status]));
-  if(expected.length&&expected.every(id=>sourceStatus.get(id)==='failed'))return 'source_failed';
+  if(expected.some(id=>sourceStatus.get(id)==='failed')&&!expected.some(id=>sourceStatus.get(id)==='ok'))return 'source_failed';
   return 'not_connected';
 }
 
