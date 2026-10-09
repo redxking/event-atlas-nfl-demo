@@ -1,4 +1,25 @@
 {
+  "3712": {
+    "name": "EverBank Stadium",
+    "sourceAddress": "Jacksonville, FL, USA",
+    "id": "Q635117",
+    "lat": 30.323889,
+    "lon": -81.6375,
+    "coordinateSource": "Wikidata stadium coordinate candidate; 2026 venue identity checked against Jacksonville Jaguars stadium source; point unreviewed",
+    "coordinateUrl": "https://www.wikidata.org/wiki/Q635117",
+    "identityUrl": "https://www.jaguars.com/stadiumofthefuture/faqs"
+  },
+  "11938": {
+    "name": "Highmark Stadium",
+    "sourceAddress": "Orchard Park, NY, USA",
+    "id": "Q16251517",
+    "lat": 42.77297222222222,
+    "lon": -78.79219444444445,
+    "coordinateSource": "Wikidata new-stadium coordinate candidate corroborated against OpenStreetMap new-stadium footprint; 2026 venue identity checked against Buffalo Bills source; point unreviewed",
+    "coordinateUrl": "https://www.wikidata.org/wiki/Q16251517",
+    "identityUrl": "https://www.buffalobills.com/news/our-new-home-bills-unveil-logo-for-2026-inaugural-season-at-highmark-stadium",
+    "footprintUrl": "https://www.openstreetmap.org/way/1339149058"
+  },
   "3933": {
     "name": "Soldier Field",
     "sourceAddress": "Chicago, IL, USA",
