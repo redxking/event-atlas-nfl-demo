@@ -92,6 +92,18 @@ test('Charlotte open CMPD roadway check is source context, not a police alert or
   assert.ok(picture.gaps.some(gap=>gap.includes('No active jurisdictional police alert')));
 });
 
+test('Foxboro station alert overlap is a transit review cue with bounded export',()=>{
+  const foxboro={...game,venue:{...game.venue,id:'3738',lat:42.09094,lon:-71.26434}};
+  const transit={state:'retrieved',checkedAt:now,stopId:'place-FS-0049',stopName:'Foxboro',stopDistanceKm:0.52,totalReturned:1,invalidCount:0,screenable:true,eventWindow:{start:'2026-10-11T16:00:00Z',end:'2026-10-12T01:00:00Z'},overlapCount:1,sourceUrl:'https://api-v3.mbta.com/alerts?filter%5Bstop%5D=place-FS-0049',interpretation:'Transit context only',alerts:[{id:'123',header:'Synthetic station shuttle',effect:'SHUTTLE',lifecycle:'UPCOMING',updatedAt:'2026-10-09T17:00:00Z',periods:[{start:'2026-10-11T18:00:00Z',end:'2026-10-11T22:00:00Z'}],eventWindowOverlap:true,sourceUrl:'https://api-v3.mbta.com/alerts/123',privateNote:'Do not export'}]};
+  const picture=buildNflEventPicture(foxboro,{schedule:inputs.schedule,transit},now);
+  assert.equal(picture.cueCounts.transit,1);
+  assert.equal(picture.cues.length,1);
+  assert.equal(picture.cues[0].type,'transit alert');
+  assert.equal(picture.sources.find(item=>item.name==='MBTA Foxboro station alerts').state,'station alerts checked');
+  assert.equal(picture.transitContext.alerts[0].privateNote,undefined);
+  assert.equal(picture.assessment.severity,'not_assessed');
+});
+
 test('failed direct Tennessee road check is visible as a gap',()=>{
   const nashville={...game,venue:{...game.venue,id:'3810',lat:36.1663,lon:-86.7713}};
   const picture=buildNflEventPicture(nashville,{schedule:inputs.schedule,roadDirect:{state:'failed',checkedAt:now}},now);
