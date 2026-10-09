@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-17';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-18';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 
 const pick=(value,fields)=>Object.fromEntries(fields.filter(key=>value?.[key]!==undefined).map(key=>[key,value[key]]));
@@ -22,7 +22,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     event:pick(game,['id','title','week','kickoff','timeTbd','status','sourceUrl','sourceRetrievedAt']),
     venue:pick(game.venue,['id','name','address','lat','lon','coordinateStatus','venueCandidateUrl']),
     picture,
-    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,usgs:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,cmpdOpenTraffic:inputs.cmpdTraffic?.checkedAt?new Date(inputs.cmpdTraffic.checkedAt).toISOString():null,mbtaFoxboro:inputs.transit?.checkedAt?new Date(inputs.transit.checkedAt).toISOString():null,mbtaFoxboroSchedule:inputs.transitSchedule?.checkedAt?new Date(inputs.transitSchedule.checkedAt).toISOString():null,ntas:inputs.ntas?.retrievedAt||null},
+    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,usgs:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,cmpdOpenTraffic:inputs.cmpdTraffic?.checkedAt?new Date(inputs.cmpdTraffic.checkedAt).toISOString():null,mbtaFoxboro:inputs.transit?.checkedAt?new Date(inputs.transit.checkedAt).toISOString():null,mbtaFoxboroSchedule:inputs.transitSchedule?.checkedAt?new Date(inputs.transitSchedule.checkedAt).toISOString():null,mbtaFoxboroPredictions:inputs.transitPredictions?.checkedAt?new Date(inputs.transitPredictions.checkedAt).toISOString():null,ntas:inputs.ntas?.retrievedAt||null},
     geography:{
       zoneRegistry:buildVenueZoneRegistry(game,inputs),
       ground:ground?{status:'unreviewed_osm_candidate',sourceUrl:ground.sourceUrl,sourceVersion:ground.sourceVersion,sourceEditedAt:ground.sourceEditedAt,identityMethod:ground.identityMethod,outerRings:ground.outerRings||[ground.ring]}:null,
@@ -38,7 +38,8 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       policeAggregate:picture.policeContext,
       openRoadwayAggregate:picture.openRoadwayContext,
       stationAlerts:picture.transitContext,
-      stationSchedule:picture.transitScheduleContext
+      stationSchedule:picture.transitScheduleContext,
+      stationPredictions:picture.transitPredictionsContext
     },
     protectedPeople:{state:'not_collected_in_public_demo',reason:'Named-person material requires a documented protective nexus, controlled access, source review, and supervisor approval.'}
   };
