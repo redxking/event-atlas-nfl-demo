@@ -79,6 +79,15 @@ test('HTTP analyst register rejects anonymous writes and records a separate revi
     assert.equal((await personPost(`/api/brief-snapshots/${saved.id}/review`,analyst,{decision:'accepted_for_internal_review',rationale:'Synthetic brief and source were checked.'})).status,400);
     assert.equal((await personPost(`/api/brief-snapshots/${saved.id}/review`,reviewer,{decision:'accepted_for_internal_review',rationale:'The synthetic saved version and cited sources were checked.'})).status,201);
     const savedList=await fetch(base+`/api/cases/${nflOpened.id}/brief-snapshots`,{headers:{Authorization:`Bearer ${analyst}`}});assert.equal((await savedList.json()).items[0].status,'accepted_for_internal_review');
-    const me=await fetch(base+'/api/operators/me',{headers:{Authorization:`Bearer ${reviewer}`}});const result=await me.json();assert.equal(result.audit.verified,true);assert.equal(result.audit.entries,21);
+    assert.equal((await fetch(base+'/api/cases',{headers:{Authorization:`Bearer ${analyst}`}})).status,200);
+    assert.equal((await fetch(base+`/api/cases/${nflOpened.id}/access-log`,{headers:{Authorization:`Bearer ${reviewer}`}})).status,404);
+    assert.equal((await fetch(base+`/api/cases/${nflOpened.id}/access-log`,{headers:{Authorization:`Bearer ${otherAnalyst}`}})).status,404);
+    const accessResponse=await fetch(base+`/api/cases/${nflOpened.id}/access-log`,{headers:{Authorization:`Bearer ${analyst}`}});assert.equal(accessResponse.status,200);const access=(await accessResponse.json()).items;
+    assert.ok(access.some(item=>item.action==='case.viewed'&&item.operatorId==='api_reviewer'));
+    assert.ok(access.some(item=>item.action==='brief_snapshot.viewed'&&item.operatorId==='api_reviewer'&&item.resourceId===saved.id));
+    assert.ok(access.some(item=>item.action==='brief_snapshot.listed'&&item.operatorId==='api_analyst'));
+    assert.ok(access.some(item=>item.action==='case.listed'&&item.operatorId==='api_analyst'));
+    assert.ok(access.some(item=>item.action==='case.access_log_viewed'&&item.operatorId==='api_analyst'));
+    const me=await fetch(base+'/api/operators/me',{headers:{Authorization:`Bearer ${reviewer}`}});const result=await me.json();assert.equal(result.audit.verified,true);assert.ok(result.audit.entries>21);
   }finally{child?.kill();fs.rmSync(dir,{recursive:true,force:true})}
 });

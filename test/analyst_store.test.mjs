@@ -78,6 +78,24 @@ test('case grant permissions and tamper detection survive restart',()=>{
   }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
 
+test('case read history is owner scoped and tamper checked on startup',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-case-read-')),file=path.join(dir,'private','analyst.sqlite');
+  try{
+    const store=new AnalystStore(file),a=store.createOperator('read_analyst','Read Analyst','analyst'),r=store.createOperator('read_reviewer','Read Reviewer','reviewer'),owner=store.authenticate(`Bearer ${a}`),reviewer=store.authenticate(`Bearer ${r}`);
+    const c=store.createCase(owner,{type:'published_event',id:'synthetic',sourceUrl:'https://example.org/event'},'Protective review of a synthetic published event.','Synthetic agency','The cited synthetic event warrants a case review.');
+    assert.throws(()=>store.recordCaseRead(reviewer,c.id,'case.viewed'),/not accessible/);
+    store.assignCaseReviewer(owner,c.id,reviewer.id,'Assigned to review the synthetic case before reading it.');
+    store.recordCaseRead(reviewer,c.id,'case.viewed');
+    assert.equal(store.listCaseAccessFor(reviewer,c.id),null);
+    const history=store.listCaseAccessFor(owner,c.id);
+    assert.equal(history.length,2);
+    assert.equal(history.find(item=>item.action==='case.viewed').operatorId,reviewer.id);
+    assert.equal(history.find(item=>item.action==='case.access_log_viewed').operatorId,owner.id);
+    store.close();const db=new DatabaseSync(file);db.exec("UPDATE case_access_log SET action='case.deleted' WHERE action='case.viewed'");db.close();
+    assert.throws(()=>new AnalystStore(file),/Case access integrity mismatch/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+
 test('audit chain corruption prevents store startup',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-audit-')),file=path.join(dir,'private','analyst.sqlite');
   try{const store=new AnalystStore(file);store.createOperator('test_user','Test User','analyst');store.close();const db=new DatabaseSync(file);db.exec("UPDATE audit SET action='altered' WHERE seq=1");db.close();assert.throws(()=>new AnalystStore(file),/Audit chain mismatch/)}finally{fs.rmSync(dir,{recursive:true,force:true})}
