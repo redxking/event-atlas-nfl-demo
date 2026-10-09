@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Event-specific protected person profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id","displayName","role","eventIds","designationSource","protectivePurpose","reviewStatus","createdAt"],
+  "properties": {
+    "id": {"type":"string","minLength":1},
+    "displayName": {"type":"string","minLength":1},
+    "role": {"type":"string","minLength":1},
+    "eventIds": {"type":"array","minItems":1,"items":{"type":"string"}},
+    "designationSource": {"type":"object","additionalProperties":false,"required":["uri","authority","observedAt"],"properties":{"uri":{"type":"string"},"authority":{"type":"string"},"observedAt":{"type":"string","format":"date-time"}}},
+    "protectivePurpose": {"type":"string","minLength":1},
+    "publicProfessionalFacts": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["claim","sourceUrl","observedAt"],"properties":{"claim":{"type":"string"},"sourceUrl":{"type":"string","format":"uri"},"observedAt":{"type":"string","format":"date-time"},"confidence":{"enum":["low","moderate","high"]}}}},
+    "reviewStatus": {"enum":["pending","approved","rejected","expired"]},
+    "approvedBy": {"type":["string","null"]},
+    "approvedAt": {"type":["string","null"],"format":"date-time"},
+    "retentionUntil": {"type":["string","null"],"format":"date-time"},
+    "createdAt": {"type":"string","format":"date-time"}
+  }
+}

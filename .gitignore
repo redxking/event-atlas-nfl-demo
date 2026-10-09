@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+scripts/__pycache__/
+*.pyc
+data/private/
+data/voting_history/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.env
+.env.*
+*.log

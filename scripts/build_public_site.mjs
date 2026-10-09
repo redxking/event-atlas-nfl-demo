@@ -1,0 +1,17 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+const root=path.resolve(import.meta.dirname,'..');
+const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
+const source=sports.sources.find(item=>item.id==='nfl');
+if(source?.status!=='ok'||source.reportedTotal!==272||source.records<250)throw Error('NFL source is incomplete; refusing public build');
+const places=new Map(sports.places.map(place=>[place.id,place]));
+const games=sports.events.filter(event=>event.sourceId==='nfl').map(event=>{
+  const place=places.get(event.placeId);
+  if(!place||!place.address)throw Error('NFL game has no source venue: '+event.id);
+  return {id:event.id,title:event.title,kickoff:event.startsAtLocal,week:Number(event.category.match(/week (\d+)/)?.[1]),status:event.status,timeTbd:Boolean(event.timeTbd),sourceUrl:event.sourceUrl,sourceDataset:event.sourceDataset,sourceRetrievedAt:event.retrievedAt,teams:event.participants.map(team=>({name:team.name,role:team.role})),venue:{id:place.sourceVenueId,name:place.name,address:place.address,lat:place.lat,lon:place.lon,coordinateStatus:place.coordinateSource||'No verified map point',venueCandidateUrl:place.venueCandidateId?'https://www.wikidata.org/entity/'+place.venueCandidateId:null}};
+});
+if(games.length!==source.records||new Set(games.map(game=>game.id)).size!==games.length)throw Error('NFL game IDs or count changed');
+const out={builtAt:new Date().toISOString(),source:{name:source.name,url:source.dataset,status:source.status,reportedTotal:source.reportedTotal,usGames:games.length,internationalExcluded:source.excludedInternational,snapshotRetrievedAt:sports.retrievedAt},games};
+await fs.mkdir(path.join(root,'site'),{recursive:true});
+await fs.writeFile(path.join(root,'site/nfl.json'),JSON.stringify(out));
+console.log(`Built public NFL snapshot: ${games.length} games, ${new Set(games.map(game=>game.venue.id)).size} venues`);
