@@ -63,6 +63,15 @@ test('HTTP analyst register rejects anonymous writes and records a separate revi
     const scopedDetail=await fetch(base+`/api/cases/${nflOpened.id}`,{headers:{Authorization:`Bearer ${reviewer}`}});assert.equal((await scopedDetail.json()).personScopes[0].people[0].id,person.id);
     assert.equal((await personPost(`/api/protected-people/${person.id}/review`,reviewer,{decision:'approved',rationale:'Synthetic identity and designation source were checked.'})).status,201);
     const briefResponse=await fetch(base+`/api/cases/${nflOpened.id}/brief?context=none`,{headers:{Authorization:`Bearer ${analyst}`}});assert.equal(briefResponse.status,200);const brief=await briefResponse.json();assert.equal(brief.status,'draft_internal_review_only');assert.deepEqual(brief.protectedPeople.map(item=>item.id),[person.id]);assert.equal(brief.overallJudgment.severity,'not_synthesized');assert.ok(brief.gaps.some(item=>item.includes('Current public conditions')));
-    const me=await fetch(base+'/api/operators/me',{headers:{Authorization:`Bearer ${reviewer}`}});const result=await me.json();assert.equal(result.audit.verified,true);assert.equal(result.audit.entries,14);assert.equal(brief.localAuditHead,result.audit.head);
+    const savedResponse=await fetch(base+`/api/cases/${nflOpened.id}/brief-snapshots?context=none`,{method:'POST',headers:{Authorization:`Bearer ${analyst}`}});assert.equal(savedResponse.status,201);const saved=await savedResponse.json();assert.equal(saved.sequence,1);
+    assert.equal((await fetch(base+`/api/cases/${nflOpened.id}/brief-snapshots?context=none`,{method:'POST',headers:{Authorization:`Bearer ${otherAnalyst}`}})).status,404);
+    assert.equal((await fetch(base+`/api/cases/${nflOpened.id}/brief-snapshots`,{headers:{Authorization:`Bearer ${otherAnalyst}`}})).status,404);
+    assert.equal((await fetch(base+`/api/brief-snapshots/${saved.id}`)).status,401);
+    assert.equal((await fetch(base+`/api/brief-snapshots/${saved.id}`,{headers:{Authorization:`Bearer ${otherAnalyst}`}})).status,404);
+    const savedRead=await fetch(base+`/api/brief-snapshots/${saved.id}`,{headers:{Authorization:`Bearer ${reviewer}`}});assert.equal((await savedRead.json()).brief.protectedPeople[0].id,person.id);
+    assert.equal((await personPost(`/api/brief-snapshots/${saved.id}/review`,analyst,{decision:'accepted_for_internal_review',rationale:'Synthetic brief and source were checked.'})).status,400);
+    assert.equal((await personPost(`/api/brief-snapshots/${saved.id}/review`,reviewer,{decision:'accepted_for_internal_review',rationale:'The synthetic saved version and cited sources were checked.'})).status,201);
+    const savedList=await fetch(base+`/api/cases/${nflOpened.id}/brief-snapshots`,{headers:{Authorization:`Bearer ${analyst}`}});assert.equal((await savedList.json()).items[0].status,'accepted_for_internal_review');
+    const me=await fetch(base+'/api/operators/me',{headers:{Authorization:`Bearer ${reviewer}`}});const result=await me.json();assert.equal(result.audit.verified,true);assert.equal(result.audit.entries,17);
   }finally{child?.kill();fs.rmSync(dir,{recursive:true,force:true})}
 });

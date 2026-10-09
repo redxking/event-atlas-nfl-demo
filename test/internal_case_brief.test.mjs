@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildInternalCaseBrief} from '../lib/build_internal_case_brief.mjs';
+import {buildInternalCaseBrief,compareBriefSnapshots} from '../lib/build_internal_case_brief.mjs';
 
 test('draft brief carries only reviewed claims and active approved designations',()=>{
   const generatedAt='2026-10-09T20:00:00.000Z';
@@ -25,4 +25,16 @@ test('source drift and missing current context remain explicit gaps',()=>{
   assert.ok(brief.gaps.some(item=>item.includes('Current public conditions')));
   assert.equal(brief.reviewedAssessments.length,0);
   assert.throws(()=>buildInternalCaseBrief({case:{subject:{type:'voting_site'}}},{generatedBy:'analyst',auditHead:'b'.repeat(64)}),/published event case/);
+});
+
+test('brief comparison names changed event fields and reviewed entity IDs',()=>{
+  const prior={id:'brief-1',contentHash:'a'.repeat(64),brief:{event:{startsAtLocal:'2026-10-10T12:00:00Z',placeId:'venue-1'},sourceComparison:{status:'unchanged_since_intake'},reviewedAssessments:[{id:'assessment-1'}],protectedPeople:[{id:'person-1'}],publicSituation:{generatedAt:'2026-10-09T10:00:00Z'}}};
+  const next={event:{startsAtLocal:'2026-10-10T13:00:00Z',placeId:'venue-1'},sourceComparison:{status:'changed_since_intake'},reviewedAssessments:[{id:'assessment-2'}],protectedPeople:[{id:'person-1'},{id:'person-2'}],publicSituation:{generatedAt:'2026-10-09T11:00:00Z'}};
+  const change=compareBriefSnapshots(prior,next);
+  assert.deepEqual(change.changedFields,['event.startsAtLocal','sourceComparison']);
+  assert.deepEqual(change.addedReviewedAssessmentIds,['assessment-2']);
+  assert.deepEqual(change.removedReviewedAssessmentIds,['assessment-1']);
+  assert.deepEqual(change.addedProtectedPersonIds,['person-2']);
+  assert.equal(change.baselineContentHash,prior.contentHash);
+  assert.equal(change.publicSituationRefreshed,true);
 });

@@ -84,3 +84,26 @@ test('named professional records require a separately approved event scope and s
     assert.throws(()=>new AnalystStore(file),/protected_people integrity mismatch/);
   }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
+
+test('saved brief versions retain exact content, chain hashes, and independent review',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-brief-')),file=path.join(dir,'private','analyst.sqlite');
+  try{
+    const store=new AnalystStore(file),analystToken=store.createOperator('brief_analyst','Brief Analyst','analyst'),reviewerToken=store.createOperator('brief_reviewer','Brief Reviewer','reviewer');
+    const analyst=store.authenticate(`Bearer ${analystToken}`),reviewer=store.authenticate(`Bearer ${reviewerToken}`);
+    const record=store.createCase(analyst,{type:'published_event',id:'synthetic-game',title:'Synthetic game',sourceUrl:'https://example.org/game'},'Protective review of a published synthetic event.','Synthetic agency','An official synthetic event notice supports opening this case.');
+    const makeBrief=version=>{const trace=store.recordBriefRequest(analyst,record.id);return {schema:'event-atlas.internal-event-case-brief.v1',case:{id:record.id},generatedBy:analyst.id,generatedAt:trace.generatedAt,localAuditHead:trace.auditHead,version}};
+    const first=store.saveBriefSnapshot(analyst,record.id,makeBrief(1));
+    const second=store.saveBriefSnapshot(analyst,record.id,makeBrief(2));
+    assert.equal(second.sequence,2);assert.equal(second.previousHash,first.contentHash);
+    assert.equal(store.getBriefSnapshotFor(analyst,first.id).brief.version,1);
+    assert.equal(store.getBriefSnapshotFor(analyst,second.id).brief.version,2);
+    assert.throws(()=>store.reviewBriefSnapshot(reviewer,first.id,'accepted_for_internal_review','Synthetic review of old version.'),/Superseded/);
+    assert.throws(()=>store.reviewBriefSnapshot(analyst,second.id,'accepted_for_internal_review','Synthetic review of new version.'),/Reviewer role required/);
+    store.reviewBriefSnapshot(reviewer,second.id,'accepted_for_internal_review','The synthetic current version and source were checked.');
+    assert.equal(store.listBriefSnapshotsFor(analyst,record.id)[0].status,'accepted_for_internal_review');
+    store.close();
+    const reopened=new AnalystStore(file);assert.equal(reopened.getBriefSnapshotFor(reviewer,second.id).brief.version,2);reopened.close();
+    const db=new DatabaseSync(file);db.prepare('UPDATE brief_snapshots SET content_json=? WHERE id=?').run('{}',first.id);db.close();
+    assert.throws(()=>new AnalystStore(file),/Brief snapshot integrity mismatch/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});

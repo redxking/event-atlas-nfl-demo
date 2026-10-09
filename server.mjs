@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildEventBrief} from './lib/build_event_brief.mjs';
-import {buildInternalCaseBrief} from './lib/build_internal_case_brief.mjs';
+import {buildInternalCaseBrief,compareBriefSnapshots} from './lib/build_internal_case_brief.mjs';
 import {AnalystStore} from './lib/analyst_store.mjs';
 import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
 import {projectEvent,caseEventDrift} from './lib/event_snapshot.mjs';
@@ -58,6 +58,7 @@ function caseDetail(id,user){
   const item=analystStore.getCaseFor(user,id);
   if(!item)return null;
   item.personScopes=analystStore.getPersonScopesFor(user,id);
+  item.briefSnapshots=analystStore.listBriefSnapshotsFor(user,id);
   if(item.case.subject.type==='voting_site'){
     const current=votingById.get(item.case.subject.id),connector=voting.sources.find(source=>source.id===current?.sourceId||source.id===(item.case.subject.sourceId||item.case.subject.id.split(':')[0]));
     item.sourceDrift=caseVotingDrift(item.case.subject,current,connector);
@@ -66,6 +67,21 @@ function caseDetail(id,user){
     item.sourceDrift=caseEventDrift(item.case.subject,current,connector);
   }
   return item;
+}
+async function draftCaseBrief(id,user,includeContext){
+  const item=caseDetail(id,user);
+  if(!item)return null;
+  if(item.case.subject.type!=='published_event')throw Error('Published event case required');
+  const event=publicById.get(item.case.subject.id),place=placeById.get(event?.placeId);
+  let publicSituation=null;
+  if(includeContext&&event&&place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon)){
+    const c=await context({id:place.id,lat:place.lat,lon:place.lon});
+    publicSituation=buildEventBrief(event,place,{weather:c.weather,earthquakes:c.earthquakes,naturalEvents:c.naturalEvents});
+  }
+  const trace=analystStore.recordBriefRequest(user,id);
+  const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation});
+  brief.changesSincePreviousBrief=compareBriefSnapshots(analystStore.getLatestBriefSnapshotFor(user,id),brief);
+  return brief;
 }
 http.createServer(async(req,res)=>{try{const u=new URL(req.url,'http://localhost');if(u.pathname==='/api/meta')return send(res,200,{count:venues.length,retrievedAt:snapshot.retrievedAt,coverageNote:snapshot.coverageNote,source:snapshot.source,types:snapshot.queryClasses.map(x=>x[0]),feeds:sources,publishedEvents:{count:published.events.length,placeCount:published.places.length,retrievedAt:published.retrievedAt,sources:published.sources,coverageNote:published.coverageNote},voting:{count:voting.locations.length,retrievedAt:voting.retrievedAt,coverageNote:voting.coverageNote,sources:voting.sources},dns:{hostCount:dnsSnapshot.hosts.length,observedAt:dnsSnapshot.observedAt,caution:dnsSnapshot.caution}});if(u.pathname==='/api/operators/me'&&req.method==='GET'){const user=operator(req,res);return user&&send(res,200,{operator:user,audit:analystStore.auditSummary()})}if(u.pathname==='/api/events'&&req.method==='GET'){const user=operator(req,res);return user&&send(res,200,{items:analystStore.listEvents()})}
 if(u.pathname==='/api/cases'&&req.method==='GET'){const user=operator(req,res);return user&&send(res,200,{items:analystStore.listCasesFor(user),caution:'Internal analyst cases only; no protective notification or external dissemination'})}
@@ -76,7 +92,11 @@ if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/person-scopes')&&
 if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/person-scopes/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewPersonScope(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Scope not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/people')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/person-scopes/'.length,-'/people'.length));const body=await readBody(req);try{return send(res,201,analystStore.createProtectedPerson(user,id,body))}catch(error){return send(res,error.message==='Scope not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/protected-people/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/protected-people/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewProtectedPerson(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Person not found'?404:400,{error:error.message})}}
-if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief'.length)),item=caseDetail(id,user);if(!item)return send(res,404,{error:'Case not found'});if(item.case.subject.type!=='published_event')return send(res,400,{error:'Published event case required'});const event=publicById.get(item.case.subject.id),place=placeById.get(event?.placeId);let publicSituation=null;if(u.searchParams.get('context')!=='none'&&event&&place&&Number.isFinite(place.lat)&&Number.isFinite(place.lon)){const c=await context({id:place.id,lat:place.lat,lon:place.lon});publicSituation=buildEventBrief(event,place,{weather:c.weather,earthquakes:c.earthquakes,naturalEvents:c.naturalEvents})}const trace=analystStore.recordBriefRequest(user,id);return send(res,200,buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation}))}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');return brief?send(res,200,brief):send(res,404,{error:'Case not found'})}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length)),items=analystStore.listBriefSnapshotsFor(user,id);return items?send(res,200,{items}):send(res,404,{error:'Case not found'})}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');if(!brief)return send(res,404,{error:'Case not found'});return send(res,201,analystStore.saveBriefSnapshot(user,id,brief))}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/brief-snapshots/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/brief-snapshots/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewBriefSnapshot(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Brief snapshot not found'?404:400,{error:error.message})}}
+if(u.pathname.startsWith('/api/brief-snapshots/')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/brief-snapshots/'.length)),item=analystStore.getBriefSnapshotFor(user,id);return item?send(res,200,item):send(res,404,{error:'Brief snapshot not found'})}
 if(u.pathname.startsWith('/api/cases/')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length)),item=caseDetail(id,user);return item?send(res,200,item):send(res,404,{error:'Case not found'})}
 if(u.pathname==='/api/changes'){const source=u.searchParams.get('source')||'',kind=u.searchParams.get('kind')||'',limit=Math.min(500,Math.max(1,Number(u.searchParams.get('limit')||100)));const items=eventChanges.filter(x=>(!source||x.sourceId===source)&&(!kind||x.kind===kind));return send(res,200,{total:items.length,items:items.slice(0,limit),snapshots:[{name:'municipal',generatedAt:municipal.changeSet?.generatedAt||null,comparedTo:municipal.changeSet?.comparedTo||null,retainedSources:municipal.changeSet?.retainedSources||[]},{name:'sports',generatedAt:sports.changeSet?.generatedAt||null,comparedTo:sports.changeSet?.comparedTo||null,retainedSources:sports.changeSet?.retainedSources||[]}],caution:'Latest refresh comparison only. Missing from feed does not establish cancellation.'})}
 if(u.pathname==='/api/voting-history'){const limit=Math.min(50,Math.max(1,Number(u.searchParams.get('limit')||10)));return send(res,200,{total:votingHistory.length,items:votingHistory.slice(-limit).reverse(),verified:true,caution:'Local content-addressed archives; backfilled runs were archived after their original refresh. Filesystem access can still alter or delete history.'})}
