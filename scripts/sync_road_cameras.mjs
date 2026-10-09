@@ -114,7 +114,7 @@ try{
 }catch(error){sources.push({id:'idot-gateway-chicago',url:ilLayer,status:'failed',error:String(error)})}
 const wiLayer='https://services5.arcgis.com/0pgGLzT0Nh7FVjon/ArcGIS/rest/services/511_Camera_Public/FeatureServer/0';
 try{
-  const params=new URLSearchParams({where:'1=1',geometry:'-88.3,44.3,-87.8,44.7',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,Id,Roadway,Direction,Location,ViewsUrl,ViewsStatus',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+  const params=new URLSearchParams({where:'1=1',geometry:'-88.3,44.3,-87.8,44.7',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,Id,Roadway,Direction,Location,ViewsUrl,ViewsStatus,ViewsVideoURL',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
   const data=await get(`${wiLayer}/query?${params}`);
   if(!Array.isArray(data.features)||data.features.length<10||data.exceededTransferLimit)throw Error('Incomplete Green Bay-area camera inventory');
   let count=0;
@@ -123,7 +123,9 @@ try{
     if(!Number.isInteger(item.OBJECTID)||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<44.2||lat>44.8||lon< -88.4||lon> -87.7)continue;
     const viewer=item.ViewsUrl;
     if(typeof viewer!=='string'||!/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/i.test(viewer))continue;
-    cameras.push({id:`wisdot-511-${item.OBJECTID}`,agency:'WisDOT 511',name:item.Location||'Road camera',lat,lon,route:item.Roadway||null,inService:null,operationalStatus:item.ViewsStatus||null,metadataDate:null,sourceUrl:wiLayer,viewerUrl:viewer});
+    const videoUrl=item.ViewsVideoURL;
+    const allowedVideo=item.ViewsStatus==='Enabled'&&typeof videoUrl==='string'&&/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/.test(videoUrl);
+    cameras.push({id:`wisdot-511-${item.OBJECTID}`,agency:'WisDOT 511',name:item.Location||'Road camera',lat,lon,route:item.Roadway||null,inService:null,operationalStatus:item.ViewsStatus||null,metadataDate:null,sourceUrl:wiLayer,viewerUrl:viewer,...(allowedVideo?{videoUrl}:{})});
     count++;
   }
   if(count<10)throw Error('Insufficient valid Green Bay-area camera records');

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
+import fs from 'node:fs';
 
 test('failed camera source leaves venue uncovered instead of reporting an empty inventory',()=>{
   const venue={id:'pittsburgh',address:'Pittsburgh, PA, USA',lat:40.4467,lon:-80.0158};
@@ -21,4 +22,16 @@ test('Georgia DOT metadata covers the Atlanta venue only when the agency source 
   const cameras=[{id:'gdot-1',agency:'Georgia DOT GIS',lat:33.76,lon:-84.4}];
   assert.deepEqual(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'failed'}]),{});
   assert.equal(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'ok'}]).atlanta.length,1);
+});
+
+test('WisDOT public video links stay on the agency HLS host and are tied to Green Bay roadway cameras',()=>{
+  const snapshot=JSON.parse(fs.readFileSync(new URL('../site/cameras.json',import.meta.url)));
+  const items=snapshot.byVenue?.['3798']||[];
+  assert.ok(items.some(item=>item.videoUrl),'expected a public WisDOT HLS link in the saved snapshot');
+  for(const item of Object.values(snapshot.byVenue).flat().filter(item=>item.videoUrl)){
+    assert.equal(item.agency,'WisDOT 511');
+    assert.equal(item.operationalStatus,'Enabled');
+    assert.match(item.videoUrl,/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/);
+    assert.match(item.viewerUrl,/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/);
+  }
 });
