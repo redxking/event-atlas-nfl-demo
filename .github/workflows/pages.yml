@@ -23,6 +23,7 @@ jobs:
       - run: npm test
       - run: npm run sync:sports
       - run: npm run build:site
+      - run: npm run sync:cameras
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

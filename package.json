@@ -11,6 +11,7 @@
     "sync:dns": "node scripts/resolve_public_web_hosts.mjs",
     "scan:authorized": "node scripts/scan_authorized_targets.mjs",
     "sync:sports": "node scripts/sync_sports_events.mjs",
+    "sync:cameras": "node scripts/sync_road_cameras.mjs",
     "build:site": "node scripts/build_public_site.mjs",
     "sync:voting": "node scripts/sync_all_voting.mjs",
     "operator:create": "node scripts/create_local_operator.mjs",
