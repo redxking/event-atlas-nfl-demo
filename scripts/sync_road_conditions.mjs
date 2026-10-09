@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 const schedule=JSON.parse(await fs.readFile('site/nfl.json','utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI), USA$/.test(venue.address));
 const km=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
 const now=Date.now(),horizon=now+7*86400000,seasonEnd=Math.max(...schedule.games.map(game=>Date.parse(game.kickoff)).filter(Number.isFinite)),records=[],sources=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-conditions'},signal:AbortSignal.timeout(30000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -71,12 +71,30 @@ try{
   }
   sources.push({id:'idot-closure-incidents',url:ilLayer,status:'ok',records:count,sourceUpdatedAt:new Date(updated).toISOString()});
 }catch(error){sources.push({id:'idot-closure-incidents',url:ilLayer,status:'failed',error:String(error)})}
+const wiLayer='https://services5.arcgis.com/0pgGLzT0Nh7FVjon/ArcGIS/rest/services/511_Event_Points_Prod_Public/FeatureServer/0';
+try{
+  const metadata=await get(`${wiLayer}?f=json`);
+  const updated=Number(metadata.editingInfo?.dataLastEditDate);
+  if(!Number.isFinite(updated)||updated<=0||updated>now+3600000||now-updated>86400000)throw Error('WisDOT event layer update is missing or older than 24 hours');
+  const date=new Date(now).toISOString().slice(0,19).replace('T',' ');
+  const params=new URLSearchParams({where:`PlannedEndDate >= TIMESTAMP '${date}'`,geometry:'-88.3,44.3,-87.8,44.7',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,RoadwayName,DirectionOfTravel,Description,LastUpdated,StartDate,PlannedEndDate,LanesAffected,EventType,IsFullClosure',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+  const data=await get(`${wiLayer}/query?${params}`);
+  if(!Array.isArray(data.features)||data.error||data.exceededTransferLimit||data.features.length>1000)throw Error('Incomplete WisDOT Green Bay road event response');
+  let count=0;
+  for(const feature of data.features){
+    const p=feature.attributes||{},lat=Number(feature.geometry?.y),lon=Number(feature.geometry?.x),start=Number(p.StartDate),end=Number(p.PlannedEndDate);
+    if(!Number.isInteger(p.OBJECTID)||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<44.2||lat>44.8||lon< -88.4||lon> -87.7||!Number.isFinite(start)||!Number.isFinite(end)||start<=0||end<=start||start>seasonEnd||end<now)continue;
+    records.push({id:`wisdot-event-${p.OBJECTID}`,agency:'WisDOT 511',kind:'WisDOT-listed road event',name:[p.RoadwayName,p.DirectionOfTravel].filter(Boolean).join(' · ')||'Unnamed road event',detail:[p.Description,p.LanesAffected,/^(true|1)$/i.test(String(p.IsFullClosure))?'Publisher marks full closure':null].filter(Boolean).join(' · '),lat,lon,startAt:new Date(start).toISOString(),endAt:new Date(end).toISOString(),sourceUrl:wiLayer,sourceRecordDate:Number.isFinite(Number(p.LastUpdated))&&Number(p.LastUpdated)>0?new Date(Number(p.LastUpdated)).toISOString():null});
+    count++;
+  }
+  sources.push({id:'wisdot-511-events-green-bay',url:wiLayer,status:'ok',records:count,sourceUpdatedAt:new Date(updated).toISOString()});
+}catch(error){sources.push({id:'wisdot-511-events-green-bay',url:wiLayer,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public road condition source failed');
 const available=new Set(sources.filter(source=>source.status==='ok').map(source=>source.id));
-const byVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('CA, USA')?available.has('caltrans-lcs-d4')||available.has('caltrans-lcs-d7'):venue.address.includes('WA, USA')?available.has('wsdot-road-alerts'):venue.address.includes('MD, USA')?available.has('md-chart-incidents')||available.has('md-chart-closures'):available.has('idot-closure-incidents')).map(venue=>{
-  const agency=venue.address.includes('CA, USA')?'Caltrans':venue.address.includes('WA, USA')?'WSDOT':venue.address.includes('MD, USA')?'Maryland CHART':'Illinois DOT';
+const byVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('CA, USA')?available.has('caltrans-lcs-d4')||available.has('caltrans-lcs-d7'):venue.address.includes('WA, USA')?available.has('wsdot-road-alerts'):venue.address.includes('MD, USA')?available.has('md-chart-incidents')||available.has('md-chart-closures'):venue.address.includes('WI, USA')?available.has('wisdot-511-events-green-bay'):available.has('idot-closure-incidents')).map(venue=>{
+  const agency=venue.address.includes('CA, USA')?'Caltrans':venue.address.includes('WA, USA')?'WSDOT':venue.address.includes('MD, USA')?'Maryland CHART':venue.address.includes('WI, USA')?'WisDOT 511':'Illinois DOT';
   return [venue.id,records.filter(record=>record.agency===agency).map(record=>({...record,distanceKm:Math.round(km(venue.lat,venue.lon,record.lat,record.lon)*10)/10})).filter(record=>record.distanceKm<=10).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,50)];
 }));
-const timedCoverageByVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('IL, USA')&&Object.hasOwn(byVenue,venue.id)).map(venue=>[venue.id,{from:new Date(now).toISOString(),through:new Date(seasonEnd).toISOString(),basis:'Illinois DOT published closure windows from a layer updated within 24 hours; each record remains unverified for venue impact.'}]));
-await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),coverageFrom:new Date(now).toISOString(),coverageThrough:new Date(horizon).toISOString(),timedCoverageByVenue,basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; Caltrans published windows are compared for kickoffs within the next seven days, and Illinois DOT published windows through the listed NFL season when its layer edit is within 24 hours. Maryland CHART and WSDOT entries are source-listed observations or plans without a reliable event-time window. Proximity or time overlap does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
+const timedCoverageByVenue=Object.fromEntries(venues.filter(venue=>/\b(IL|WI), USA$/.test(venue.address)&&Object.hasOwn(byVenue,venue.id)).map(venue=>[venue.id,{from:new Date(now).toISOString(),through:new Date(seasonEnd).toISOString(),basis:'Illinois DOT or WisDOT published event windows from a layer updated within 24 hours; each record remains unverified for venue impact. Described recurrences are not expanded beyond the structured source window.'}]));
+await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),coverageFrom:new Date(now).toISOString(),coverageThrough:new Date(horizon).toISOString(),timedCoverageByVenue,basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; Caltrans published windows are compared for kickoffs within the next seven days, and Illinois DOT and WisDOT published windows through the listed NFL season when each layer edit is within 24 hours. Maryland CHART and WSDOT entries are source-listed observations or plans without a reliable event-time window. WisDOT recurrence text is displayed, not expanded into unstructured future dates. Proximity or time overlap does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
 console.log('Road condition sources:',sources.map(source=>`${source.id} ${source.status} ${source.records||0}`).join(', '),'venue matches:',Object.values(byVenue).map(items=>items.length).join(','));
