@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildEventBrief} from './lib/build_event_brief.mjs';
 import {buildInternalCaseBrief,compareBriefSnapshots} from './lib/build_internal_case_brief.mjs';
+import {buildNflCaseContext} from './lib/build_nfl_case_context.mjs';
 import {AnalystStore} from './lib/analyst_store.mjs';
 import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
 import {projectEvent,caseEventDrift} from './lib/event_snapshot.mjs';
@@ -15,6 +16,9 @@ const venues=snapshot.venues;
 const byId=new Map(venues.map(v=>[v.id,v]));
 const municipal=JSON.parse(await fs.readFile(path.join(root,'data/public_events.json'),'utf8'));
 const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
+async function readSiteSnapshot(name){try{return JSON.parse(await fs.readFile(path.join(root,'site',name),'utf8'))}catch{return null}}
+const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflNtas]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','ntas.json'].map(readSiteSnapshot));
+const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,ntas:nflNtas};
 const voting=JSON.parse(await fs.readFile(path.join(root,'data/voting_locations.json'),'utf8'));
 const votingHistory=readVotingHistory(path.join(root,'data/voting_history'));
 const votingById=new Map(voting.locations.map(v=>[v.id,v]));
@@ -79,8 +83,10 @@ async function draftCaseBrief(id,user,includeContext){
     const c=await context({id:place.id,lat:place.lat,lon:place.lon});
     publicSituation=buildEventBrief(event,place,{weather:c.weather,earthquakes:c.earthquakes,naturalEvents:c.naturalEvents});
   }
+  let nflContext=null;
+  if(item.case.subject.sourceId==='nfl')try{nflContext=buildNflCaseContext(item.case.subject,event,nflSnapshots)}catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
-  const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation});
+  const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});
   brief.changesSincePreviousBrief=compareBriefSnapshots(analystStore.getLatestBriefSnapshotFor(user,id),brief);
   return brief;
 }
