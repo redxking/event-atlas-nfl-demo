@@ -6,7 +6,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI), USA$/.test(venue.address));
 const km=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
 const sources=[];
 const cameras=[];
@@ -73,10 +73,27 @@ try{
   }
   sources.push({id:'idot-gateway-chicago',url:ilLayer,status:'ok',records:count});
 }catch(error){sources.push({id:'idot-gateway-chicago',url:ilLayer,status:'failed',error:String(error)})}
+const wiLayer='https://services5.arcgis.com/0pgGLzT0Nh7FVjon/ArcGIS/rest/services/511_Camera_Public/FeatureServer/0';
+try{
+  const params=new URLSearchParams({where:'1=1',geometry:'-88.3,44.3,-87.8,44.7',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,Id,Roadway,Direction,Location,ViewsUrl,ViewsStatus',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+  const data=await get(`${wiLayer}/query?${params}`);
+  if(!Array.isArray(data.features)||data.features.length<10||data.exceededTransferLimit)throw Error('Incomplete Green Bay-area camera inventory');
+  let count=0;
+  for(const feature of data.features){
+    const item=feature.attributes||{},lat=Number(feature.geometry?.y),lon=Number(feature.geometry?.x);
+    if(!Number.isInteger(item.OBJECTID)||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<44.2||lat>44.8||lon< -88.4||lon> -87.7)continue;
+    const viewer=item.ViewsUrl;
+    if(typeof viewer!=='string'||!/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/i.test(viewer))continue;
+    cameras.push({id:`wisdot-511-${item.OBJECTID}`,agency:'WisDOT 511',name:item.Location||'Road camera',lat,lon,route:item.Roadway||null,inService:null,operationalStatus:item.ViewsStatus||null,metadataDate:null,sourceUrl:wiLayer,viewerUrl:viewer});
+    count++;
+  }
+  if(count<10)throw Error('Insufficient valid Green Bay-area camera records');
+  sources.push({id:'wisdot-511-green-bay',url:wiLayer,status:'ok',records:count});
+}catch(error){sources.push({id:'wisdot-511-green-bay',url:wiLayer,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
 const byVenue=Object.fromEntries(venues.map(venue=>{
   const state=venue.address.match(/\b([A-Z]{2}), USA$/)?.[1];
-  const agency={CA:'Caltrans',WA:'WSDOT',MD:'Maryland CHART',IL:'Illinois DOT Gateway'}[state];
+  const agency={CA:'Caltrans',WA:'WSDOT',MD:'Maryland CHART',IL:'Illinois DOT Gateway',WI:'WisDOT 511'}[state];
   return [venue.id,cameras.filter(camera=>camera.agency===agency).map(camera=>({...camera,distanceKm:Math.round(km(venue.lat,venue.lon,camera.lat,camera.lon)*10)/10})).filter(camera=>camera.distanceKm<=15).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,5)];
 }));
 const out={builtAt:new Date().toISOString(),basis:'Public roadway camera metadata within 15 km of unreviewed venue point; distance does not establish a view of the venue, image freshness, or operational status.',sources,byVenue};
