@@ -38,3 +38,15 @@ test('Indianapolis case includes only a current bounded public police aggregate'
   const stale=buildNflCaseContext(subject,event,{...snapshots,indianapolis:{...snapshots.indianapolis,builtAt:new Date(now-13*3600000).toISOString()}},now);
   assert.equal(stale.evidence.publicObservations.policeAggregate,null);
 });
+
+test('Charlotte case includes only a current bounded public police aggregate',()=>{
+  const charlotteGame={...game,venue:{...game.venue,id:'3628'}};
+  const context={nearby:403,start:'2026-10-01',end:'2026-10-08',radiusKm:5,sourceLatestAt:now-45*3600000,sourceLagHours:45,checkedAt:now-3600000,reportId:'must not export'};
+  const snapshots={schedule:{builtAt:'2026-10-09T19:55:00Z',games:[charlotteGame]},charlotte:{status:'ok',builtAt:new Date(now-3600000).toISOString(),byVenue:{3628:context}}};
+  const result=buildNflCaseContext(subject,event,snapshots,now);
+  assert.equal(result.evidence.publicObservations.policeAggregate.nearby,403);
+  assert.equal(result.evidence.publicObservations.policeAggregate.reportId,undefined);
+  assert.equal(result.evidence.picture.sources.find(item=>item.name==='Local police activity').state,'delayed historical count checked');
+  const stale=buildNflCaseContext(subject,event,{...snapshots,charlotte:{...snapshots.charlotte,builtAt:new Date(now-13*3600000).toISOString()}},now);
+  assert.equal(stale.evidence.publicObservations.policeAggregate,null);
+});

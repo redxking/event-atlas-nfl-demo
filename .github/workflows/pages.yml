@@ -26,6 +26,7 @@ jobs:
       - run: npm run sync:cameras
       - run: npm run sync:roads
       - run: npm run sync:police
+      - run: npm run sync:charlotte-police
       - run: npm run sync:ntas
       - run: npm run sync:seams
       - run: npm run sync:tfr
