@@ -1,5 +1,6 @@
 import {selectRoadContext} from './road_relevance.js';
 import {selectWeatherContext} from './weather_relevance.js';
+import {tfrAtKickoff} from './tfr_notam.js';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -18,6 +19,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const faaFresh=fresh(airspace?.builtAt,now,12*HOUR);
   const tfrFresh=fresh(tfr?.builtAt,now,12*HOUR);
   const tfrMatches=tfr?.byVenue?.[venueId]||[];
+  const tfrAtListedKickoff=tfrMatches.filter(item=>tfrAtKickoff(game,item)==='listed_kickoff_within_notam_window').length;
   const road=selectRoadContext(game,roads,now);
   const weather=conditions?.alertsError||!Array.isArray(conditions?.alerts?.features)?null:selectWeatherContext(game,conditions.alerts.features,conditions.at,now);
   const policeConnected=['3687','3673'].includes(venueId);
@@ -29,7 +31,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('NFL schedule',fresh(schedule?.builtAt,now,12*HOUR)?'current snapshot':'stale or unavailable',game.sourceRetrievedAt,'Confirm changes with the NFL or host club.',game.sourceUrl),
     row('Ground geometry',footprint?'unreviewed candidate':'unavailable',footprint?.sourceEditedAt,footprint?.identityMethod==='exact_name'?'Exact name only; venue identity needs review.':'Not an approved security perimeter.',footprint?.sourceUrl),
     row('FAA SEAMS',!faa?'no linked record':faaFresh?'current snapshot':'stale snapshot',airspace?.builtAt,`Airspace record last edited ${faa?.sourceUpdatedAt||'not supplied'}; current NOTAM not verified.`,airspace?.sourceItemUrl),
-    row('FAA TFR list',!tfrFresh?'stale or unavailable':tfrMatches.length?`${tfrMatches.length} spatial review candidate${tfrMatches.length===1?'':'s'}`:'no spatial match in snapshot',tfr?.builtAt,'Venue point in published shape only; exact effective hours and NOTAM text unverified. No drone detection.',tfr?.sourcePageUrl||'https://tfr.faa.gov/tfr3/'),
+    row('FAA TFR list',!tfrFresh?'stale or unavailable':tfrAtListedKickoff?`${tfrAtListedKickoff} at listed kickoff; review` :tfrMatches.length?`${tfrMatches.length} spatial review candidate${tfrMatches.length===1?'':'s'}`:'no spatial match in snapshot',tfr?.builtAt,'Single explicit UTC windows are parsed from FAA NOTAM detail; recurring, permanent, and multi-area schedules need direct review. A time match does not link a notice to the NFL event or detect a drone.',tfr?.sourcePageUrl||'https://tfr.faa.gov/tfr3/'),
     row('NWS point alerts',conditions?.alertsError?'source failed':!conditions?'not yet checked':weather?.state==='stale'?'stale':weather?.state==='kickoff_unavailable'?'checked; time screen unavailable':'checked',conditions?.at?new Date(conditions.at).toISOString():null,'Point query; verify alert footprint.',Number.isFinite(game.venue.lat)&&Number.isFinite(game.venue.lon)?`https://api.weather.gov/alerts/active?point=${game.venue.lat},${game.venue.lon}`:null),
     row('USGS earthquakes',conditions?.quakesError?'source failed':!conditions?'not yet checked':usgsFresh?'checked':'stale or unavailable',usgsFresh?new Date(conditions.at).toISOString():null,'Magnitude 2.5+ weekly feed; proximity does not establish event impact.','https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson'),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),

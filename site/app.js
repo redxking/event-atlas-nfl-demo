@@ -4,8 +4,9 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261009-5';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-8';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-3';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-9';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-4';
+import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
@@ -102,7 +103,15 @@ function renderTfr(game){
   const age=Date.now()-Date.parse(tfrSnapshot.builtAt),fresh=Number.isFinite(age)&&age>=-60000&&age<12*3600000;
   if(!fresh){target.innerHTML=`<p>FAA TFR snapshot stale. Check ${link(tfrSnapshot.sourcePageUrl,'FAA TFR list')} directly.</p>`;return}
   const matches=tfrSnapshot.byVenue?.[game.venue.id]||[];
-  target.innerHTML=`<p class="feed-state">FAA TFR LIST AND GEOMETRY · SNAPSHOT ${esc(fmt(tfrSnapshot.builtAt))}</p><p>${matches.length?`${matches.length} spatial review candidate${matches.length===1?'':'s'} at this venue candidate point.`:'No spatial match in this snapshot; unrestricted airspace cannot be inferred.'} The FAA list includes current or future restrictions. Exact effective hours and governing NOTAM text need direct verification. This feed does not detect drones.</p>${matches.map(item=>`<div class="brief-cue"><strong>${esc(item.notamId)} · ${esc(item.type)}</strong><span>${esc(item.description)}</span><small>${esc(item.matchBasis)} ${link(item.detailUrl,'FAA detail')}</small></div>`).join('')}<p>${link(tfrSnapshot.sourcePageUrl,'FAA TFR list')}</p>`;
+  const timing=item=>{
+    const state=tfrAtKickoff(game,item);
+    if(state==='listed_kickoff_within_notam_window')return `Listed kickoff falls within this parsed UTC window (${fmt(item.startAt)} to ${fmt(item.endAt)}). This does not establish that the NFL game caused the notice.`;
+    if(state==='listed_kickoff_outside_notam_window')return `Listed kickoff is outside this parsed UTC window (${fmt(item.startAt)} to ${fmt(item.endAt)}).`;
+    if(state==='standing_airspace_context')return 'Standing or permanent airspace restriction; not an event-specific notice.';
+    if(state==='kickoff_unverified')return 'Kickoff time is not verified; no time comparison made.';
+    return 'Recurring, multi-area, unavailable, or otherwise complex timing; verify the FAA NOTAM directly.';
+  };
+  target.innerHTML=`<p class="feed-state">FAA TFR LIST, GEOMETRY AND NOTAM DETAIL · SNAPSHOT ${esc(fmt(tfrSnapshot.builtAt))}</p><p>${matches.length?`${matches.length} spatial review candidate${matches.length===1?'':'s'} at this venue candidate point.`:'No spatial match in this snapshot; unrestricted airspace cannot be inferred.'} Single explicit UTC windows are screened against the listed kickoff. Confirm the governing FAA NOTAM before an aviation decision. This feed does not detect drones.</p>${matches.map(item=>`<div class="brief-cue"><strong>${esc(item.notamId)} · ${esc(item.type)}</strong><span>${esc(item.description)}${item.reason?' · FAA reason: '+esc(item.reason):''}</span><small>${esc(timing(item))} ${esc(item.matchBasis)} ${link(item.detailUrl,'FAA detail')}</small></div>`).join('')}<p>${link(tfrSnapshot.sourcePageUrl,'FAA TFR list')}</p>`;
 }
 async function renderAirspace(game){
   const target=$('airspace');

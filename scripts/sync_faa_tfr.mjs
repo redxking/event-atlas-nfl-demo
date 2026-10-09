@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FAA_TFR_LIST,FAA_TFR_GEOMETRY,selectTfrVenueIntersections} from '../site/tfr_relevance.js';
+import {parseTfrNotam} from '../site/tfr_notam.js';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
@@ -10,6 +11,13 @@ const get=async url=>{const response=await fetch(url,{headers:{Accept:'applicati
 const [list,geo]=await Promise.all([get(FAA_TFR_LIST),get(FAA_TFR_GEOMETRY)]);
 if(!Array.isArray(list)||list.length<1||!Array.isArray(geo?.features)||geo.features.length<1)throw Error('FAA TFR list or geometry empty');
 const byVenue=selectTfrVenueIntersections(venues,list,geo);
-const out={builtAt:new Date().toISOString(),listUrl:FAA_TFR_LIST,geometryUrl:FAA_TFR_GEOMETRY,sourcePageUrl:'https://tfr.faa.gov/tfr3/',basis:'Spatial review only. FAA list includes current or upcoming restrictions. Match uses an unreviewed NFL venue candidate point inside a published shape. Exact effective hours and NOTAM text require separate verification; no drone detection is provided.',listCount:list.length,shapeCount:geo.features.length,venueCount:venues.length,matchedVenueCount:Object.keys(byVenue).length,byVenue};
+const ids=[...new Set(Object.values(byVenue).flat().map(item=>item.notamId))];
+const details=new Map(await Promise.all(ids.map(async id=>{
+  const detailUrl=`https://tfr.faa.gov/tfrapi/getWebText?notamId=${encodeURIComponent(id)}`;
+  try{return [id,parseTfrNotam(id,await get(detailUrl))]}
+  catch{return [id,{detailStatus:'unavailable',windowState:'complex_or_unverified',startAt:null,endAt:null,reason:null,notamType:null}]}
+})));
+for(const items of Object.values(byVenue))for(const item of items)Object.assign(item,details.get(item.notamId));
+const out={builtAt:new Date().toISOString(),listUrl:FAA_TFR_LIST,geometryUrl:FAA_TFR_GEOMETRY,detailApi:'https://tfr.faa.gov/tfrapi/getWebText',sourcePageUrl:'https://tfr.faa.gov/tfr3/',basis:'FAA list includes current or upcoming restrictions. Match uses an unreviewed NFL venue candidate point inside a published shape. Single explicit UTC windows are parsed from the FAA NOTAM detail text for listed-kickoff comparison only; recurring, standing, and multi-area schedules require direct review. No drone detection is provided.',listCount:list.length,shapeCount:geo.features.length,venueCount:venues.length,matchedVenueCount:Object.keys(byVenue).length,detailRetrievedCount:[...details.values()].filter(item=>item.detailStatus==='retrieved').length,byVenue};
 await fs.writeFile(path.join(site,'tfr.json'),JSON.stringify(out));
 console.log(`FAA TFR ${list.length} notices, ${geo.features.length} shapes, ${out.matchedVenueCount} venue candidate matches`);

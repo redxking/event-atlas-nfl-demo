@@ -24,7 +24,7 @@ export function selectTfrVenueIntersections(venues,list,geo){
       if(!pointInsideRing(venue,ring))continue;
       const prior=matched.get(notice.notamId);
       if(prior){prior.shapeCount++;continue}
-      matched.set(notice.notamId,{...notice,notamKey:key,detailUrl:`https://tfr.faa.gov/tfr3/?page=detail_${key}`,matchBasis:'Venue candidate point intersects FAA-published TFR shape; exact effective hours and NOTAM text unverified.',shapeCount:1,ring:ring.map(([lon,lat])=>[Number(lon.toFixed(6)),Number(lat.toFixed(6))])});
+      matched.set(notice.notamId,{...notice,notamKey:key,detailUrl:`https://tfr.faa.gov/tfr3/?page=detail_${notice.notamId.replace('/','_')}`,matchBasis:'Unreviewed venue candidate point intersects an FAA-published TFR shape; spatial relation alone does not link the notice to the NFL event.',shapeCount:1,ring:ring.map(([lon,lat])=>[Number(lon.toFixed(6)),Number(lat.toFixed(6))])});
     }
     if(matched.size)byVenue[venue.id]=[...matched.values()].sort((a,b)=>a.notamId.localeCompare(b.notamId));
   }
