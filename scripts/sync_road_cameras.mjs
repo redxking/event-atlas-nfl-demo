@@ -2,12 +2,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
+import {MN_CAMERA_URL,parseMinnesotaCameras,requireSourceAge} from '../lib/minnesota_iris.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -148,6 +149,15 @@ try{
   if(count<100)throw Error('Insufficient valid PennDOT camera records');
   sources.push({id:'penndot-camera-inventory',url:paLayer,status:'ok',records:count});
 }catch(error){sources.push({id:'penndot-camera-inventory',url:paLayer,status:'failed',error:String(error)})}
+try{
+  const response=await fetch(MN_CAMERA_URL,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});
+  if(!response.ok)throw Error(`HTTP ${response.status}`);
+  const sourceUpdatedAt=requireSourceAge(response.headers.get('last-modified'),Date.now(),24*3600000);
+  const parsed=parseMinnesotaCameras(await response.json());
+  if(parsed.length<500)throw Error('Insufficient published MnDOT camera records');
+  cameras.push(...parsed);
+  sources.push({id:'mndot-iris-cameras',url:MN_CAMERA_URL,status:'ok',records:parsed.length,sourceUpdatedAt});
+}catch(error){sources.push({id:'mndot-iris-cameras',url:MN_CAMERA_URL,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
 const byVenue=selectCameraCoverage(venues,cameras,sources);
 const out={builtAt:new Date().toISOString(),basis:'Public roadway camera metadata within 15 km of unreviewed venue point; distance does not establish a view of the venue, image freshness, or operational status.',sources,byVenue};

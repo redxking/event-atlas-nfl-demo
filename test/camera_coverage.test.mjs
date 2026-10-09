@@ -17,6 +17,13 @@ test('Maryland iMAP inventory can cover a venue when the CHART endpoint fails',(
   assert.equal(selectCameraCoverage([venue],cameras,sources).baltimore.length,1);
 });
 
+test('MnDOT published inventory links U.S. Bank Stadium only when the source succeeds',()=>{
+  const venue={id:'5239',address:'Minneapolis, MN, USA',lat:44.973889,lon:-93.258056};
+  const cameras=[{id:'mndot-C627',agency:'MnDOT IRIS',lat:44.9717,lon:-93.2522,viewerUrl:'https://511mn.org/cameras'}];
+  assert.deepEqual(selectCameraCoverage([venue],cameras,[{id:'mndot-iris-cameras',status:'failed'}]),{});
+  assert.equal(selectCameraCoverage([venue],cameras,[{id:'mndot-iris-cameras',status:'ok'}])['5239'].length,1);
+});
+
 test('Georgia DOT metadata covers the Atlanta venue only when the agency source succeeds',()=>{
   const venue={id:'atlanta',address:'Atlanta, GA, USA',lat:33.7553,lon:-84.4008};
   const cameras=[{id:'gdot-1',agency:'Georgia DOT GIS',lat:33.76,lon:-84.4}];
