@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseTennesseeRoadEvents} from '../lib/tennessee_road_events.mjs';
+import {parseTennesseeRoadEvents,tennesseeRoadQuery} from '../site/tennessee_road_events.js';
 
 test('Tennessee source-listed incident preserves description without mislabeling local wall time as UTC',()=>{
   const now=Date.parse('2026-10-09T20:53:00Z'),source='https://spatial.tdot.tn.gov/ArcGIS/rest/services/Smartway/Smartway_Events/FeatureServer/0';
@@ -13,4 +13,11 @@ test('Tennessee source-listed incident preserves description without mislabeling
   assert.equal(rows[0].sourceRecordDate,null);
   assert.equal(rows[0].timingPolicy,'source_listed_only');
   assert.deepEqual(parseTennesseeRoadEvents([{...feature,attributes:{...feature.attributes,REVISED_DATE:now-2*86400000}}],now,Date.parse('2027-01-10T00:00:00Z'),source),[]);
+});
+
+test('direct Tennessee query stays bounded to Nashville and recent source revisions',()=>{
+  const query=new URL(tennesseeRoadQuery(Date.parse('2026-10-09T20:00:00Z')));
+  assert.equal(query.searchParams.get('geometry'),'-87.05,35.9,-86.6,36.35');
+  assert.match(query.searchParams.get('where'),/REVISED_DATE >= TIMESTAMP '2026-10-02 20:00:00'/);
+  assert.equal(query.searchParams.get('resultRecordCount'),'1000');
 });

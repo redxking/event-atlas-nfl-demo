@@ -1,4 +1,12 @@
 const DAY=86400000;
+export const tennesseeRoadLayer='https://spatial.tdot.tn.gov/ArcGIS/rest/services/Smartway/Smartway_Events/FeatureServer/0';
+
+export function tennesseeRoadQuery(now=Date.now()){
+  const from=new Date(now-7*DAY).toISOString().slice(0,19).replace('T',' ');
+  const through=new Date(now).toISOString().slice(0,19).replace('T',' ');
+  const params=new URLSearchParams({where:`(END_DATE IS NULL OR END_DATE >= TIMESTAMP '${through}') AND REVISED_DATE >= TIMESTAMP '${from}'`,geometry:'-87.05,35.9,-86.6,36.35',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,START_DATE,END_DATE,REVISED_DATE,CD_ROAD_NAMES,EVENT_TYPE,EVENT_SUBTYPE,DESCRIPTION,HAS_CLOSURE',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+  return `${tennesseeRoadLayer}/query?${params}`;
+}
 
 export function parseTennesseeRoadEvents(features,now,seasonEnd,sourceUrl){
   if(!Array.isArray(features))throw Error('Tennessee road features required');

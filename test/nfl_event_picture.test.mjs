@@ -54,3 +54,10 @@ test('Chicago historical count stays a dated aggregate and never becomes a threa
   assert.ok(picture.gaps.some(gap=>gap.includes('no active police alert feed')));
   assert.equal(picture.cues.length,0);
 });
+
+test('failed direct Tennessee road check is visible as a gap',()=>{
+  const nashville={...game,venue:{...game.venue,id:'3810',lat:36.1663,lon:-86.7713}};
+  const picture=buildNflEventPicture(nashville,{schedule:inputs.schedule,roadDirect:{state:'failed',checkedAt:now}},now);
+  assert.ok(picture.gaps.some(gap=>gap.includes('Direct Tennessee DOT SmartWay check failed')));
+  assert.equal(picture.cueCounts.road,0);
+});

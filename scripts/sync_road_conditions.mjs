@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import {parseLouisianaRoadEvents} from '../lib/louisiana_road_events.mjs';
-import {parseTennesseeRoadEvents} from '../lib/tennessee_road_events.mjs';
+import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from '../site/tennessee_road_events.js';
 const schedule=JSON.parse(await fs.readFile('site/nfl.json','utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
   .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|LA|TN), USA$/.test(venue.address));
@@ -104,17 +104,13 @@ try{
   records.push(...parsed);
   sources.push({id:'ladotd-511-new-orleans',url:laLayer,status:'ok',records:parsed.length,sourceUpdatedAt:new Date(sourceUpdated).toISOString()});
 }catch(error){sources.push({id:'ladotd-511-new-orleans',url:laLayer,status:'failed',error:String(error)})}
-const tnLayer='https://spatial.tdot.tn.gov/ArcGIS/rest/services/Smartway/Smartway_Events/FeatureServer/0';
 try{
-  const from=new Date(now-7*86400000).toISOString().slice(0,19).replace('T',' ');
-  const through=new Date(now).toISOString().slice(0,19).replace('T',' ');
-  const params=new URLSearchParams({where:`(END_DATE IS NULL OR END_DATE >= TIMESTAMP '${through}') AND REVISED_DATE >= TIMESTAMP '${from}'`,geometry:'-87.05,35.9,-86.6,36.35',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,START_DATE,END_DATE,REVISED_DATE,CD_ROAD_NAMES,EVENT_TYPE,EVENT_SUBTYPE,DESCRIPTION,HAS_CLOSURE',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
-  const data=await get(`${tnLayer}/query?${params}`);
+  const data=await get(tennesseeRoadQuery(now));
   if(!Array.isArray(data.features)||data.error||data.exceededTransferLimit||data.features.length>=1000)throw Error('Incomplete Tennessee DOT SmartWay road response');
-  const parsed=parseTennesseeRoadEvents(data.features,now,seasonEnd,tnLayer);
+  const parsed=parseTennesseeRoadEvents(data.features,now,seasonEnd,tennesseeRoadLayer);
   records.push(...parsed);
-  sources.push({id:'tdot-smartway-nashville',url:tnLayer,status:'ok',records:parsed.length,dateSemantics:'Numeric date fields are used only as conservative inclusion filters; their time zone is not verified.'});
-}catch(error){sources.push({id:'tdot-smartway-nashville',url:tnLayer,status:'failed',error:String(error)})}
+  sources.push({id:'tdot-smartway-nashville',url:tennesseeRoadLayer,status:'ok',records:parsed.length,dateSemantics:'Numeric date fields are used only as conservative inclusion filters; their time zone is not verified.'});
+}catch(error){sources.push({id:'tdot-smartway-nashville',url:tennesseeRoadLayer,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public road condition source failed');
 const available=new Set(sources.filter(source=>source.status==='ok').map(source=>source.id));
 const byVenue=Object.fromEntries(venues.filter(venue=>venue.address.includes('CA, USA')?available.has('caltrans-lcs-d4')||available.has('caltrans-lcs-d7'):venue.address.includes('WA, USA')?available.has('wsdot-road-alerts'):venue.address.includes('MD, USA')?available.has('md-chart-incidents')||available.has('md-chart-closures'):venue.address.includes('WI, USA')?available.has('wisdot-511-events-green-bay'):venue.address.includes('LA, USA')?available.has('ladotd-511-new-orleans'):venue.address.includes('TN, USA')?available.has('tdot-smartway-nashville'):available.has('idot-closure-incidents')).map(venue=>{

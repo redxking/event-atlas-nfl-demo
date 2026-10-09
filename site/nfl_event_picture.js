@@ -1,4 +1,4 @@
-import {selectRoadContext} from './road_relevance.js';
+import {selectRoadContext} from './road_relevance.js?v=20261009-4';
 import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
 
@@ -10,7 +10,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,conditions,police,ntas}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,roadDirect,conditions,police,ntas}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -53,6 +53,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(venueId==='3933')gaps.push('Chicago reported-crime data excludes recent days and records without usable coordinates; no active police alert feed is connected.');
   if(!cameraFresh||!cameraItems)gaps.push('No current roadway-camera metadata coverage is available for this venue.');
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
+  if(venueId==='3810'&&roadDirect?.state==='failed')gaps.push('Direct Tennessee DOT SmartWay check failed; the scheduled road snapshot may be stale.');
   if(!weather||weather.state!=='screened')gaps.push('NWS alert event-time screening is unavailable or incomplete.');
   if(!faa||!faaFresh)gaps.push('FAA SEAMS event snapshot is absent or stale.');
   if(!tfrFresh)gaps.push('FAA TFR list and geometry snapshot is absent or stale.');
