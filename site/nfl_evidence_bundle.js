@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-7';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-8';
 
 const pick=(value,fields)=>Object.fromEntries(fields.filter(key=>value?.[key]!==undefined).map(key=>[key,value[key]]));
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
@@ -21,10 +21,11 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     event:pick(game,['id','title','week','kickoff','timeTbd','status','sourceUrl','sourceRetrievedAt']),
     venue:pick(game.venue,['id','name','address','lat','lon','coordinateStatus','venueCandidateUrl']),
     picture,
-    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,usgs:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,ntas:inputs.ntas?.retrievedAt||null},
+    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,usgs:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,ntas:inputs.ntas?.retrievedAt||null},
     geography:{
       ground:ground?{status:'unreviewed_osm_candidate',sourceUrl:ground.sourceUrl,sourceVersion:ground.sourceVersion,sourceEditedAt:ground.sourceEditedAt,identityMethod:ground.identityMethod,outerRings:ground.outerRings||[ground.ring]}:null,
-      airspace:airspace?{status:'FAA SEAMS source record; current NOTAM unverified',sourceUrl:inputs.airspace.sourceItemUrl,record:pick(airspace,['objectId','eventName','startAt','endAt','status','isActive','sourceUpdatedAt','center','ring'])}:null
+      airspace:airspace?{status:'FAA SEAMS source record; current NOTAM unverified',sourceUrl:inputs.airspace.sourceItemUrl,record:pick(airspace,['objectId','eventName','startAt','endAt','status','isActive','sourceUpdatedAt','center','ring'])}:null,
+      tfrCandidates:inputs.tfr?.byVenue?.[venueId]||[]
     },
     publicObservations:{
       weather:Array.isArray(alerts)?alerts.map(feature=>{const p=feature.properties||{};return {sourceId:feature.id||null,sourceUrl:p['@id']||null,event:p.event||null,severity:p.severity||null,urgency:p.urgency||null,status:p.status||null,effective:p.effective||null,ends:p.ends||p.expires||null}}):null,

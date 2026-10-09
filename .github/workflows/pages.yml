@@ -27,6 +27,7 @@ jobs:
       - run: npm run sync:roads
       - run: npm run sync:ntas
       - run: npm run sync:seams
+      - run: npm run sync:tfr
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

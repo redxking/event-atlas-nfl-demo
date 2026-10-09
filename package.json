@@ -15,6 +15,7 @@
     "sync:roads": "node scripts/sync_road_conditions.mjs",
     "sync:ntas": "python3 scripts/sync_dhs_ntas.py",
     "sync:seams": "node scripts/sync_faa_seams.mjs",
+    "sync:tfr": "node scripts/sync_faa_tfr.mjs",
     "build:site": "node scripts/build_public_site.mjs",
     "sync:voting": "node scripts/sync_all_voting.mjs",
     "operator:create": "node scripts/create_local_operator.mjs",
