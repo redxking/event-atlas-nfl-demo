@@ -11,7 +11,21 @@ function sorted(games){const now=Date.now(),upcoming=$('time').value==='upcoming
 function renderList(){const q=$('search').value.trim().toLowerCase(),week=$('week').value;const items=sorted(snapshot.games.filter(game=>(!week||String(game.week)===week)&&(!q||[game.title,game.venue.name,game.venue.address].some(value=>value.toLowerCase().includes(q)))));$('result-count').textContent=items.length+' games';$('games').innerHTML=items.length?items.map(game=>`<button class="game ${game.id===selected?'selected':''}" data-id="${esc(game.id)}"><span class="game-top"><span>WEEK ${game.week}</span><span class="date">${esc(gameTime(game))}</span></span><strong>${esc(game.title)}</strong><small>${esc(game.venue.name)} · ${esc(game.venue.address)}</small></button>`).join(''):'<p class="empty" style="padding:20px">No games match these filters.</p>';for(const button of $('games').querySelectorAll('.game'))button.onclick=()=>selectGame(button.dataset.id)}
 function fact(label,value){return `<div class="fact"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`}
 function link(url,label){try{const parsed=new URL(url);if(parsed.protocol!=='https:')return '';return `<a href="${esc(parsed.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch{return ''}}
-function renderCameras(game){const target=$('cameras');if(!target)return;const sources=cameraSnapshot?.sources||[],items=cameraSnapshot?.byVenue?.[game.venue.id]||[],state=sources.filter(source=>source.status==='failed');if(!cameraSnapshot){target.innerHTML='<p>Camera metadata snapshot unavailable.</p>';return}target.innerHTML=`<p class="feed-state">PUBLIC ROADWAY CAMERAS · SNAPSHOT ${esc(fmt(cameraSnapshot.builtAt))}</p><p>Nearest agency-listed cameras within 15 km of the venue candidate point. Distance does not establish a stadium view, live image, or access to venue security cameras.</p>${items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span><span>${link(item.viewerUrl,'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):'<p>No nearby camera metadata in the connected agency snapshots for this venue.</p>'}${state.length?`<p>Unavailable source: ${esc(state.map(source=>source.id).join(', '))}. The displayed coverage may be incomplete.</p>`:''}`}
+function renderCameras(game){
+  const target=$('cameras');
+  if(!target)return;
+  if(!cameraSnapshot){target.innerHTML='<p>Camera metadata snapshot unavailable.</p>';return}
+  const sources=cameraSnapshot.sources||[];
+  const covered=Object.hasOwn(cameraSnapshot.byVenue||{},game.venue.id);
+  const items=covered?cameraSnapshot.byVenue[game.venue.id]:[];
+  const failed=sources.filter(source=>source.status==='failed');
+  const builtAt=Date.parse(cameraSnapshot.builtAt);
+  const stale=!Number.isFinite(builtAt)||Date.now()-builtAt>12*3600000;
+  target.innerHTML=`<p class="feed-state">PUBLIC ROADWAY CAMERAS · SNAPSHOT ${esc(fmt(cameraSnapshot.builtAt))}</p>`+
+    `<p>${covered?'Nearest agency-listed cameras within 15 km of the venue candidate point. Distance does not establish a stadium view, live image, or access to venue security cameras.':'No connected agency roadway-camera inventory for this venue.'}${stale?' This snapshot is more than 12 hours old.':''}</p>`+
+    (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span><span>${link(item.viewerUrl,'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
+    (failed.length?`<p>Unavailable source: ${esc(failed.map(source=>source.id).join(', '))}. The displayed coverage may be incomplete.</p>`:'');
+}
 function renderRoads(game){
   const target=$('roads');
   if(!target)return;

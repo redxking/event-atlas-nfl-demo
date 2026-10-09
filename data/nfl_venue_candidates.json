@@ -1,0 +1,12 @@
+{
+  "3933": {
+    "name": "Soldier Field",
+    "sourceAddress": "Chicago, IL, USA",
+    "id": "Q1132413",
+    "lat": 41.8625,
+    "lon": -87.616666666667,
+    "coordinateSource": "Wikidata coordinate candidate; venue identity checked against official Soldier Field address; point unreviewed",
+    "coordinateUrl": "https://www.wikidata.org/wiki/Q1132413",
+    "identityUrl": "https://www.soldierfield.com/stadium-info/contact-us"
+  }
+}
