@@ -26,3 +26,15 @@ test('changed game and stale schedule cannot masquerade as current matched conte
   assert.equal(stale.status,'stale_schedule_snapshot');
   assert.equal(buildNflCaseContext(subject,null,{schedule},now).status,'unavailable');
 });
+
+test('Indianapolis case includes only a current bounded public police aggregate',()=>{
+  const indyGame={...game,venue:{...game.venue,id:'3812'}};
+  const context={nearby:17,start:'2026-10-01',end:'2026-10-08',radiusKm:5,sourceLatestAt:now-30*3600000,sourceLagHours:30,checkedAt:now-3600000,privateAddress:'must not export'};
+  const snapshots={schedule:{builtAt:'2026-10-09T19:55:00Z',games:[indyGame]},indianapolis:{status:'ok',builtAt:new Date(now-3600000).toISOString(),byVenue:{3812:context}}};
+  const result=buildNflCaseContext(subject,event,snapshots,now);
+  assert.equal(result.evidence.publicObservations.policeAggregate.nearby,17);
+  assert.equal(result.evidence.publicObservations.policeAggregate.privateAddress,undefined);
+  assert.equal(result.evidence.picture.sources.find(item=>item.name==='Local police activity').state,'delayed historical count checked');
+  const stale=buildNflCaseContext(subject,event,{...snapshots,indianapolis:{...snapshots.indianapolis,builtAt:new Date(now-13*3600000).toISOString()}},now);
+  assert.equal(stale.evidence.publicObservations.policeAggregate,null);
+});

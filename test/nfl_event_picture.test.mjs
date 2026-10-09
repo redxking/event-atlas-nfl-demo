@@ -60,6 +60,17 @@ test('Chicago historical count stays a dated aggregate and never becomes a threa
   assert.equal(picture.cues.length,0);
 });
 
+test('Indianapolis delayed calls remain historical context with no threat cue',()=>{
+  const indy={...game,venue:{...game.venue,id:'3812',lat:39.760056,lon:-86.163806}};
+  const context={nearby:123,start:'2026-10-01',end:'2026-10-08',radiusKm:5,sourceLatestAt:now-30*3600000,sourceLagHours:30,privateAddress:'must not export'};
+  const picture=buildNflEventPicture(indy,{schedule:inputs.schedule,police:{state:'retrieved',sourceId:'indianapolis',checkedAt:now-2*3600000,context}},now);
+  assert.equal(picture.sources.find(item=>item.name==='Local police activity').state,'delayed historical count checked');
+  assert.equal(picture.policeContext.nearby,123);
+  assert.equal(picture.policeContext.privateAddress,undefined);
+  assert.equal(picture.cues.length,0);
+  assert.ok(picture.gaps.some(gap=>gap.includes('delayed seven-day aggregate')));
+});
+
 test('failed direct Tennessee road check is visible as a gap',()=>{
   const nashville={...game,venue:{...game.venue,id:'3810',lat:36.1663,lon:-86.7713}};
   const picture=buildNflEventPicture(nashville,{schedule:inputs.schedule,roadDirect:{state:'failed',checkedAt:now}},now);
