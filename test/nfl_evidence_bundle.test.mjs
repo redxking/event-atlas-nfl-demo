@@ -11,6 +11,8 @@ test('public evidence export retains source links and gaps without person or pol
   assert.equal(bundle.event.sourceUrl,game.sourceUrl);
   assert.equal(bundle.geography.ground.status,'unreviewed_osm_candidate');
   assert.equal(bundle.geography.airspace.record.status,'SCHEDULED');
+  assert.equal(bundle.geography.zoneRegistry.status,'research_geometry_only');
+  assert.ok(bundle.geography.zoneRegistry.gaps.some(gap=>gap.includes('operator-approved')));
   assert.equal(bundle.publicObservations.roads[0].sourceUrl,'https://agency.gov/road');
   assert.equal(bundle.publicObservations.cameras[0].stillUrl,'https://images.wsdot.wa.gov/nw/test.jpg');
   assert.equal(bundle.publicObservations.earthquakes[0].sourceUrl,'https://earthquake.usgs.gov/1');

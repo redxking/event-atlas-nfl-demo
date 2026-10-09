@@ -1,4 +1,5 @@
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-12';
+import {buildVenueZoneRegistry} from './zone_registry.js';
 
 const pick=(value,fields)=>Object.fromEntries(fields.filter(key=>value?.[key]!==undefined).map(key=>[key,value[key]]));
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
@@ -23,6 +24,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     picture,
     sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,usgs:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,ntas:inputs.ntas?.retrievedAt||null},
     geography:{
+      zoneRegistry:buildVenueZoneRegistry(game,inputs),
       ground:ground?{status:'unreviewed_osm_candidate',sourceUrl:ground.sourceUrl,sourceVersion:ground.sourceVersion,sourceEditedAt:ground.sourceEditedAt,identityMethod:ground.identityMethod,outerRings:ground.outerRings||[ground.ring]}:null,
       airspace:airspace?{status:'FAA SEAMS source record; current NOTAM unverified',sourceUrl:inputs.airspace.sourceItemUrl,record:pick(airspace,['objectId','eventName','startAt','endAt','status','isActive','sourceUpdatedAt','center','ring'])}:null,
       tfrCandidates:inputs.tfr?.byVenue?.[venueId]||[]

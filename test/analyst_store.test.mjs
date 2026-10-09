@@ -41,6 +41,9 @@ test('case assessment preserves cited evidence and separates analyst from review
     const analyst=store.authenticate(`Bearer ${analystToken}`),reviewer=store.authenticate(`Bearer ${reviewerToken}`);
     const subject={type:'voting_site',id:'synthetic-site',title:'Synthetic voting site',sourceUrl:'https://example.org/site',retrievedAt:'2026-10-09T12:00:00Z'};
     const caseRecord=store.createCase(analyst,subject,'Protective review of a sourced election site.','Synthetic election office','A documented source observation warrants local analyst triage.');
+    assert.equal(store.getCaseFor(reviewer,caseRecord.id),null);
+    const grant=store.assignCaseReviewer(analyst,caseRecord.id,reviewer.id,'This reviewer is assigned to the synthetic election case.');
+    assert.equal(store.getCaseFor(reviewer,caseRecord.id).case.id,caseRecord.id);
     const input={severity:'review_candidate',confidence:'low',analysis:'A cited source claim requires verification against current site operations before any protective conclusion.',confidenceRationale:'Only one synthetic source is available, so confidence remains low.',impact:'Potential disruption would need confirmation by site operators.',alternativeExplanations:'The observation could reflect a stale notice or a routine change.',protectiveNexus:'The cited claim concerns the selected election site and its operation.',recommendation:'Verify the claim with the responsible authority.',limitations:'The synthetic source does not establish actual site impact.',evidence:[{url:'https://example.org/notice',observedAt:'2026-10-09T12:00:00Z',claim:'Synthetic source reports a site notice.',relevance:'The notice concerns the selected site.',classification:'official_notice'}]};
     assert.throws(()=>store.createAssessment(analyst,caseRecord.id,{...input,evidence:[]}),/timestamped HTTPS citations/);
     const assessment=store.createAssessment(analyst,caseRecord.id,input);
@@ -49,8 +52,29 @@ test('case assessment preserves cited evidence and separates analyst from review
     assert.throws(()=>store.reviewAssessment(analyst,assessment.id,'accepted_for_internal_review','Sufficient synthetic reviewer rationale.'),/Reviewer role required/);
     store.reviewAssessment(reviewer,assessment.id,'accepted_for_internal_review','Citation and alternatives were checked in this synthetic test.');
     assert.equal(store.getCase(caseRecord.id).assessments[0].status,'accepted_for_internal_review');
+    store.revokeCaseReviewer(analyst,grant.id,'The synthetic case review has concluded for this reviewer.');
+    assert.equal(store.getCaseFor(reviewer,caseRecord.id),null);
+    assert.deepEqual(store.listCasesFor(reviewer),[]);
+    assert.equal(store.listBriefSnapshotsFor(reviewer,caseRecord.id),null);
+    const regrant=store.assignCaseReviewer(analyst,caseRecord.id,reviewer.id,'A second synthetic review assignment is needed after revocation.');
+    assert.equal(store.getCaseFor(reviewer,caseRecord.id).case.id,caseRecord.id);
+    assert.equal(store.listCaseReviewersFor(analyst,caseRecord.id).filter(item=>!item.revokedAt).length,1);
+    store.revokeCaseReviewer(analyst,regrant.id,'Second synthetic review assignment is complete and access ends.');
     store.close();
     const reopened=new AnalystStore(file);assert.equal(reopened.listCases()[0].assessmentCount,1);reopened.close();
+  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+
+test('case grant permissions and tamper detection survive restart',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-case-grant-')),file=path.join(dir,'private','analyst.sqlite');
+  try{
+    const store=new AnalystStore(file),a=store.createOperator('grant_analyst','Grant Analyst','analyst'),r=store.createOperator('grant_reviewer','Grant Reviewer','reviewer'),analyst=store.authenticate(`Bearer ${a}`),reviewer=store.authenticate(`Bearer ${r}`);
+    const c=store.createCase(analyst,{type:'published_event',id:'synthetic',sourceUrl:'https://example.org/event'},'Protective review of a synthetic published event.','Synthetic agency','The cited synthetic event warrants a case review.');
+    assert.deepEqual(store.listCasesFor(reviewer),[]);
+    assert.throws(()=>store.assignCaseReviewer(reviewer,c.id,analyst.id,'A reviewer cannot assign another operator to a case.'),/Case owner required/);
+    const grant=store.assignCaseReviewer(analyst,c.id,reviewer.id,'Independent review of this synthetic event case is required.');
+    store.close();const db=new DatabaseSync(file);db.prepare('UPDATE case_reviewers SET rationale=? WHERE id=?').run('Tampered grant rationale',grant.id);db.close();
+    assert.throws(()=>new AnalystStore(file),/Case reviewer grant mismatch/);
   }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
 
@@ -65,6 +89,7 @@ test('named professional records require a separately approved event scope and s
     const store=new AnalystStore(file),analystToken=store.createOperator('person_analyst','Person Analyst','analyst'),reviewerToken=store.createOperator('person_reviewer','Person Reviewer','reviewer');
     const analyst=store.authenticate(`Bearer ${analystToken}`),reviewer=store.authenticate(`Bearer ${reviewerToken}`);
     const eventCase=store.createCase(analyst,{type:'published_event',id:'synthetic-nfl-event',title:'Synthetic NFL event',sourceUrl:'https://example.org/game'},'Protective event planning for designated officials.','Synthetic public safety agency','Published event and designated role require a bounded protective review.');
+    store.assignCaseReviewer(analyst,eventCase.id,reviewer.id,'This reviewer checks the synthetic professional role scope.');
     const expiresAt=new Date(Date.now()+7*86400000).toISOString();
     const scope=store.requestPersonScope(analyst,eventCase.id,{role:'team_official',protectiveNexus:'A designated team official will attend the selected published event.',lawfulAuthority:'Synthetic agency protective assignment',collectionPurpose:'Prepare a bounded protective event brief.',expiresAt});
     const input={displayName:'Jordan Example',role:'team_official',professionalRole:'Synthetic team president',designationSource:{url:'https://example.org/official',authority:'Synthetic team',observedAt:new Date().toISOString()},identityConfidence:'moderate',identityRationale:'Name and professional role match the synthetic source record.',publicProfessionalFacts:[{claim:'Serves as the synthetic team president.',sourceUrl:'https://example.org/official',observedAt:new Date().toISOString()}],retentionUntil:new Date(Date.now()+6*86400000).toISOString()};
@@ -91,6 +116,7 @@ test('saved brief versions retain exact content, chain hashes, and independent r
     const store=new AnalystStore(file),analystToken=store.createOperator('brief_analyst','Brief Analyst','analyst'),reviewerToken=store.createOperator('brief_reviewer','Brief Reviewer','reviewer');
     const analyst=store.authenticate(`Bearer ${analystToken}`),reviewer=store.authenticate(`Bearer ${reviewerToken}`);
     const record=store.createCase(analyst,{type:'published_event',id:'synthetic-game',title:'Synthetic game',sourceUrl:'https://example.org/game'},'Protective review of a published synthetic event.','Synthetic agency','An official synthetic event notice supports opening this case.');
+    store.assignCaseReviewer(analyst,record.id,reviewer.id,'This reviewer checks synthetic saved brief versions.');
     const makeBrief=version=>{const trace=store.recordBriefRequest(analyst,record.id);return {schema:'event-atlas.internal-event-case-brief.v1',case:{id:record.id},generatedBy:analyst.id,generatedAt:trace.generatedAt,localAuditHead:trace.auditHead,version}};
     const first=store.saveBriefSnapshot(analyst,record.id,makeBrief(1));
     const second=store.saveBriefSnapshot(analyst,record.id,makeBrief(2));
