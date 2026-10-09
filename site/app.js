@@ -7,6 +7,7 @@ import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-9';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-4';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
+import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
@@ -234,6 +235,22 @@ function renderPublicSafety(game){
     target.innerHTML='<p>Checking Seattle Police’s public calls-for-service layer…</p>';
     refreshSeattle();
     publicSafetyRefreshTimer=setInterval(()=>{if(selected===game.id)refreshSeattle();else{clearInterval(publicSafetyRefreshTimer);publicSafetyRefreshTimer=null}},300000);
+    return;
+  }
+  if(game.venue.id==='3933'){
+    async function refreshChicago(){
+      try{
+        const checkedAt=Date.now(),query=chicagoCrimeQuery(game.venue,checkedAt);
+        const response=await json(query.url);
+        if(selected!==game.id)return;
+        const context=summarizeChicagoCrimes(response,query,checkedAt);
+        briefPolice={state:'retrieved',checkedAt,context,sourceId:'chicago'};renderBrief(game);
+        target.innerHTML=`<p class="feed-state">CHICAGO POLICE REPORTED-CRIME DATA · CHECKED ${esc(fmt(checkedAt))}</p><p>${esc(context.nearby)} geocoded public records within 5 km of the unreviewed Soldier Field point, dated ${esc(context.start)} through the day before ${esc(context.end)}. The 30-day window ends eight days before the current UTC date.</p><p>This is a delayed, potentially incomplete historical count, not a current incident feed, police alert, comparison over time, stadium incident, or threat finding. Records without usable coordinates are absent from this count. The city warns against time comparisons and notes past missing location values. No individual record, address, or location is shown or retained. ${link(chicagoCrimeDataset,'City dataset')} · ${link('https://data.cityofchicago.org/stories/s/Problem-Crime-Datasets-Missing-Location-Values-10-/ragt-xajb/','Location-data notice')}</p>`;
+      }catch(error){if(selected===game.id){briefPolice={state:'failed',sourceId:'chicago'};renderBrief(game);target.innerHTML=`<p>Chicago delayed crime aggregate unavailable (${esc(error.message)}). No negative finding can be inferred. ${link(chicagoCrimeDataset,'City dataset')}</p>`}}
+    }
+    target.innerHTML='<p>Checking Chicago’s delayed public crime aggregate…</p>';
+    refreshChicago();
+    publicSafetyRefreshTimer=setInterval(()=>{if(selected===game.id)refreshChicago();else{clearInterval(publicSafetyRefreshTimer);publicSafetyRefreshTimer=null}},300000);
     return;
   }
   if(game.venue.id!=='3687'){

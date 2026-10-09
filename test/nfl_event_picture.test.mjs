@@ -44,3 +44,13 @@ test('Seattle closed-call context is labeled and never becomes a threat cue',()=
   assert.equal(picture.assessment.severity,'not_assessed');
   assert.ok(!picture.gaps.some(gap=>gap.includes('No jurisdictional police incident feed')));
 });
+
+test('Chicago historical count stays a dated aggregate and never becomes a threat cue',()=>{
+  const chicago={...game,venue:{...game.venue,id:'3933',lat:41.8625,lon:-87.6167}};
+  const picture=buildNflEventPicture(chicago,{schedule:inputs.schedule,police:{state:'retrieved',sourceId:'chicago',checkedAt:now,context:{nearby:83,start:'2026-09-01',end:'2026-10-01',radiusKm:5,caseNumber:'private'}}},now);
+  const source=picture.sources.find(item=>item.name==='Local police activity');
+  assert.equal(source.state,'delayed historical count checked');
+  assert.deepEqual(picture.policeContext,{nearby:83,start:'2026-09-01',end:'2026-10-01',radiusKm:5});
+  assert.ok(picture.gaps.some(gap=>gap.includes('no active police alert feed')));
+  assert.equal(picture.cues.length,0);
+});
