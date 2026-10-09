@@ -4,13 +4,14 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261009-5';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-4';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-7';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-2';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
 const gameTime=game=>game.timeTbd?new Date(game.kickoff).toLocaleDateString(undefined,{dateStyle:'medium',timeZone:'America/New_York'})+' · kickoff TBD':fmt(game.kickoff);
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
-const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,groundSnapshot,selected,cameraRefreshTimer,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice;
+const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,groundSnapshot,ntasSnapshot,selected,cameraRefreshTimer,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice;
 const arlingtonSource='https://gis2.arlingtontx.gov/agsext2/rest/services/Police/ActiveIncident/MapServer/0';
 const arlingtonQuery=arlingtonSource+'/query?'+new URLSearchParams({where:'1=1',outFields:'OBJECTID,CallDate,UpdatedDate',returnGeometry:'true',outSR:'4326',f:'geojson'});
 async function json(url){const local=new URL(url,location.href).origin===location.origin;const result=await fetch(url,{headers:{Accept:'application/geo+json, application/json'},cache:local?'no-store':'default'});if(!result.ok)throw Error('HTTP '+result.status);return result.json()}
@@ -18,19 +19,30 @@ function sorted(games){const now=Date.now(),upcoming=$('time').value==='upcoming
 function renderList(){const q=$('search').value.trim().toLowerCase(),week=$('week').value;const items=sorted(snapshot.games.filter(game=>(!week||String(game.week)===week)&&(!q||[game.title,game.venue.name,game.venue.address].some(value=>value.toLowerCase().includes(q)))));$('result-count').textContent=items.length+' games';$('games').innerHTML=items.length?items.map(game=>`<button class="game ${game.id===selected?'selected':''}" data-id="${esc(game.id)}"><span class="game-top"><span>WEEK ${game.week}</span><span class="date">${esc(gameTime(game))}</span></span><strong>${esc(game.title)}</strong><small>${esc(game.venue.name)} · ${esc(game.venue.address)}</small></button>`).join(''):'<p class="empty" style="padding:20px">No games match these filters.</p>';for(const button of $('games').querySelectorAll('.game'))button.onclick=()=>selectGame(button.dataset.id)}
 function fact(label,value){return `<div class="fact"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`}
 function link(url,label){try{const parsed=new URL(url);if(parsed.protocol!=='https:')return '';return `<a href="${esc(parsed.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch{return ''}}
+const briefInputs=()=>({schedule:snapshot,ground:groundSnapshot,airspace:seamsSnapshot,cameras:cameraSnapshot,roads:roadSnapshot,conditions:briefConditions,police:briefPolice,ntas:ntasSnapshot});
+function downloadEvidenceBundle(game){
+  if(selected!==game.id)return;
+  const bundle=buildNflEvidenceBundle(game,briefInputs());
+  const url=URL.createObjectURL(new Blob([JSON.stringify(bundle,null,2)+'\n'],{type:'application/json'}));
+  const anchor=document.createElement('a');anchor.href=url;anchor.download=`event-atlas-${game.id.replace(/[^A-Za-z0-9_-]/g,'-')}-public-evidence.json`;
+  document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
 function renderBrief(game){
   const target=$('event-picture');
   if(!target||!game)return;
-  const picture=buildNflEventPicture(game,{schedule:snapshot,ground:groundSnapshot,airspace:seamsSnapshot,cameras:cameraSnapshot,roads:roadSnapshot,conditions:briefConditions,police:briefPolice});
+  const picture=buildNflEventPicture(game,briefInputs());
   const total=picture.cueCounts.weather+picture.cueCounts.road;
   target.innerHTML=`<p class="feed-state">PUBLIC-SOURCE EVENT PICTURE · GENERATED ${esc(fmt(picture.generatedAt))}</p><p><strong>Assessment: severity and confidence not assessed.</strong> ${picture.cueCounts.weather} NWS alert review candidate${picture.cueCounts.weather===1?'':'s'}; ${picture.cueCounts.road} published roadway time overlap${picture.cueCounts.road===1?'':'s'}. ${esc(picture.interpretation)}</p>`+
     (picture.cues.length?`<div class="brief-cues">${picture.cues.map(cue=>`<div class="brief-cue"><strong>${esc(cue.type.toUpperCase())} · ${esc(cue.title)}</strong><span>${esc(cue.basis)}${cue.sourceAt?' · source time '+esc(fmt(cue.sourceAt)):''}</span>${link(cue.sourceUrl,cue.type==='road condition'?'Agency data layer':'NWS alert')}</div>`).join('')}${total>picture.cues.length?`<p>These panels show bounded samples. Consult the agency feeds for the complete set of source records.</p>`:''}</div>`:'')+
-    `<details class="brief-details"><summary>Source status and gaps</summary><div class="brief-grid">${picture.sources.map(source=>`<div><strong>${esc(source.name)}</strong><span>${esc(source.state)}${source.asOf?' · '+esc(fmt(source.asOf)):''}</span><small>${esc(source.detail)} ${link(source.sourceUrl,'Source')}</small></div>`).join('')}</div><p><strong>Unresolved for this brief</strong></p><ul>${picture.gaps.map(gap=>`<li>${esc(gap)}</li>`).join('')}</ul></details>`;
+    `<details class="brief-details"><summary>Source status and gaps</summary><div class="brief-grid">${picture.sources.map(source=>`<div><strong>${esc(source.name)}</strong><span>${esc(source.state)}${source.asOf?' · '+esc(fmt(source.asOf)):''}</span><small>${esc(source.detail)} ${link(source.sourceUrl,'Source')}</small></div>`).join('')}</div><p><strong>Unresolved for this brief</strong></p><ul>${picture.gaps.map(gap=>`<li>${esc(gap)}</li>`).join('')}</ul></details><button type="button" class="evidence-download">Download public evidence bundle (JSON)</button><p class="bundle-note">Includes source status, candidate geography, bounded public observations, and gaps at download time. Unreviewed; no threat assessment or named-person records.</p>`;
+  target.querySelector('.evidence-download').onclick=()=>downloadEvidenceBundle(game);
 }
 async function loadNtas(){
   const target=$('ntas');
   try{
     const feed=await json('ntas.json'),age=Date.now()-Date.parse(feed.retrievedAt);
+    ntasSnapshot=feed;
+    if(selected&&snapshot)renderBrief(snapshot.games.find(game=>game.id===selected));
     if(feed.status!=='ok'||!Number.isFinite(age)||age>12*3600000||age<0){
       target.innerHTML=`<p>Advisory snapshot unavailable or more than 12 hours old. Check ${link(feed.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml','DHS NTAS')} directly.</p>`;
       return;
@@ -39,6 +51,8 @@ async function loadNtas(){
       (feed.activeCount?feed.active.map(item=>`<div class="camera-row"><strong>${esc(item.type)}</strong><span>Published interval ${esc(fmt(item.start))} to ${esc(fmt(item.end))}${item.locations?.length?' · Listed locations: '+esc(item.locations.join(', ')):''}${item.sectors?.length?' · Listed sectors: '+esc(item.sectors.join(', ')):''}</span><span>${esc(item.summary)}</span>${link(item.url,'DHS advisory')}</div>`).join(''):'<p>The DHS feed returned no active entries at this snapshot time.</p>')+
       `<p>National advisories are context, not a finding about any NFL game or venue. A zero-entry feed does not establish absence of threats. ${link(feed.sourceUrl,'DHS feed')}</p>`;
   }catch{
+    ntasSnapshot={status:'failed'};
+    if(selected&&snapshot)renderBrief(snapshot.games.find(game=>game.id===selected));
     target.innerHTML=`<p>Advisory snapshot unavailable. Check ${link('https://www.dhs.gov/ntas/1.1/feed.xml','DHS NTAS')} directly.</p>`;
   }
 }
