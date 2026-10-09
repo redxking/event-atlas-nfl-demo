@@ -33,3 +33,14 @@ test('missing sources are gaps rather than zero-incident findings',()=>{
   assert.equal(picture.sources.find(source=>source.name==='Local police activity').state,'no connector');
   assert.ok(picture.gaps.some(gap=>gap.includes('No jurisdictional police incident feed')));
 });
+
+test('Seattle closed-call context is labeled and never becomes a threat cue',()=>{
+  const seattle={...game,venue:{...game.venue,id:'3673',lat:47.5952,lon:-122.3316}};
+  const picture=buildNflEventPicture(seattle,{schedule:inputs.schedule,police:{state:'retrieved',checkedAt:now,context:{nearby:5}}},now);
+  const source=picture.sources.find(item=>item.name==='Local police activity');
+  assert.equal(source.state,'public call count checked');
+  assert.match(source.detail,/closed CAD responses/);
+  assert.equal(picture.cues.length,0);
+  assert.equal(picture.assessment.severity,'not_assessed');
+  assert.ok(!picture.gaps.some(gap=>gap.includes('No jurisdictional police incident feed')));
+});

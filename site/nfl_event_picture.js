@@ -18,6 +18,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const faaFresh=fresh(airspace?.builtAt,now,12*HOUR);
   const road=selectRoadContext(game,roads,now);
   const weather=conditions?.alertsError||!Array.isArray(conditions?.alerts?.features)?null:selectWeatherContext(game,conditions.alerts.features,conditions.at,now);
+  const policeConnected=['3687','3673'].includes(venueId);
   const policeFresh=police?.state==='retrieved'&&Number.isFinite(police.checkedAt)&&police.checkedAt<=now+60000&&now-police.checkedAt<=15*60000;
   const sources=[
     row('NFL schedule',fresh(schedule?.builtAt,now,12*HOUR)?'current snapshot':'stale or unavailable',game.sourceRetrievedAt,'Confirm changes with the NFL or host club.',game.sourceUrl),
@@ -26,7 +27,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('NWS point alerts',conditions?.alertsError?'source failed':!conditions?'not yet checked':weather?.state==='stale'?'stale':weather?.state==='kickoff_unavailable'?'checked; time screen unavailable':'checked',conditions?.at?new Date(conditions.at).toISOString():null,'Point query; verify alert footprint.',Number.isFinite(game.venue.lat)&&Number.isFinite(game.venue.lon)?`https://api.weather.gov/alerts/active?point=${game.venue.lat},${game.venue.lon}`:null),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?'metadata connected':'no connector',cameras?.builtAt,'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
-    row('Local police activity',venueId!=='3687'?'no connector':police?.state==='failed'?'source failed':policeFresh?'delayed count checked':'not current',policeFresh?new Date(police.checkedAt).toISOString():null,'Arlington only; public calls are delayed and not threat findings.',venueId==='3687'?'https://policeincidents.arlingtontx.gov/':null)
+    row('Local police activity',!policeConnected?'no connector':police?.state==='failed'?'source failed':policeFresh?'public call count checked':'not current',policeFresh?new Date(police.checkedAt).toISOString():null,venueId==='3673'?'Seattle publishes closed CAD responses; these are not active police alerts or threat findings.':venueId==='3687'?'Arlington public calls are delayed; these are not threat findings.':'No jurisdictional source connected.',venueId==='3673'?'https://experience.arcgis.com/experience/6ee2574e047d4cdb9cb5ad287b76d091':venueId==='3687'?'https://policeincidents.arlingtontx.gov/':null)
   ];
   const cues=[];
   if(weather?.state==='screened')for(const entry of weather.alerts.filter(item=>item.candidate)){
@@ -37,8 +38,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     cues.push({type:'road condition',title:`${item.kind} · ${item.name}`,basis:`${item.agency}; ${item.distanceKm} km from candidate point; published window overlaps event`,sourceUrl:item.sourceUrl||null,sourceAt:item.sourceRecordDate||item.startAt||null});
   }
   const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.'];
-  if(venueId!=='3687')gaps.push('No jurisdictional police incident feed is connected for this venue.');
-  else if(!policeFresh)gaps.push('Arlington delayed police-call context is unavailable or not current.');
+  if(!policeConnected)gaps.push('No jurisdictional police incident feed is connected for this venue.');
+  else if(!policeFresh)gaps.push(`${venueId==='3673'?'Seattle':'Arlington'} public police-call context is unavailable or not current.`);
   if(!cameraFresh||!cameraItems)gaps.push('No current roadway-camera metadata coverage is available for this venue.');
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
   if(!weather||weather.state!=='screened')gaps.push('NWS alert event-time screening is unavailable or incomplete.');

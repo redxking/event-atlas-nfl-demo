@@ -2,9 +2,9 @@ import {selectRoadContext} from './road_relevance.js?v=20261009-3';
 import {selectWeatherContext} from './weather_relevance.js';
 import {summarizeCoverage} from './coverage_summary.js?v=20261009-5';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
-import {summarizeArlingtonCalls} from './public_safety_relevance.js?v=20261009-1';
+import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-3';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-4';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
@@ -138,6 +138,22 @@ function renderRoads(game){
 function renderPublicSafety(game){
   const target=$('public-safety');
   if(publicSafetyRefreshTimer){clearInterval(publicSafetyRefreshTimer);publicSafetyRefreshTimer=null}
+  if(game.venue.id==='3673'){
+    async function refreshSeattle(){
+      try{
+        const checkedAt=Date.now(),queries=seattleCallQueries(game.venue,checkedAt);
+        const [count,latest]=await Promise.all([json(queries.countUrl),json(queries.latestUrl)]);
+        if(selected!==game.id)return;
+        const context=summarizeSeattleCalls(count,latest,checkedAt);
+        briefPolice={state:'retrieved',checkedAt,context,sourceId:'seattle'};renderBrief(game);
+        target.innerHTML=`<p class="feed-state">SEATTLE POLICE CLOSED CAD RESPONSES · CHECKED ${esc(fmt(checkedAt))}</p><p>${esc(context.nearby)} public call ID${context.nearby===1?'':'s'} returned within 5 km of the unreviewed Lumen Field point and the preceding 12 hours. Latest source call time ${esc(fmt(context.newestUpdate))}.</p><p>The city publishes responses after closure, as close to real time as possible. These are dispatched calls, not active police alerts, confirmed crimes, incidents at the stadium, or threats. The count is a geographic context observation; no call identifiers, addresses, types, or locations are shown or retained. ${link(seattleCallsViewer,'Seattle Police public map')} · ${link(seattleCallsLayer,'City data layer')}</p>`;
+      }catch(error){if(selected===game.id){briefPolice={state:'failed',sourceId:'seattle'};renderBrief(game);target.innerHTML=`<p>Seattle Police calls-for-service check unavailable or stale (${esc(error.message)}). No negative finding can be inferred. ${link(seattleCallsViewer,'City public map')}</p>`}}
+    }
+    target.innerHTML='<p>Checking Seattle Police’s public calls-for-service layer…</p>';
+    refreshSeattle();
+    publicSafetyRefreshTimer=setInterval(()=>{if(selected===game.id)refreshSeattle();else{clearInterval(publicSafetyRefreshTimer);publicSafetyRefreshTimer=null}},300000);
+    return;
+  }
   if(game.venue.id!=='3687'){
     briefPolice=null;
     target.innerHTML='<p>No connected jurisdictional police incident source for this venue. This is a coverage gap, not a finding that no incidents exist.</p>';
