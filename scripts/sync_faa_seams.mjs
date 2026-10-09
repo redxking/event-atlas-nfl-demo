@@ -7,10 +7,18 @@ const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const source='https://services1.arcgis.com/n4Ot9Qz0t5espY4s/arcgis/rest/services/SEAMS_Production_View/FeatureServer/0';
 const url=`${source}/query?`+new URLSearchParams({where:"LEAGUE_NAME='NFL'",outFields:'OBJECTID,GAME_DETAIL_ID,EVENT_NAME,VENUE,GAME_DATE,END_DATE,STATUS,IS_ACTIVE,updatedAt',returnGeometry:'true',outSR:'4326',f:'geojson',resultRecordCount:'1000'});
-const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 FAA-SEAMS-public-data'},signal:AbortSignal.timeout(25000)});
-if(!response.ok)throw Error(`FAA SEAMS HTTP ${response.status}`);
-const data=await response.json();
-if(!Array.isArray(data.features)||data.features.length>=1000||data.exceededTransferLimit)throw Error('FAA SEAMS NFL response incomplete');
+let data;
+try{
+  const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 FAA-SEAMS-public-data'},signal:AbortSignal.timeout(25000)});
+  if(!response.ok)throw Error(`FAA SEAMS HTTP ${response.status}`);
+  data=await response.json();
+  if(!Array.isArray(data.features)||data.features.length>=1000||data.exceededTransferLimit)throw Error('FAA SEAMS NFL response incomplete');
+}catch(error){
+  const retained=JSON.parse(await fs.readFile(path.join(site,'seams.json'),'utf8').catch(()=>'null'));
+  if(!retained?.builtAt||!retained?.byGame||retained.sourceUrl!==source)throw Error(`FAA SEAMS refresh failed and no valid previous snapshot exists: ${error.message}`);
+  console.warn(`FAA SEAMS refresh failed (${error.message}); retained previous snapshot from ${retained.builtAt}. It remains stale until a successful source refresh.`);
+  process.exit(0);
+}
 const normalize=value=>String(value||'').toLowerCase().replace(/\s+@\s+/g,' at ').replace(/[^a-z0-9]+/g,' ').trim();
 const games=new Map(schedule.games.map(game=>[normalize(game.title),game]));
 const byGame={};let unmatched=0;
