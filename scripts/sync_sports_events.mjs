@@ -1,14 +1,37 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import {saveReconciledEventSnapshot} from '../lib/event_snapshot.mjs';
+import {pointInsideRing} from '../site/ground_relevance.js';
 const venues=JSON.parse(await fs.readFile('data/venues.json','utf8')).venues;
 const nflVenueCandidates=JSON.parse(await fs.readFile('data/nfl_venue_candidates.json','utf8'));
+const groundFootprints=JSON.parse(await fs.readFile('site/ground_footprints.json','utf8'));
 const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 const byName=new Map();for(const v of venues){const k=norm(v.name);let x=byName.get(k)||[];x.push(v);byName.set(k,x)}
 const start=new Date(),end=new Date(start.getTime()+30*86400000),ymd=d=>d.toISOString().slice(0,10);
 const sources=[{id:'nfl',name:'2026 NFL regular season via ESPN scoreboard',dataset:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',status:'ok',records:0},{id:'mlb',name:'Major League Baseball schedule',dataset:'https://statsapi.mlb.com/api/v1/schedule',status:'ok',records:0},{id:'nhl',name:'National Hockey League schedule',dataset:'https://api-web.nhle.com/v1/schedule/',status:'ok',records:0}];
 const events=[];const places=new Map();
-function add({id,title,startsAtLocal,timeZone,sourceId,sourceUrl,sourceDataset,placeName,placeAddress=null,category,description,participants,status,timeTbd=false,sourceVenueId=null}){if(!startsAtLocal||!placeName)return;const candidates=byName.get(norm(placeName))||[];const explicit=sourceId==='nfl'&&nflVenueCandidates[sourceVenueId];const checked=explicit?.name===placeName&&explicit?.sourceAddress===placeAddress?explicit:null;const candidate=candidates.length===1?candidates[0]:checked;const key=`${sourceId}|${sourceVenueId||norm(placeName)}`;const placeId='place:'+crypto.createHash('sha256').update(key).digest('hex').slice(0,16);if(!places.has(placeId))places.set(placeId,{id:placeId,name:placeName,address:placeAddress,lat:candidate?.lat??null,lon:candidate?.lon??null,coordinateSource:candidate?.coordinateSource|| (candidate?'Wikidata name-match candidate':null),sourceIds:[sourceId],sourceVenueId,venueCandidateId:candidate?.id??null,matchStatus:candidate?'unreviewed unique-name candidate':'unlinked'});events.push({id,title,startsAtLocal,endsAtLocal:null,timeZone,sourceId,sourceUrl,sourceDataset,sourcePlace:{name:placeName,address:placeAddress,lat:candidate?.lat??null,lon:candidate?.lon??null},placeId,venueId:candidate?.id??null,venueLinkStatus:candidate?'unreviewed unique-name candidate':'unlinked',category,description,timeTbd,organizer:sourceId==='nfl'?'National Football League':sourceId==='mlb'?'Major League Baseball':'National Hockey League',participants,status,retrievedAt:new Date().toISOString()})}
+function add({id,title,startsAtLocal,timeZone,sourceId,sourceUrl,sourceDataset,placeName,placeAddress=null,category,description,participants,status,timeTbd=false,sourceVenueId=null}){
+  if(!startsAtLocal||!placeName)return;
+  const candidates=byName.get(norm(placeName))||[];
+  const explicit=sourceId==='nfl'&&nflVenueCandidates[sourceVenueId];
+  const checked=explicit?.name===placeName&&explicit?.sourceAddress===placeAddress?explicit:null;
+  const candidate=candidates.length===1?candidates[0]:checked;
+  let lat=candidate?.lat??null,lon=candidate?.lon??null;
+  let coordinateSource=candidate?.coordinateSource||(candidate?'Wikidata name-match candidate':null);
+  const footprint=sourceId==='nfl'&&sourceVenueId==='7065'&&groundFootprints.byVenue?.['7065'];
+  if(footprint?.osmId===860635712&&footprint.wikidata===candidate?.id&&!pointInsideRing({lat,lon},footprint.ring)){
+    const vertices=footprint.ring.slice(0,-1);
+    const center=vertices.reduce((sum,[x,y])=>[sum[0]+x,sum[1]+y],[0,0]).map(value=>value/vertices.length);
+    if(pointInsideRing({lon:center[0],lat:center[1]},footprint.ring)){
+      lon=center[0];lat=center[1];
+      coordinateSource='OpenStreetMap way 860635712 geometry-derived point candidate; Wikidata point conflict; unreviewed';
+    }
+  }
+  const key=`${sourceId}|${sourceVenueId||norm(placeName)}`;
+  const placeId='place:'+crypto.createHash('sha256').update(key).digest('hex').slice(0,16);
+  if(!places.has(placeId))places.set(placeId,{id:placeId,name:placeName,address:placeAddress,lat,lon,coordinateSource,sourceIds:[sourceId],sourceVenueId,venueCandidateId:candidate?.id??null,matchStatus:candidate?'unreviewed unique-name candidate':'unlinked'});
+  events.push({id,title,startsAtLocal,endsAtLocal:null,timeZone,sourceId,sourceUrl,sourceDataset,sourcePlace:{name:placeName,address:placeAddress,lat,lon},placeId,venueId:candidate?.id??null,venueLinkStatus:candidate?'unreviewed unique-name candidate':'unlinked',category,description,timeTbd,organizer:sourceId==='nfl'?'National Football League':sourceId==='mlb'?'Major League Baseball':'National Hockey League',participants,status,retrievedAt:new Date().toISOString()});
+}
 async function get(url){const r=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.2 (public sports schedule evaluation)'},signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json()}
 try{
   const weeks=await Promise.all(Array.from({length:18},(_,i)=>{const week=i+1,url=`https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=2026&seasontype=2&week=${week}&limit=100`;return get(url).then(data=>({week,url,data}))}));

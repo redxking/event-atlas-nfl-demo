@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {pointInsideRing} from '../site/ground_relevance.js';
 
-test('mapped NFL ground candidates keep source identity and expose the SoFi point conflict',()=>{
+test('mapped NFL ground candidates keep source identity and mark the corrected SoFi candidate point',()=>{
   const feed=JSON.parse(fs.readFileSync('site/ground_footprints.json','utf8'));
   const schedule=JSON.parse(fs.readFileSync('site/nfl.json','utf8'));
   const venues=new Map(schedule.games.map(game=>[game.venue.id,game.venue]));
@@ -24,6 +24,7 @@ test('mapped NFL ground candidates keep source identity and expose the SoFi poin
     assert.deepEqual(item.ring[0],item.ring.at(-1));
     assert.ok(item.ring.every(([lon,lat])=>Number.isFinite(lon)&&Number.isFinite(lat)));
   }
-  assert.equal(pointInsideRing(venues.get('7065'),feed.byVenue['7065'].ring),false);
+  assert.equal(pointInsideRing(venues.get('7065'),feed.byVenue['7065'].ring),true);
+  assert.match(venues.get('7065').coordinateStatus,/OpenStreetMap way 860635712.*Wikidata point conflict; unreviewed/);
   assert.equal(pointInsideRing(venues.get('3687'),feed.byVenue['3687'].ring),true);
 });
