@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI), USA$/.test(venue.address));
-const km=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -90,12 +90,25 @@ try{
   if(count<10)throw Error('Insufficient valid Green Bay-area camera records');
   sources.push({id:'wisdot-511-green-bay',url:wiLayer,status:'ok',records:count});
 }catch(error){sources.push({id:'wisdot-511-green-bay',url:wiLayer,status:'failed',error:String(error)})}
+const paLayer='https://gis.penndot.gov/gis/rest/services/paprojects/paprojects/MapServer/14';
+try{
+  let count=0;
+  for(const bbox of ['-75.3,39.85,-74.95,40.1','-80.15,40.35,-79.8,40.55']){
+    const params=new URLSearchParams({where:"STATUS_NAME='EXISTING'",geometry:bbox,geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'ID,STATEWIDE_ID,STATUS_NAME,LOCATION_DESC,RECORD_UPDATE',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+    const data=await get(`${paLayer}/query?${params}`);
+    if(!Array.isArray(data.features)||data.features.length<50||data.error||data.exceededTransferLimit)throw Error('Incomplete PennDOT camera inventory');
+    for(const feature of data.features){
+      const p=feature.attributes||{},lat=Number(feature.geometry?.y),lon=Number(feature.geometry?.x),updated=Number(p.RECORD_UPDATE);
+      if(!Number.isInteger(p.ID)||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<39.7||lat>40.7||lon< -80.3||lon> -74.8||p.STATUS_NAME!=='EXISTING')continue;
+      cameras.push({id:`penndot-${p.ID}`,agency:'PennDOT GIS',name:p.LOCATION_DESC||'Road camera',lat,lon,route:null,inService:null,operationalStatus:'Existing in agency inventory',metadataDate:Number.isFinite(updated)&&updated>0?new Date(updated).toISOString().slice(0,10):null,sourceUrl:paLayer,viewerUrl:'https://511pa.com/cctv'});
+      count++;
+    }
+  }
+  if(count<100)throw Error('Insufficient valid PennDOT camera records');
+  sources.push({id:'penndot-camera-inventory',url:paLayer,status:'ok',records:count});
+}catch(error){sources.push({id:'penndot-camera-inventory',url:paLayer,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
-const byVenue=Object.fromEntries(venues.map(venue=>{
-  const state=venue.address.match(/\b([A-Z]{2}), USA$/)?.[1];
-  const agency={CA:'Caltrans',WA:'WSDOT',MD:'Maryland CHART',IL:'Illinois DOT Gateway',WI:'WisDOT 511'}[state];
-  return [venue.id,cameras.filter(camera=>camera.agency===agency).map(camera=>({...camera,distanceKm:Math.round(km(venue.lat,venue.lon,camera.lat,camera.lon)*10)/10})).filter(camera=>camera.distanceKm<=15).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,5)];
-}));
+const byVenue=selectCameraCoverage(venues,cameras,sources);
 const out={builtAt:new Date().toISOString(),basis:'Public roadway camera metadata within 15 km of unreviewed venue point; distance does not establish a view of the venue, image freshness, or operational status.',sources,byVenue};
 await fs.writeFile(path.join(site,'cameras.json'),JSON.stringify(out));
 console.log('Camera metadata sources:',sources.map(source=>`${source.id} ${source.status} ${source.records||0}`).join(', '),'venue matches:',Object.values(byVenue).map(items=>items.length).join(','));
