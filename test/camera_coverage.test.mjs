@@ -15,3 +15,10 @@ test('Maryland iMAP inventory can cover a venue when the CHART endpoint fails',(
   const sources=[{id:'md-chart-cameras',status:'failed'},{id:'md-imap-cameras',status:'ok'}];
   assert.equal(selectCameraCoverage([venue],cameras,sources).baltimore.length,1);
 });
+
+test('Georgia DOT metadata covers the Atlanta venue only when the agency source succeeds',()=>{
+  const venue={id:'atlanta',address:'Atlanta, GA, USA',lat:33.7553,lon:-84.4008};
+  const cameras=[{id:'gdot-1',agency:'Georgia DOT GIS',lat:33.76,lon:-84.4}];
+  assert.deepEqual(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'failed'}]),{});
+  assert.equal(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'ok'}]).atlanta.length,1);
+});

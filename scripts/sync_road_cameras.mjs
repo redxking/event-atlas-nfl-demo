@@ -7,7 +7,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -76,6 +76,22 @@ if(sources.find(source=>source.id==='md-chart-cameras')?.status==='failed'){
     sources.push({id:'md-imap-cameras',url:imap,status:'ok',records:count,upstreamFreshness:'unknown'});
   }catch(error){sources.push({id:'md-imap-cameras',url:imap,status:'failed',error:String(error)})}
 }
+const gaLayer='https://enterprisegis.dot.ga.gov/hosting/rest/services/web_trafficcameras/MapServer/0';
+try{
+  const params=new URLSearchParams({where:'1=1',geometry:'-84.5,33.7,-84.3,33.85',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,DEVICE_ID,DEVICE_DESCRIPTION,ACTIVE,PRIMARY_ROAD,CITY_NAME,URL,LATITUDE,LONGITUDE',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
+  const data=await get(`${gaLayer}/query?${params}`);
+  if(!Array.isArray(data.features)||data.features.length<100||data.error||data.exceededTransferLimit)throw Error('Incomplete Atlanta camera inventory');
+  let count=0;
+  for(const feature of data.features){
+    const item=feature.attributes||{},lat=Number(item.LATITUDE),lon=Number(item.LONGITUDE),viewerUrl=item.URL;
+    if(!Number.isInteger(item.OBJECTID)||item.ACTIVE!==1||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<33.6||lat>34||lon< -84.7||lon> -84.1)continue;
+    if(typeof viewerUrl!=='string'||!/^https:\/\/snapshot\.navigator\.dot\.ga\.gov\/thumbs\/[A-Za-z0-9_.-]+\.png$/.test(viewerUrl))continue;
+    cameras.push({id:`gdot-${item.OBJECTID}`,agency:'Georgia DOT GIS',name:item.DEVICE_DESCRIPTION||item.PRIMARY_ROAD||'Road camera',lat,lon,route:item.PRIMARY_ROAD||null,inService:null,operationalStatus:'Listed active in agency inventory; image status unverified',metadataDate:null,sourceUrl:gaLayer,viewerUrl,viewerKind:'still'});
+    count++;
+  }
+  if(count<100)throw Error('Insufficient valid Atlanta camera records');
+  sources.push({id:'gdot-atlanta-cameras',url:gaLayer,status:'ok',records:count,upstreamFreshness:'unknown'});
+}catch(error){sources.push({id:'gdot-atlanta-cameras',url:gaLayer,status:'failed',error:String(error)})}
 const ilLayer='https://services2.arcgis.com/aIrBD8yn1TDTEXoz/arcgis/rest/services/TrafficCamerasTM_Public/FeatureServer/0';
 try{
   const params=new URLSearchParams({where:'1=1',geometry:'-87.9,41.65,-87.45,42.1',geometryType:'esriGeometryEnvelope',inSR:'4326',outSR:'4326',outFields:'OBJECTID,CameraLocation,CameraDirection,ImgPath',returnGeometry:'true',f:'json',resultRecordCount:'1000'});
