@@ -14,7 +14,7 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
 const gameTime=game=>game.timeTbd?new Date(game.kickoff).toLocaleDateString(undefined,{dateStyle:'medium',timeZone:'America/New_York'})+' · kickoff TBD':fmt(game.kickoff);
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
-const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,ntasSnapshot,selected,cameraRefreshTimer,cameraPlayer,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice,liveTennesseeRoad,tennesseeRoadRefreshTimer;
+const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,ntasSnapshot,selected,cameraRefreshTimer,cameraPlayer,cameraFrame,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice,liveTennesseeRoad,tennesseeRoadRefreshTimer;
 const arlingtonSource='https://gis2.arlingtontx.gov/agsext2/rest/services/Police/ActiveIncident/MapServer/0';
 const arlingtonQuery=arlingtonSource+'/query?'+new URLSearchParams({where:'1=1',outFields:'OBJECTID,CallDate,UpdatedDate',returnGeometry:'true',outSR:'4326',f:'geojson'});
 async function json(url){const local=new URL(url,location.href).origin===location.origin;const result=await fetch(url,{headers:{Accept:'application/geo+json, application/json'},cache:local?'no-store':'default'});if(!result.ok)throw Error('HTTP '+result.status);return result.json()}
@@ -145,6 +145,21 @@ function cameraStill(item,stale){
   return `<div class="camera-image"><img class="camera-still" src="${esc(item.stillUrl)}?t=${Date.now()}" data-src="${esc(item.stillUrl)}" alt="Agency roadway camera image near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer"><small>${esc(note)}</small></div>`;
 }
 const wisdotVideo=url=>/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/.test(url||'');
+const marylandViewer=url=>/^https:\/\/chart\.maryland\.gov\/Video\/GetVideo\/[a-f0-9]{32}$/i.test(url||'');
+function stopCameraFrame(){
+  if(!cameraFrame)return;
+  const {frame,button}=cameraFrame;
+  frame.removeAttribute('src');frame.closest('.camera-video').hidden=true;
+  if(button?.isConnected)button.textContent='Show official CHART video';
+  cameraFrame=null;
+}
+function toggleCameraFrame(button){
+  const url=button.dataset.frameUrl,container=button.nextElementSibling,frame=container?.querySelector('iframe');
+  if(!marylandViewer(url)||!frame)return;
+  if(cameraFrame?.frame===frame){stopCameraFrame();return}
+  stopCameraFrame();stopCameraVideo();
+  container.hidden=false;frame.src=url;button.textContent='Stop official CHART video';cameraFrame={frame,button};
+}
 function stopCameraVideo(){
   if(!cameraPlayer)return;
   const {video,hls}=cameraPlayer;
@@ -166,7 +181,7 @@ async function playCameraVideo(button,game){
   const url=button.dataset.videoUrl,container=button.nextElementSibling,video=container?.querySelector('video'),status=container?.querySelector('.camera-video-status');
   if(!wisdotVideo(url)||!video||!status)return;
   if(cameraPlayer?.video===video){stopCameraVideo();container.hidden=true;button.textContent='Play public roadway video';return}
-  stopCameraVideo();container.hidden=false;button.textContent='Stop public roadway video';status.textContent='Connecting to WisDOT public roadway stream…';
+  stopCameraVideo();stopCameraFrame();container.hidden=false;button.textContent='Stop public roadway video';status.textContent='Connecting to WisDOT public roadway stream…';
   cameraPlayer={video,hls:null};
   video.onplaying=()=>{if(cameraPlayer?.video===video)status.textContent='Playing agency roadway stream. Capture latency and field of view are not independently verified.'};
   video.onerror=()=>{if(cameraPlayer?.video===video)status.textContent='Stream unavailable. Use the WisDOT camera viewer link.'};
@@ -188,6 +203,7 @@ function renderCameras(game){
   const target=$('cameras');
   if(!target)return;
   stopCameraVideo();
+  stopCameraFrame();
   if(cameraRefreshTimer){clearInterval(cameraRefreshTimer);cameraRefreshTimer=null}
   if(!cameraSnapshot){target.innerHTML='<p>Camera metadata snapshot unavailable.</p>';return}
   const sources=cameraSnapshot.sources||[];
@@ -198,10 +214,11 @@ function renderCameras(game){
   const stale=!Number.isFinite(builtAt)||Date.now()-builtAt>12*3600000;
   target.innerHTML=`<p class="feed-state">PUBLIC ROADWAY CAMERAS · SNAPSHOT ${esc(fmt(cameraSnapshot.builtAt))}</p>`+
     `<p>${covered?'Nearest agency-listed cameras within 15 km of the venue candidate point. Distance does not establish a stadium view, live image, or access to venue security cameras.':'No connected agency roadway-camera inventory for this venue.'}${stale?' This snapshot is more than 12 hours old.':''}</p>`+
-    (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span>${cameraStill(item,stale)}${!stale&&item.agency==='WisDOT 511'&&wisdotVideo(item.videoUrl)?`<button type="button" class="camera-video-toggle" data-video-url="${esc(item.videoUrl)}">Play public roadway video</button><div class="camera-video" hidden><video controls muted playsinline preload="none" aria-label="WisDOT roadway camera near ${esc(item.name)}"></video><small class="camera-video-status">Agency stream not yet started. Camera direction and stadium view are unverified.</small></div>`:''}<span>${link(item.viewerUrl,item.viewerKind==='unverified_still'?'Agency image URL (freshness unverified)':'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
+    (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span>${cameraStill(item,stale)}${!stale&&item.agency==='WisDOT 511'&&wisdotVideo(item.videoUrl)?`<button type="button" class="camera-video-toggle" data-video-url="${esc(item.videoUrl)}">Play public roadway video</button><div class="camera-video" hidden><video controls muted playsinline preload="none" aria-label="WisDOT roadway camera near ${esc(item.name)}"></video><small class="camera-video-status">Agency stream not yet started. Camera direction and stadium view are unverified.</small></div>`:''}${!stale&&item.agency==='Maryland CHART'&&item.operationalStatus==='OK'&&marylandViewer(item.viewerUrl)?`<button type="button" class="camera-video-toggle camera-frame-toggle" data-frame-url="${esc(item.viewerUrl)}">Show official CHART video</button><div class="camera-video" hidden><iframe title="Maryland CHART roadway camera near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; fullscreen" allowfullscreen></iframe><small>Official CHART public viewer. Source status is from its last cache update; playback, latency, field of view and stadium visibility are unverified. No video is stored by Event Atlas.</small></div>`:''}<span>${link(item.viewerUrl,item.viewerKind==='unverified_still'?'Agency image URL (freshness unverified)':'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
     (failed.length?`<p>Unavailable source: ${esc(failed.map(source=>source.id).join(', '))}. The displayed coverage may be incomplete.</p>`:'');
   const images=[...target.querySelectorAll('.camera-still')];
-  for(const button of target.querySelectorAll('.camera-video-toggle'))button.onclick=()=>playCameraVideo(button,game);
+  for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle)'))button.onclick=()=>playCameraVideo(button,game);
+  for(const button of target.querySelectorAll('.camera-frame-toggle'))button.onclick=()=>toggleCameraFrame(button);
   for(const img of images)img.addEventListener('error',()=>{img.closest('.camera-image').querySelector('small').textContent='Agency image unavailable. Use the agency viewer.';img.hidden=true});
   if(images.length)cameraRefreshTimer=setInterval(()=>{
     if(selected!==game.id){clearInterval(cameraRefreshTimer);cameraRefreshTimer=null;return}
