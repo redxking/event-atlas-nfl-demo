@@ -61,13 +61,16 @@ function renderGround(game){
   if(!target)return;
   if(!groundSnapshot){target.innerHTML='<p>Ground footprint candidate snapshot unavailable.</p>';return}
   const item=groundSnapshot.byVenue?.[game.venue.id];
-  if(!item){target.innerHTML=`<p>No identity-matched OpenStreetMap polygon candidate for this venue. A stadium ground boundary has not been established. ${link(groundSnapshot.licenseUrl,'OpenStreetMap data')}</p>`;return}
-  const ring=item.ring,venue=game.venue,inside=pointInsideRing(venue,ring);
-  const xs=[...ring.map(point=>point[0]),venue.lon],ys=[...ring.map(point=>point[1]),venue.lat];
+  if(!item){target.innerHTML=`<p>No qualifying OpenStreetMap polygon candidate for this venue. A stadium ground boundary has not been established. ${link(groundSnapshot.licenseUrl,'OpenStreetMap data')}</p>`;return}
+  const rings=item.outerRings||[item.ring],venue=game.venue,inside=rings.some(ring=>pointInsideRing(venue,ring));
+  const xs=[...rings.flatMap(ring=>ring.map(point=>point[0])),venue.lon],ys=[...rings.flatMap(ring=>ring.map(point=>point[1])),venue.lat];
   const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),width=maxX-minX,height=maxY-minY;
   const sx=x=>20+220*(x-minX)/width,sy=y=>240-220*(y-minY)/height;
-  const outline=ring.map(([x,y],index)=>`${index?'L':'M'}${sx(x).toFixed(1)} ${sy(y).toFixed(1)}`).join(' ')+'Z';
-  target.innerHTML=`<p class="feed-state">UNREVIEWED OSM FOOTPRINT CANDIDATE · SOURCE EDIT ${esc(fmt(item.sourceEditedAt))}</p><p>Mapped feature: ${esc(Object.entries(item.mappedFeature).map(([key,value])=>key+'='+value).join(', '))}. Approximate mapped area ${esc((item.areaM2/1000).toFixed(1))} thousand m². The orange dot is the separate venue point candidate.${inside?'':' <strong class="geometry-warning">The venue point falls outside this mapped polygon; resolve the coordinate mismatch before using either geometry.</strong>'}</p><svg class="ground-ring" viewBox="0 0 260 260" role="img" aria-label="Unreviewed OpenStreetMap stadium polygon and separate venue point candidate"><path d="${outline}"/><circle cx="${sx(venue.lon).toFixed(1)}" cy="${sy(venue.lat).toFixed(1)}" r="5"/></svg><p>Community mapped building or stadium geometry is a research candidate. It is not an operator-approved ground security perimeter, property line, camera coverage area, gate, parking zone, or active geofence. Source version ${esc(item.sourceVersion)}. ${link(item.sourceUrl,'OSM feature')} · © ${link(groundSnapshot.licenseUrl,'OpenStreetMap contributors / ODbL')}</p>`;
+  const outline=rings.map(ring=>ring.map(([x,y],index)=>`${index?'L':'M'}${sx(x).toFixed(1)} ${sy(y).toFixed(1)}`).join(' ')+'Z').join(' ');
+  const identity=item.identityMethod==='exact_name'?'Exact mapped-name match without a Wikidata tag; identity requires review.':'Wikidata identity match.';
+  const components=rings.length>1?` ${rings.length} separate outer components are shown.`:'';
+  const holes=item.innerRingCount?` ${item.innerRingCount} mapped interior hole(s) are omitted from this sketch and area estimate.`:'';
+  target.innerHTML=`<p class="feed-state">UNREVIEWED OSM FOOTPRINT CANDIDATE · SOURCE EDIT ${esc(fmt(item.sourceEditedAt))}</p><p>Mapped feature: ${esc(Object.entries(item.mappedFeature).map(([key,value])=>key+'='+value).join(', '))}. Approximate outer area ${esc((item.areaM2/1000).toFixed(1))} thousand m².${components}${holes} ${identity} The orange dot is the separate venue point candidate.${inside?'':' <strong class="geometry-warning">The venue point falls outside these mapped polygons; resolve the coordinate mismatch before using either geometry.</strong>'}</p><svg class="ground-ring" viewBox="0 0 260 260" role="img" aria-label="Unreviewed OpenStreetMap stadium outer polygons and separate venue point candidate"><path d="${outline}"/><circle cx="${sx(venue.lon).toFixed(1)}" cy="${sy(venue.lat).toFixed(1)}" r="5"/></svg><p>Community mapped building or stadium geometry is a research candidate. It is not an operator-approved ground security perimeter, property line, camera coverage area, gate, parking zone, or active geofence. Source version ${esc(item.sourceVersion)}. ${link(item.sourceUrl,'OSM feature')} · © ${link(groundSnapshot.licenseUrl,'OpenStreetMap contributors / ODbL')}</p>`;
 }
 async function renderAirspace(game){
   const target=$('airspace');
