@@ -19,7 +19,7 @@ function feedState(venue,snapshot,kind,now){
 export function summarizeCoverage(games,cameras,roads,now=Date.now()){
   const venues=[...new Map(games.map(game=>[game.venue.id,game.venue])).values()]
     .sort((a,b)=>a.name.localeCompare(b.name));
-  const rows=venues.map(venue=>({id:venue.id,name:venue.name,address:venue.address,
+  const rows=venues.map(venue=>({id:venue.id,name:venue.name,address:venue.address,lat:venue.lat,lon:venue.lon,
     point:Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)?'candidate':'unmapped',
     camera:feedState(venue,cameras,'camera',now),road:feedState(venue,roads,'road',now)}));
   return {rows,total:rows.length,points:rows.filter(row=>row.point==='candidate').length,
