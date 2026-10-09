@@ -4,8 +4,8 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261009-5';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-11';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-6';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-12';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-7';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
@@ -38,7 +38,7 @@ function renderBrief(game){
   const total=picture.cueCounts.weather+picture.cueCounts.road;
   target.innerHTML=`<p class="feed-state">PUBLIC-SOURCE EVENT PICTURE · GENERATED ${esc(fmt(picture.generatedAt))}</p><p><strong>Assessment: severity and confidence not assessed.</strong> ${picture.cueCounts.weather} NWS alert review candidate${picture.cueCounts.weather===1?'':'s'}; ${picture.cueCounts.road} published roadway time overlap${picture.cueCounts.road===1?'':'s'}. ${esc(picture.interpretation)}</p>`+
     (picture.cues.length?`<div class="brief-cues">${picture.cues.map(cue=>`<div class="brief-cue"><strong>${esc(cue.type.toUpperCase())} · ${esc(cue.title)}</strong><span>${esc(cue.basis)}${cue.sourceAt?' · source time '+esc(fmt(cue.sourceAt)):''}</span>${link(cue.sourceUrl,cue.type==='road condition'?'Agency data layer':'NWS alert')}</div>`).join('')}${total>picture.cues.length?`<p>These panels show bounded samples. Consult the agency feeds for the complete set of source records.</p>`:''}</div>`:'')+
-    `<details class="brief-details"><summary>Source status and gaps</summary><div class="brief-grid">${picture.sources.map(source=>`<div><strong>${esc(source.name)}</strong><span>${esc(source.state)}${source.asOf?' · '+esc(fmt(source.asOf)):''}</span><small>${esc(source.detail)} ${link(source.sourceUrl,'Source')}</small></div>`).join('')}</div><p><strong>Unresolved for this brief</strong></p><ul>${picture.gaps.map(gap=>`<li>${esc(gap)}</li>`).join('')}</ul></details><button type="button" class="evidence-download">Download public evidence bundle (JSON)</button><p class="bundle-note">Includes source status, candidate geography, bounded public observations, and gaps at download time. Unreviewed; no threat assessment or named-person records.</p>`;
+    `<details class="brief-details"><summary>Zone and sensor status</summary><div class="brief-grid">${picture.zoneReview.map(zone=>`<div><strong>${esc(zone.name)}</strong><span>${esc(zone.state)} · ${esc(zone.owner)}</span><small>${esc(zone.purpose)} ${link(zone.sourceUrl,'Source')}</small></div>`).join('')}</div></details><details class="brief-details"><summary>Source status and gaps</summary><div class="brief-grid">${picture.sources.map(source=>`<div><strong>${esc(source.name)}</strong><span>${esc(source.state)}${source.asOf?' · '+esc(fmt(source.asOf)):''}</span><small>${esc(source.detail)} ${link(source.sourceUrl,'Source')}</small></div>`).join('')}</div><p><strong>Unresolved for this brief</strong></p><ul>${picture.gaps.map(gap=>`<li>${esc(gap)}</li>`).join('')}</ul></details><button type="button" class="evidence-download">Download public evidence bundle (JSON)</button><p class="bundle-note">Includes source status, candidate geography, bounded public observations, and gaps at download time. Unreviewed; no threat assessment or named-person records.</p>`;
   target.querySelector('.evidence-download').onclick=()=>downloadEvidenceBundle(game);
 }
 async function loadNtas(){

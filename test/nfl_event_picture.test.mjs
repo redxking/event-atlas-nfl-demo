@@ -15,6 +15,10 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.equal(picture.cues[1].sourceUrl,'https://example.gov/road/1');
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
   assert.ok(picture.gaps.some(gap=>gap.includes('stadium CCTV')));
+  assert.equal(picture.zoneReview.find(zone=>zone.name==='Stadium ground perimeter').state,'unreviewed mapped candidate');
+  assert.equal(picture.zoneReview.find(zone=>zone.name==='FAA event airspace').state,'source snapshot; NOTAM unverified');
+  assert.equal(picture.zoneReview.find(zone=>zone.name==='Drone detections').state,'no connected detection source');
+  assert.ok(picture.gaps.some(gap=>gap.includes('active jurisdictional police alert')));
 });
 
 test('stale observations and unknown kickoff do not create time-aligned cues',()=>{
@@ -32,6 +36,7 @@ test('missing sources are gaps rather than zero-incident findings',()=>{
   assert.equal(picture.cues.length,0);
   assert.equal(picture.sources.find(source=>source.name==='Local police activity').state,'no connector');
   assert.ok(picture.gaps.some(gap=>gap.includes('No jurisdictional police incident feed')));
+  assert.equal(picture.zoneReview.find(zone=>zone.name==='Stadium ground perimeter').state,'no mapped candidate');
 });
 
 test('Seattle closed-call context is labeled and never becomes a threat cue',()=>{

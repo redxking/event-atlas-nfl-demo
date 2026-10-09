@@ -27,6 +27,12 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const policeContext=policeFresh?Object.fromEntries(Object.entries(police.context||{}).filter(([key,value])=>key==='gameWindowCurrent'?typeof value==='boolean':key==='windowCount'?value===null||Number.isSafeInteger(value)&&value>=0:['nearby','newestUpdate','periodHours','radiusKm','checkedAt'].includes(key)&&Number.isFinite(value)&&value>=0||['start','end'].includes(key)&&/^\d{4}-\d{2}-\d{2}$/.test(value))):null;
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
   const usgsFresh=!conditions?.quakesError&&Array.isArray(conditions?.quakes?.features)&&Number.isFinite(conditions?.at)&&conditions.at<=now+60000&&now-conditions.at<=5*60000;
+  const zoneReview=[
+    {name:'Stadium ground perimeter',state:footprint?'unreviewed mapped candidate':'no mapped candidate',owner:'Venue operator approval required',purpose:'Entrances, queues, parking and controlled areas need separate operator geometry.',sourceUrl:footprint?.sourceUrl||null},
+    {name:'Observation buffers',state:Number.isFinite(game.venue.lat)&&Number.isFinite(game.venue.lon)?'research buffers around candidate point':'unavailable without point',owner:'Event Atlas research',purpose:'5 km public police counts where connected; 10 km road features; 15 km roadway camera metadata. These are search radii, not geofences or impact areas.',sourceUrl:null},
+    {name:'FAA event airspace',state:faa&&faaFresh?'source snapshot; NOTAM unverified':faa?'stale source snapshot':'no linked SEAMS record',owner:'FAA',purpose:'Published airspace context only; not a ground perimeter or drone observation.',sourceUrl:airspace?.sourceItemUrl||null},
+    {name:'Drone detections',state:'no connected detection source',owner:'Authorized sensor or agency feed required',purpose:'FAA restrictions do not report aircraft presence or violations.',sourceUrl:null}
+  ];
   const sources=[
     row('NFL schedule',fresh(schedule?.builtAt,now,12*HOUR)?'current snapshot':'stale or unavailable',game.sourceRetrievedAt,'Confirm changes with the NFL or host club.',game.sourceUrl),
     row('Ground geometry',footprint?'unreviewed candidate':'unavailable',footprint?.sourceEditedAt,footprint?.identityMethod==='exact_name'?'Exact name only; venue identity needs review.':'Not an approved security perimeter.',footprint?.sourceUrl),
@@ -47,7 +53,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(road.timingState==='matched')for(const item of road.records.filter(record=>record.overlaps).slice(0,4)){
     cues.push({type:'road condition',title:`${item.kind} · ${item.name}`,basis:`${item.agency}; ${item.distanceKm} km from candidate point; published window overlaps event`,sourceUrl:item.sourceUrl||null,sourceAt:item.sourceRecordDate||item.startAt||null});
   }
-  const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.'];
+  const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.','No authorized drone-detection feed is connected.','No active jurisdictional police alert feed is connected.'];
   if(!policeConnected)gaps.push('No jurisdictional police incident feed is connected for this venue.');
   else if(!policeFresh)gaps.push(`${venueId==='3673'?'Seattle':venueId==='3933'?'Chicago':'Arlington'} public police context is unavailable or not current.`);
   if(venueId==='3933')gaps.push('Chicago reported-crime data excludes recent days and records without usable coordinates; no active police alert feed is connected.');
@@ -59,5 +65,5 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(!tfrFresh)gaps.push('FAA TFR list and geometry snapshot is absent or stale.');
   if(!ntasFresh)gaps.push('Current DHS NTAS national advisory context is unavailable.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,road:road.timingState==='matched'?road.overlapCount:0},sources,gaps,policeContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,road:road.timingState==='matched'?road.overlapCount:0},zoneReview,sources,gaps,policeContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }
