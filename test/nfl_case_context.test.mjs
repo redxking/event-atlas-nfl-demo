@@ -50,3 +50,16 @@ test('Charlotte case includes only a current bounded public police aggregate',()
   const stale=buildNflCaseContext(subject,event,{...snapshots,charlotte:{...snapshots.charlotte,builtAt:new Date(now-13*3600000).toISOString()}},now);
   assert.equal(stale.evidence.publicObservations.policeAggregate,null);
 });
+
+test('Gillette case retains current bounded MBTA context and marks failed checks as gaps',()=>{
+  const foxboroGame={...game,venue:{...game.venue,id:'3738'}};
+  const schedule={builtAt:'2026-10-09T19:55:00Z',games:[foxboroGame]};
+  const transit={state:'retrieved',checkedAt:now-60000,stopId:'place-FS-0049',stopName:'Foxboro',stopDistanceKm:0.52,totalReturned:1,invalidCount:0,screenable:true,eventWindow:{start:'2026-10-11T16:00:00Z',end:'2026-10-12T01:00:00Z'},overlapCount:1,omittedAlertCount:0,sourceUrl:'https://api-v3.mbta.com/alerts?filter%5Bstop%5D=place-FS-0049',interpretation:'Transit context only',alerts:[{id:'test',header:'Synthetic station alert',effect:'SHUTTLE',lifecycle:'UPCOMING',updatedAt:'2026-10-09T19:55:00Z',periods:[{start:'2026-10-11T18:00:00Z',end:'2026-10-11T23:00:00Z'}],eventWindowOverlap:true,sourceUrl:'https://api-v3.mbta.com/alerts/test',privateNote:'must not export'}]};
+  const result=buildNflCaseContext(subject,event,{schedule,transit},now);
+  assert.equal(result.evidence.picture.cueCounts.transit,1);
+  assert.equal(result.evidence.publicObservations.stationAlerts.alerts[0].privateNote,undefined);
+  assert.equal(result.evidence.picture.assessment.severity,'not_assessed');
+  const failed=buildNflCaseContext(subject,event,{schedule,transit:{state:'failed',checkedAt:now}},now);
+  assert.equal(failed.evidence.publicObservations.stationAlerts,null);
+  assert.ok(failed.evidence.picture.gaps.some(gap=>gap.includes('MBTA Foxboro station alerts are unavailable')));
+});

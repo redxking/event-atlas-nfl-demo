@@ -58,3 +58,26 @@ test('saved brief baseline hash and evidence changes travel together',()=>{
   assert.equal(result.evidenceChanges.reviewCues.added[0].title,'Test closure');
   assert.equal(compareBriefSnapshots(null,current).evidenceChanges.state,'no_baseline');
 });
+
+test('Gillette transit alert revisions are compared only across complete checks',()=>{
+  const checkedTransit=source('MBTA Foxboro station alerts','station alerts checked','https://api-v3.mbta.com/alerts?filter%5Bstop%5D=place-FS-0049');
+  const old=cue('transit alert','Station shuttle','Published period overlaps event');
+  const prior=brief(picture([...checked,checkedTransit],[old]));
+  const next=brief(picture([...checked,checkedTransit],[{...old,title:'Revised station shuttle',sourceAt:'2026-10-11T19:00:00Z'}]));
+  for(const item of [prior,next]){
+    item.nflContext.evidence.venue={id:'3738'};
+    item.nflContext.evidence.picture.transitContext={screenable:true,eventWindow:{start:'2026-10-11T16:00:00Z',end:'2026-10-12T01:00:00Z'}};
+  }
+  const changed=comparePublicEvidence(prior,next);
+  assert.equal(changed.reviewCues.changed.length,1);
+  assert.equal(changed.reviewCues.changed[0].current.title,'Revised station shuttle');
+  const failed=brief(picture([...checked,source('MBTA Foxboro station alerts','source failed',checkedTransit.sourceUrl)],[]));
+  failed.nflContext.evidence.venue={id:'3738'};
+  const unavailable=comparePublicEvidence(prior,failed);
+  assert.ok(unavailable.reviewCues.notCompared.includes('transit alert'));
+  assert.equal(unavailable.reviewCues.noLongerPresent.length,0);
+  const unscreenable=brief(picture([...checked,checkedTransit],[]));
+  unscreenable.nflContext.evidence.venue={id:'3738'};
+  unscreenable.nflContext.evidence.picture.transitContext={screenable:false,eventWindow:{start:null,end:null}};
+  assert.ok(comparePublicEvidence(prior,unscreenable).reviewCues.notCompared.includes('transit alert'));
+});

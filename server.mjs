@@ -10,6 +10,7 @@ import {normalizeGroundZone,screenControlledGroundZones} from './lib/controlled_
 import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
 import {projectEvent,caseEventDrift} from './lib/event_snapshot.mjs';
 import {readVotingHistory} from './lib/voting_history.mjs';
+import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './site/mbta_foxboro_alerts.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||4173);
 const snapshot=JSON.parse(await fs.readFile(path.join(root,'data/venues.json'),'utf8'));
@@ -98,7 +99,16 @@ async function draftCaseBrief(id,user,includeContext){
     publicSituation=buildEventBrief(event,place,{weather:c.weather,earthquakes:c.earthquakes,naturalEvents:c.naturalEvents});
   }
   let nflContext=null;
-  if(item.case.subject.sourceId==='nfl')try{nflContext=buildNflCaseContext(item.case.subject,event,nflSnapshots)}catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
+  if(item.case.subject.sourceId==='nfl')try{
+    const game=nflSnapshots.schedule?.games?.find(candidate=>candidate.id===item.case.subject.id);
+    let transit=null;
+    if(game?.venue?.id==='3738'){
+      const response=await remote('mbta:foxboro',mbtaFoxboroAlertsUrl,300000);
+      if(!response.stale&&response.data)try{transit=summarizeMbtaFoxboroAlerts(response.data,game,response.at)}catch{transit={state:'failed',checkedAt:Date.now()}}
+      else transit={state:'failed',checkedAt:Date.now()};
+    }
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,transit});
+  }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});
   brief.changesSincePreviousBrief=compareBriefSnapshots(analystStore.getLatestBriefSnapshotFor(user,id),brief);
