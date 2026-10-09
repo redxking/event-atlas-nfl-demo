@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {selectRoadContext} from '../site/road_relevance.js';
+
+const now=Date.parse('2026-10-09T18:00:00Z');
+const game={kickoff:'2026-10-11T20:00:00Z',timeTbd:false,venue:{id:'stadium'}};
+const snapshot={builtAt:'2026-10-09T17:00:00Z',coverageFrom:'2026-10-09T17:00:00Z',coverageThrough:'2026-10-16T17:00:00Z',byVenue:{stadium:[
+  {id:'near-other-day',distanceKm:1,startAt:'2026-10-12T08:00:00Z',endAt:'2026-10-12T10:00:00Z'},
+  {id:'far-overlap',distanceKm:8,startAt:'2026-10-11T18:00:00Z',endAt:'2026-10-11T22:00:00Z'},
+  {id:'untimed',distanceKm:2,startAt:null,endAt:null}
+]}};
+
+test('kickoff window puts a farther overlapping closure before closer unrelated records',()=>{
+  const result=selectRoadContext(game,snapshot,now);
+  assert.equal(result.timingState,'matched');
+  assert.equal(result.overlapCount,1);
+  assert.equal(result.records[0].id,'far-overlap');
+  assert.equal(result.records[0].overlaps,true);
+  assert.equal(result.records[1].overlaps,false);
+  assert.equal(result.records.find(record=>record.id==='untimed').overlaps,false);
+});
+
+test('TBD, stale, past, and out-of-window games do not get temporal matches',()=>{
+  const cases=[
+    [{...game,timeTbd:true},snapshot,'kickoff_tbd'],
+    [game,{...snapshot,builtAt:'2026-10-08T00:00:00Z'},'stale'],
+    [{...game,kickoff:'2026-10-08T20:00:00Z'},snapshot,'past_or_invalid'],
+    [{...game,kickoff:'2026-11-11T20:00:00Z'},snapshot,'outside_window']
+  ];
+  for(const [event,data,state] of cases){const result=selectRoadContext(event,data,now);assert.equal(result.timingState,state);assert.equal(result.overlapCount,0);assert.ok(result.records.every(record=>!record.overlaps))}
+});
+
+test('a venue without a connected road feed is not reported as a clean match',()=>{
+  const result=selectRoadContext({...game,venue:{id:'other-stadium'}},snapshot,now);
+  assert.equal(result.timingState,'no_coverage');
+  assert.equal(result.overlapCount,0);
+  assert.deepEqual(result.records,[]);
+});

@@ -38,7 +38,7 @@ try{
 if(sources.every(source=>source.status==='failed'))throw Error('Every public road condition source failed');
 const byVenue=Object.fromEntries(venues.map(venue=>{
   const agency=venue.address.includes('CA, USA')?'Caltrans':'WSDOT';
-  return [venue.id,records.filter(record=>record.agency===agency).map(record=>({...record,distanceKm:Math.round(km(venue.lat,venue.lon,record.lat,record.lon)*10)/10})).filter(record=>record.distanceKm<=10).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,8)];
+  return [venue.id,records.filter(record=>record.agency===agency).map(record=>({...record,distanceKm:Math.round(km(venue.lat,venue.lon,record.lat,record.lon)*10)/10})).filter(record=>record.distanceKm<=10).sort((a,b)=>a.distanceKm-b.distanceKm).slice(0,50)];
 }));
-await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; proximity does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
+await fs.writeFile('site/roads.json',JSON.stringify({builtAt:new Date().toISOString(),coverageFrom:new Date(now).toISOString(),coverageThrough:new Date(horizon).toISOString(),basis:'Agency-listed road conditions within 10 km of an unreviewed venue point; Caltrans future closure selection covers seven days. Proximity or time overlap does not establish travel impact, event relevance, or a threat.',sources,byVenue}));
 console.log('Road condition sources:',sources.map(source=>`${source.id} ${source.status} ${source.records||0}`).join(', '),'venue matches:',Object.values(byVenue).map(items=>items.length).join(','));
