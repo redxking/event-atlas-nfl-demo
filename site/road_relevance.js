@@ -6,8 +6,9 @@ export function selectRoadContext(game,snapshot,now=Date.now()){
   const builtAt=Date.parse(snapshot?.builtAt);
   const stale=!Number.isFinite(builtAt)||builtAt>now+HOUR||now-builtAt>12*HOUR;
   const kickoff=Date.parse(game.kickoff);
-  const coverageStart=Date.parse(snapshot?.coverageFrom);
-  const coverageEnd=Date.parse(snapshot?.coverageThrough);
+  const venueCoverage=snapshot?.timedCoverageByVenue?.[game.venue.id];
+  const coverageStart=Date.parse(venueCoverage?.from||snapshot?.coverageFrom);
+  const coverageEnd=Date.parse(venueCoverage?.through||snapshot?.coverageThrough);
   const canMatch=!stale&&!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now&&
     Number.isFinite(coverageStart)&&Number.isFinite(coverageEnd)&&kickoff>=coverageStart&&kickoff<=coverageEnd;
   const start=kickoff-4*HOUR,end=kickoff+5*HOUR;

@@ -36,3 +36,13 @@ test('a venue without a connected road feed is not reported as a clean match',()
   assert.equal(result.overlapCount,0);
   assert.deepEqual(result.records,[]);
 });
+
+test('a fresh Illinois published window can be compared beyond the Caltrans seven-day horizon',()=>{
+  const chicago={kickoff:'2026-10-22T20:00:00Z',timeTbd:false,venue:{id:'soldier'}};
+  const data={...snapshot,timedCoverageByVenue:{soldier:{from:'2026-10-09T17:00:00Z',through:'2027-01-10T05:00:00Z'}},byVenue:{soldier:[{id:'idot-closure-14',agency:'Illinois DOT',distanceKm:8.3,startAt:'2026-04-13T12:00:00Z',endAt:'2027-10-29T12:00:00Z'}]}};
+  const result=selectRoadContext(chicago,data,now);
+  assert.equal(result.timingState,'matched');
+  assert.equal(result.overlapCount,1);
+  assert.equal(result.records[0].overlaps,true);
+  assert.equal(selectRoadContext(chicago,{...data,builtAt:'2026-10-08T00:00:00Z'},now).overlapCount,0);
+});
