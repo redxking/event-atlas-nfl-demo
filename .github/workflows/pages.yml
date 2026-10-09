@@ -24,6 +24,7 @@ jobs:
       - run: npm run sync:sports
       - run: npm run build:site
       - run: npm run sync:cameras
+      - run: npm run sync:roads
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
