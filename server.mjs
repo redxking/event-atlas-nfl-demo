@@ -6,6 +6,7 @@ import {buildEventBrief} from './lib/build_event_brief.mjs';
 import {buildInternalCaseBrief,compareBriefSnapshots} from './lib/build_internal_case_brief.mjs';
 import {buildNflCaseContext} from './lib/build_nfl_case_context.mjs';
 import {AnalystStore} from './lib/analyst_store.mjs';
+import {normalizeGroundZone,screenControlledGroundZones} from './lib/controlled_ground_zone.mjs';
 import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
 import {projectEvent,caseEventDrift} from './lib/event_snapshot.mjs';
 import {readVotingHistory} from './lib/voting_history.mjs';
@@ -64,6 +65,7 @@ function caseDetail(id,user){
   item.personScopes=analystStore.getPersonScopesFor(user,id);
   item.briefSnapshots=analystStore.listBriefSnapshotsFor(user,id);
   item.reviewers=analystStore.listCaseReviewersFor(user,id);
+  item.groundZones=analystStore.listGroundZonesFor(user,id);
   if(item.case.subject.type==='voting_site'){
     const current=votingById.get(item.case.subject.id),connector=voting.sources.find(source=>source.id===current?.sourceId||source.id===(item.case.subject.sourceId||item.case.subject.id.split(':')[0]));
     item.sourceDrift=caseVotingDrift(item.case.subject,current,connector);
@@ -73,6 +75,17 @@ function caseDetail(id,user){
   }
   analystStore.recordCaseRead(user,id,'case.viewed');
   return item;
+}
+function currentNflGame(caseId,user){
+  const detail=analystStore.getCaseFor(user,caseId);
+  if(!detail)return null;
+  const subject=detail.case.subject,event=publicById.get(subject.id);
+  if(subject.type!=='published_event'||subject.sourceId!=='nfl'||caseEventDrift(subject,event,published.sources.find(source=>source.id==='nfl')).status!=='unchanged_since_intake')throw Error('Reconcile NFL event source with case intake before ground-zone use');
+  const context=buildNflCaseContext(subject,event,nflSnapshots);
+  if(context?.status!=='snapshot_available_unreviewed')throw Error('Fresh, matched NFL schedule snapshot required for ground-zone use');
+  const game=nflSchedule.games.find(item=>item.id===subject.id);
+  if(!game?.venue?.id||!Number.isFinite(game.venue.lat)||!Number.isFinite(game.venue.lon))throw Error('NFL venue candidate point required');
+  return game;
 }
 async function draftCaseBrief(id,user,includeContext){
   const item=caseDetail(id,user);
@@ -96,6 +109,10 @@ if(u.pathname==='/api/cases'&&req.method==='GET'){const user=operator(req,res);i
 if(u.pathname==='/api/cases'&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const body=await readBody(req);let subject=null;if(body.subjectType==='published_event'){const e=publicById.get(body.subjectId);if(e)subject={type:'published_event',id:e.id,sourceId:e.sourceId,title:e.title,sourceUrl:e.sourceUrl,retrievedAt:e.retrievedAt,startsAtLocal:e.startsAtLocal,placeId:e.placeId||null,sourceStatus:e.status,connectorStatus:published.sources.find(s=>s.id===e.sourceId)?.status||'unknown',operationalSnapshot:projectEvent(e)}}else if(body.subjectType==='voting_site'){const v=votingById.get(body.subjectId);if(v)subject={type:'voting_site',id:v.id,sourceId:v.sourceId,title:v.name,sourceUrl:v.sourceRecordUrl||v.sourceUrl,retrievedAt:v.retrievedAt,sourceDataStatus:v.sourceDataStatus,connectorStatus:voting.sources.find(s=>s.id===v.sourceId)?.status||'unknown',operationalSnapshot:projectVotingSite(v)}}if(!subject)return send(res,400,{error:'Known published event or voting site required'});try{return send(res,201,analystStore.createCase(user,subject,body.purpose,body.authority,body.openingRationale))}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/reviewers')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/reviewers'.length));const body=await readBody(req);try{return send(res,201,analystStore.assignCaseReviewer(user,id,body.reviewerId,body.rationale))}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/case-reviewers/')&&u.pathname.endsWith('/revoke')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/case-reviewers/'.length,-'/revoke'.length));const body=await readBody(req);try{return send(res,200,analystStore.revokeCaseReviewer(user,id,body.rationale))}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ground-zones/screen')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ground-zones/screen'.length));const body=await readBody(req);try{const game=currentNflGame(id,user);if(!game)return send(res,404,{error:'Case not found'});const zones=analystStore.listGroundZonesFor(user,id);const results=screenControlledGroundZones(zones,game,body);analystStore.recordCaseRead(user,id,'ground_zone.screened');return send(res,200,{eventId:game.id,venueId:game.venue.id,results,interpretation:'Local planning relation only; no observation is persisted, no alert is generated, and no field boundary is verified.'})}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ground-zones')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ground-zones'.length));const body=await readBody(req);try{const game=currentNflGame(id,user);if(!game)return send(res,404,{error:'Case not found'});return send(res,201,analystStore.createGroundZone(user,id,normalizeGroundZone(body,game)))}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/ground-zones/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/ground-zones/'.length,-'/review'.length));const body=await readBody(req);try{const zone=analystStore.getGroundZoneFor(user,id);if(!zone)return send(res,404,{error:'Ground zone not found'});const game=currentNflGame(zone.caseId,user);if(game?.id!==zone.eventId||game.venue.id!==zone.venueId)throw Error('Event or venue changed; ground zone must be resubmitted');return send(res,201,analystStore.reviewGroundZone(user,id,body.decision,body.rationale,body.verificationReference))}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/ground-zones/')&&u.pathname.endsWith('/revoke')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/ground-zones/'.length,-'/revoke'.length));const body=await readBody(req);try{return send(res,200,analystStore.revokeGroundZone(user,id,body.rationale))}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/assessments')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/assessments'.length));const body=await readBody(req);try{return send(res,201,analystStore.createAssessment(user,id,body))}catch(error){return send(res,error.message==='Case not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/assessments/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/assessments/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewAssessment(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Assessment not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/person-scopes')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/person-scopes'.length));const body=await readBody(req);try{return send(res,201,analystStore.requestPersonScope(user,id,body))}catch(error){return send(res,error.message==='Case not found'?404:400,{error:error.message})}}
