@@ -82,6 +82,16 @@ test('Charlotte delayed incident reports remain historical context with no threa
   assert.ok(picture.gaps.some(gap=>gap.includes('noncriminal and potentially unfounded')));
 });
 
+test('Charlotte open CMPD roadway check is source context, not a police alert or threat cue',()=>{
+  const charlotte={...game,venue:{...game.venue,id:'3628',lat:35.225833333,lon:-80.852777777}};
+  const picture=buildNflEventPicture(charlotte,{schedule:inputs.schedule,cmpdTraffic:{state:'retrieved',checkedAt:now,totalOpen:12,nearby:2,invalidCount:0,newestNearbyAt:'2026-10-09T17:00:00Z',sourceUrl:'https://cmpdinfo.charlottenc.gov/api/v2.1/TrafficRSS',interpretation:'Open roadway context only',privateTitle:'Do not export'}},now);
+  assert.equal(picture.sources.find(item=>item.name==='CMPD open roadway incidents').state,'open-feed count checked');
+  assert.equal(picture.openRoadwayContext.nearby,2);
+  assert.equal(picture.openRoadwayContext.privateTitle,undefined);
+  assert.equal(picture.cues.length,0);
+  assert.ok(picture.gaps.some(gap=>gap.includes('No active jurisdictional police alert')));
+});
+
 test('failed direct Tennessee road check is visible as a gap',()=>{
   const nashville={...game,venue:{...game.venue,id:'3810',lat:36.1663,lon:-86.7713}};
   const picture=buildNflEventPicture(nashville,{schedule:inputs.schedule,roadDirect:{state:'failed',checkedAt:now}},now);
