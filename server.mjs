@@ -11,6 +11,7 @@ import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
 import {projectEvent,caseEventDrift} from './lib/event_snapshot.mjs';
 import {readVotingHistory} from './lib/voting_history.mjs';
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './site/mbta_foxboro_alerts.js';
+import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './site/mbta_foxboro_schedules.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||4173);
 const snapshot=JSON.parse(await fs.readFile(path.join(root,'data/venues.json'),'utf8'));
@@ -101,13 +102,17 @@ async function draftCaseBrief(id,user,includeContext){
   let nflContext=null;
   if(item.case.subject.sourceId==='nfl')try{
     const game=nflSnapshots.schedule?.games?.find(candidate=>candidate.id===item.case.subject.id);
-    let transit=null;
+    let transit=null,transitSchedule=null;
     if(game?.venue?.id==='3738'){
-      const response=await remote('mbta:foxboro',mbtaFoxboroAlertsUrl,300000);
+      let scheduleUrl=null;
+      try{scheduleUrl=mbtaFoxboroSchedulesUrl(game)}catch{}
+      const [response,scheduleResponse]=await Promise.all([remote('mbta:foxboro',mbtaFoxboroAlertsUrl,300000),scheduleUrl?remote('mbta:foxboro:'+scheduleUrl,scheduleUrl,1800000):Promise.resolve({stale:true})]);
       if(!response.stale&&response.data)try{transit=summarizeMbtaFoxboroAlerts(response.data,game,response.at)}catch{transit={state:'failed',checkedAt:Date.now()}}
       else transit={state:'failed',checkedAt:Date.now()};
+      if(!scheduleResponse.stale&&scheduleResponse.data)try{transitSchedule=summarizeMbtaFoxboroSchedules(scheduleResponse.data,game,scheduleResponse.at)}catch{transitSchedule={state:'failed',checkedAt:Date.now()}}
+      else transitSchedule={state:'failed',checkedAt:Date.now()};
     }
-    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,transit});
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,transit,transitSchedule});
   }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});

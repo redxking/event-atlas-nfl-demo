@@ -4,14 +4,15 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261009-6';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-16';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-11';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-17';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261009-12';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
 import {charlotteIncidentsLayer} from './charlotte_public_safety.js';
 import {cmpdOpenTrafficFeed,parseCmpdOpenTrafficXml,summarizeCmpdOpenTraffic} from './cmpd_open_traffic.js';
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_alerts.js';
+import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);
@@ -19,7 +20,7 @@ const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&
 const fmt=value=>new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});
 const gameTime=game=>game.timeTbd?new Date(game.kickoff).toLocaleDateString(undefined,{dateStyle:'medium',timeZone:'America/New_York'})+' · kickoff TBD':fmt(game.kickoff);
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
-const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,ntasSnapshot,indyPoliceSnapshot,charlottePoliceSnapshot,selected,cameraRefreshTimer,cameraPlayer,cameraFrame,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice,cmpdTraffic,mbtaTransit,transitRefreshTimer,liveTennesseeRoad,tennesseeRoadRefreshTimer,exerciseEnabled=false,exerciseStage=0,exercisePlaybackTimer;
+const cache=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,ntasSnapshot,indyPoliceSnapshot,charlottePoliceSnapshot,selected,cameraRefreshTimer,cameraPlayer,cameraFrame,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,briefConditions,briefPolice,cmpdTraffic,mbtaTransit,mbtaSchedule,transitRefreshTimer,liveTennesseeRoad,tennesseeRoadRefreshTimer,exerciseEnabled=false,exerciseStage=0,exercisePlaybackTimer;
 const arlingtonSource='https://gis2.arlingtontx.gov/agsext2/rest/services/Police/ActiveIncident/MapServer/0';
 const arlingtonQuery=arlingtonSource+'/query?'+new URLSearchParams({where:'1=1',outFields:'OBJECTID,CallDate,UpdatedDate',returnGeometry:'true',outSR:'4326',f:'geojson'});
 async function json(url){const local=new URL(url,location.href).origin===location.origin;const result=await fetch(url,{headers:{Accept:'application/geo+json, application/json'},cache:local?'no-store':'default'});if(!result.ok)throw Error('HTTP '+result.status);return result.json()}
@@ -28,7 +29,7 @@ function renderList(){const q=$('search').value.trim().toLowerCase(),week=$('wee
 function fact(label,value){return `<div class="fact"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`}
 function link(url,label){try{const parsed=new URL(url);if(parsed.protocol!=='https:')return '';return `<a href="${esc(parsed.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch{return ''}}
 const selectedRoadSnapshot=game=>game?.venue.id==='3810'&&liveTennesseeRoad?.state==='ok'&&Date.now()-liveTennesseeRoad.checkedAt<=15*60000?liveTennesseeRoad.snapshot:roadSnapshot;
-const briefInputs=()=>({schedule:snapshot,ground:groundSnapshot,airspace:seamsSnapshot,tfr:tfrSnapshot,cameras:cameraSnapshot,roads:selectedRoadSnapshot(snapshot?.games.find(game=>game.id===selected)),roadDirect:liveTennesseeRoad,conditions:briefConditions,police:briefPolice,cmpdTraffic,transit:mbtaTransit,ntas:ntasSnapshot});
+const briefInputs=()=>({schedule:snapshot,ground:groundSnapshot,airspace:seamsSnapshot,tfr:tfrSnapshot,cameras:cameraSnapshot,roads:selectedRoadSnapshot(snapshot?.games.find(game=>game.id===selected)),roadDirect:liveTennesseeRoad,conditions:briefConditions,police:briefPolice,cmpdTraffic,transit:mbtaTransit,transitSchedule:mbtaSchedule,ntas:ntasSnapshot});
 function downloadEvidenceBundle(game){
   if(selected!==game.id)return;
   const bundle=buildNflEvidenceBundle(game,briefInputs());
@@ -307,7 +308,7 @@ async function refreshCmpdOpenTraffic(game){
 }
 async function refreshMbtaAlerts(game){
   if(game.venue.id!=='3738'||selected!==game.id)return;
-  const target=$('transit');if(!target)return;
+  const target=$('transit-alerts');if(!target)return;
   try{
     const response=await fetch(mbtaFoxboroAlertsUrl,{headers:{Accept:'application/vnd.api+json'},cache:'no-store',signal:AbortSignal.timeout(15000)});
     if(!response.ok)throw Error(`HTTP ${response.status}`);
@@ -320,12 +321,30 @@ async function refreshMbtaAlerts(game){
       `<p>Foxboro station is about 0.5 km from the unreviewed Gillette Stadium point. These are transit service notices; even a time overlap does not establish event-train impact, stadium access disruption, or a threat. Confirm service and travel plans with MBTA. ${link(mbtaFoxboroAlertsUrl,'MBTA stop-filtered feed')}</p>`;
   }catch(error){if(selected!==game.id)return;mbtaTransit={state:'failed',checkedAt:Date.now()};renderBrief(game);target.innerHTML=`<p>MBTA Foxboro station alerts unavailable or invalid (${esc(error.message)}). No negative transit finding can be inferred. ${link(mbtaFoxboroAlertsUrl,'MBTA feed')}</p>`}
 }
+async function refreshMbtaSchedules(game){
+  if(game.venue.id!=='3738'||selected!==game.id)return;
+  const target=$('transit-schedule');if(!target)return;
+  if(mbtaSchedule?.state==='retrieved'&&Date.now()-mbtaSchedule.checkedAt<30*60000)return;
+  let sourceUrl;
+  try{
+    sourceUrl=mbtaFoxboroSchedulesUrl(game);
+    const response=await fetch(sourceUrl,{headers:{Accept:'application/vnd.api+json'},cache:'no-store',signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw Error(`HTTP ${response.status}`);
+    const context=summarizeMbtaFoxboroSchedules(await response.json(),game,Date.now());
+    if(selected!==game.id)return;
+    mbtaSchedule=context;renderBrief(game);
+    target.innerHTML=`<p class="feed-state">MBTA FOXBORO PUBLISHED SCHEDULE · SERVICE DATE ${esc(context.serviceDate)} · CHECKED ${esc(fmt(context.checkedAt))}</p><p>${esc(context.totalReturned)} station schedule entr${context.totalReturned===1?'y':'ies'} returned; ${esc(context.arrivalCount)} with arrival times, ${esc(context.departureCount)} with departure times.${context.state==='partial'?' Response incomplete or contains invalid records.':''}</p>`+
+      context.entries.slice(0,8).map(item=>`<div class="camera-row"><strong>${esc(item.headsign||'MBTA commuter rail trip')}</strong><span>${item.arrivalAt?'Arrival '+esc(fmt(item.arrivalAt)):''}${item.arrivalAt&&item.departureAt?' · ':''}${item.departureAt?'Departure '+esc(fmt(item.departureAt)):''}</span>${link(item.sourceUrl,'MBTA trip record')}</div>`).join('')+
+      (context.totalReturned>8?`<p>Showing eight of ${esc(context.totalReturned)} returned entries; ${esc(context.omittedEntryCount)} valid entries exceed the 30-entry evidence export limit. Consult the source for the full schedule.</p>`:'')+
+      `<p>These are published station times, not live train positions or a guarantee of operation. A missing postgame departure time in this response does not mean no return service. ${link(sourceUrl,'MBTA game-date station schedule')}</p>`;
+  }catch(error){if(selected!==game.id)return;mbtaSchedule={state:'failed',checkedAt:Date.now()};renderBrief(game);target.innerHTML=`<p>MBTA Foxboro game-date schedule unavailable or invalid (${esc(error.message)}). No service conclusion can be inferred. ${link(sourceUrl||'https://api-v3.mbta.com/schedules','MBTA schedules')}</p>`}
+}
 function renderTransit(game){
   const target=$('transit');if(!target)return;
   if(game.venue.id!=='3738'){target.innerHTML='<p>No station-specific transit alert connector is configured for this venue.</p>';return}
-  target.innerHTML='<p>Checking MBTA Foxboro station alerts…</p>';
-  refreshMbtaAlerts(game);
-  transitRefreshTimer=setInterval(()=>{if(selected===game.id)refreshMbtaAlerts(game);else{clearInterval(transitRefreshTimer);transitRefreshTimer=null}},300000);
+  target.innerHTML='<div id="transit-alerts"><p>Checking MBTA Foxboro station alerts…</p></div><div id="transit-schedule"><p>Checking game-date station schedule…</p></div>';
+  refreshMbtaAlerts(game);refreshMbtaSchedules(game);
+  transitRefreshTimer=setInterval(()=>{if(selected===game.id){refreshMbtaAlerts(game);refreshMbtaSchedules(game)}else{clearInterval(transitRefreshTimer);transitRefreshTimer=null}},300000);
 }
 function renderPublicSafety(game){
   const target=$('public-safety');
@@ -405,7 +424,7 @@ function renderPublicSafety(game){
   refresh();
   publicSafetyRefreshTimer=setInterval(()=>{if(selected===game.id)refresh();else{clearInterval(publicSafetyRefreshTimer);publicSafetyRefreshTimer=null}},300000);
 }
-function selectGame(id){clearInterval(exercisePlaybackTimer);exercisePlaybackTimer=null;clearInterval(transitRefreshTimer);transitRefreshTimer=null;selected=id;exerciseStage=0;briefConditions=null;briefPolice=null;cmpdTraffic=null;mbtaTransit=null;liveTennesseeRoad=null;if(tennesseeRoadRefreshTimer){clearInterval(tennesseeRoadRefreshTimer);tennesseeRoadRefreshTimer=null}if(briefRefreshTimer)clearInterval(briefRefreshTimer);renderList();const game=snapshot.games.find(item=>item.id===id);if(!game)return;const venue=game.venue,point=Number.isFinite(venue.lat)&&Number.isFinite(venue.lon);$('venue-map')?.querySelectorAll('.map-marker').forEach(button=>button.classList.toggle('selected',button.dataset.venueId===venue.id));$('detail').innerHTML=`<span class="tag">WEEK ${game.week} · ${esc(game.status.toUpperCase())}</span><h3>${esc(game.title)}</h3><p class="detail-sub">${esc(gameTime(game))}</p><div class="facts">${fact('VENUE',venue.name)}${fact('LOCATION',venue.address)}${fact('SOURCE VENUE ID',venue.id)}${fact('MAP POINT',point?venue.lat.toFixed(5)+', '+venue.lon.toFixed(5):'Not verified')}</div><div class="detail-section"><h4>Schedule & venue provenance</h4><p>ESPN scoreboard ID ${esc(game.id)}. Retrieved ${esc(fmt(game.sourceRetrievedAt))}. Game and venue may change; confirm with the NFL or host club.</p><p>Venue coordinate: ${esc(venue.coordinateStatus)}. ${point?'A name match is not an entrance, footprint, or operational asset.':'No point-specific feed is queried for this venue.'}</p>${link(game.sourceUrl,'ESPN game')}${venue.venueCandidateUrl?' · '+link(venue.venueCandidateUrl,'Wikidata venue candidate'):''}</div><div class="detail-section event-picture-section"><h4>Public-source event picture</h4><div id="event-picture"><p>Assembling source status…</p></div></div><div class="detail-section exercise-section"><h4>Threat briefing exercise</h4><div id="exercise"></div></div><div class="detail-section"><h4>Ground footprint candidate</h4><div id="ground"><p>Loading mapped ground geometry…</p></div></div><div class="detail-section"><h4>Airspace and geofence</h4><div id="airspace"><p>Loading FAA SEAMS…</p></div></div><div class="detail-section"><h4>FAA TFR and NOTAM review</h4><div id="tfr"><p>Loading FAA TFR list…</p></div></div><div class="detail-section"><h4>Public conditions</h4><div id="conditions"><p>Loading current public feeds…</p></div></div><div class="detail-section"><h4>Public safety activity</h4><div id="public-safety"><p>Checking jurisdictional coverage…</p></div></div><div class="detail-section"><h4>Transit service alerts</h4><div id="transit"><p>Checking station coverage…</p></div></div><div class="detail-section"><h4>Roadway camera sources</h4><div id="cameras"><p>Loading camera metadata…</p></div></div><div class="detail-section"><h4>Road conditions</h4><div id="roads"><p>Loading agency road conditions…</p></div></div>`;renderGround(game);renderAirspace(game);renderTfr(game);renderCameras(game);renderRoads(game);renderPublicSafety(game);renderTransit(game);renderBrief(game);renderExercise(game);if(game.venue.id==='3810'){refreshTennesseeRoad(game);tennesseeRoadRefreshTimer=setInterval(()=>{if(selected===id)refreshTennesseeRoad(game)},300000)}briefRefreshTimer=setInterval(()=>{if(selected===id)renderBrief(game)},60000);if(point)loadConditions(game);else $('conditions').innerHTML='<p>Point-specific feeds unavailable because the venue map point has not been verified.</p>'}
+function selectGame(id){clearInterval(exercisePlaybackTimer);exercisePlaybackTimer=null;clearInterval(transitRefreshTimer);transitRefreshTimer=null;selected=id;exerciseStage=0;briefConditions=null;briefPolice=null;cmpdTraffic=null;mbtaTransit=null;mbtaSchedule=null;liveTennesseeRoad=null;if(tennesseeRoadRefreshTimer){clearInterval(tennesseeRoadRefreshTimer);tennesseeRoadRefreshTimer=null}if(briefRefreshTimer)clearInterval(briefRefreshTimer);renderList();const game=snapshot.games.find(item=>item.id===id);if(!game)return;const venue=game.venue,point=Number.isFinite(venue.lat)&&Number.isFinite(venue.lon);$('venue-map')?.querySelectorAll('.map-marker').forEach(button=>button.classList.toggle('selected',button.dataset.venueId===venue.id));$('detail').innerHTML=`<span class="tag">WEEK ${game.week} · ${esc(game.status.toUpperCase())}</span><h3>${esc(game.title)}</h3><p class="detail-sub">${esc(gameTime(game))}</p><div class="facts">${fact('VENUE',venue.name)}${fact('LOCATION',venue.address)}${fact('SOURCE VENUE ID',venue.id)}${fact('MAP POINT',point?venue.lat.toFixed(5)+', '+venue.lon.toFixed(5):'Not verified')}</div><div class="detail-section"><h4>Schedule & venue provenance</h4><p>ESPN scoreboard ID ${esc(game.id)}. Retrieved ${esc(fmt(game.sourceRetrievedAt))}. Game and venue may change; confirm with the NFL or host club.</p><p>Venue coordinate: ${esc(venue.coordinateStatus)}. ${point?'A name match is not an entrance, footprint, or operational asset.':'No point-specific feed is queried for this venue.'}</p>${link(game.sourceUrl,'ESPN game')}${venue.venueCandidateUrl?' · '+link(venue.venueCandidateUrl,'Wikidata venue candidate'):''}</div><div class="detail-section event-picture-section"><h4>Public-source event picture</h4><div id="event-picture"><p>Assembling source status…</p></div></div><div class="detail-section exercise-section"><h4>Threat briefing exercise</h4><div id="exercise"></div></div><div class="detail-section"><h4>Ground footprint candidate</h4><div id="ground"><p>Loading mapped ground geometry…</p></div></div><div class="detail-section"><h4>Airspace and geofence</h4><div id="airspace"><p>Loading FAA SEAMS…</p></div></div><div class="detail-section"><h4>FAA TFR and NOTAM review</h4><div id="tfr"><p>Loading FAA TFR list…</p></div></div><div class="detail-section"><h4>Public conditions</h4><div id="conditions"><p>Loading current public feeds…</p></div></div><div class="detail-section"><h4>Public safety activity</h4><div id="public-safety"><p>Checking jurisdictional coverage…</p></div></div><div class="detail-section"><h4>Transit alerts and published service</h4><div id="transit"><p>Checking station coverage…</p></div></div><div class="detail-section"><h4>Roadway camera sources</h4><div id="cameras"><p>Loading camera metadata…</p></div></div><div class="detail-section"><h4>Road conditions</h4><div id="roads"><p>Loading agency road conditions…</p></div></div>`;renderGround(game);renderAirspace(game);renderTfr(game);renderCameras(game);renderRoads(game);renderPublicSafety(game);renderTransit(game);renderBrief(game);renderExercise(game);if(game.venue.id==='3810'){refreshTennesseeRoad(game);tennesseeRoadRefreshTimer=setInterval(()=>{if(selected===id)refreshTennesseeRoad(game)},300000)}briefRefreshTimer=setInterval(()=>{if(selected===id)renderBrief(game)},60000);if(point)loadConditions(game);else $('conditions').innerHTML='<p>Point-specific feeds unavailable because the venue map point has not been verified.</p>'}
 async function loadConditions(game){
   const venue=game.venue,target=$('conditions'),id=game.id,key=venue.id;
   const nwsUrl='https://api.weather.gov/alerts/active?point='+venue.lat+','+venue.lon;
