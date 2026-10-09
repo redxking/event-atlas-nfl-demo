@@ -9,7 +9,7 @@ export function selectRoadContext(game,snapshot,now=Date.now()){
   const venueCoverage=snapshot?.timedCoverageByVenue?.[game.venue.id];
   const coverageStart=Date.parse(venueCoverage?.from||snapshot?.coverageFrom);
   const coverageEnd=Date.parse(venueCoverage?.through||snapshot?.coverageThrough);
-  const canMatch=!stale&&!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now&&
+  const canMatch=!stale&&!game.timeTbd&&!/^cancel/i.test(game.status||'')&&Number.isFinite(kickoff)&&kickoff>=now&&
     Number.isFinite(coverageStart)&&Number.isFinite(coverageEnd)&&kickoff>=coverageStart&&kickoff<=coverageEnd;
   const start=kickoff-4*HOUR,end=kickoff+5*HOUR;
   const ranked=records.map(record=>{
@@ -21,6 +21,7 @@ export function selectRoadContext(game,snapshot,now=Date.now()){
   let timingState='matched';
   if(!covered)timingState='no_coverage';
   else if(stale)timingState='stale';
+  else if(/^cancel/i.test(game.status||''))timingState='cancelled';
   else if(game.timeTbd)timingState='kickoff_tbd';
   else if(!Number.isFinite(kickoff)||kickoff<now)timingState='past_or_invalid';
   else if(!canMatch)timingState='outside_window';

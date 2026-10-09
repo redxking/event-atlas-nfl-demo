@@ -23,6 +23,7 @@ test('kickoff window puts a farther overlapping closure before closer unrelated 
 test('TBD, stale, past, and out-of-window games do not get temporal matches',()=>{
   const cases=[
     [{...game,timeTbd:true},snapshot,'kickoff_tbd'],
+    [{...game,status:'cancelled in source'},snapshot,'cancelled'],
     [game,{...snapshot,builtAt:'2026-10-08T00:00:00Z'},'stale'],
     [{...game,kickoff:'2026-10-08T20:00:00Z'},snapshot,'past_or_invalid'],
     [{...game,kickoff:'2026-11-11T20:00:00Z'},snapshot,'outside_window']
