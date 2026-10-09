@@ -58,3 +58,29 @@ test('audit chain corruption prevents store startup',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-audit-')),file=path.join(dir,'private','analyst.sqlite');
   try{const store=new AnalystStore(file);store.createOperator('test_user','Test User','analyst');store.close();const db=new DatabaseSync(file);db.exec("UPDATE audit SET action='altered' WHERE seq=1");db.close();assert.throws(()=>new AnalystStore(file),/Audit chain mismatch/)}finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
+
+test('named professional records require a separately approved event scope and survive audited restart',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-person-')),file=path.join(dir,'private','analyst.sqlite');
+  try{
+    const store=new AnalystStore(file),analystToken=store.createOperator('person_analyst','Person Analyst','analyst'),reviewerToken=store.createOperator('person_reviewer','Person Reviewer','reviewer');
+    const analyst=store.authenticate(`Bearer ${analystToken}`),reviewer=store.authenticate(`Bearer ${reviewerToken}`);
+    const eventCase=store.createCase(analyst,{type:'published_event',id:'synthetic-nfl-event',title:'Synthetic NFL event',sourceUrl:'https://example.org/game'},'Protective event planning for designated officials.','Synthetic public safety agency','Published event and designated role require a bounded protective review.');
+    const expiresAt=new Date(Date.now()+7*86400000).toISOString();
+    const scope=store.requestPersonScope(analyst,eventCase.id,{role:'team_official',protectiveNexus:'A designated team official will attend the selected published event.',lawfulAuthority:'Synthetic agency protective assignment',collectionPurpose:'Prepare a bounded protective event brief.',expiresAt});
+    const input={displayName:'Jordan Example',role:'team_official',professionalRole:'Synthetic team president',designationSource:{url:'https://example.org/official',authority:'Synthetic team',observedAt:new Date().toISOString()},identityConfidence:'moderate',identityRationale:'Name and professional role match the synthetic source record.',publicProfessionalFacts:[{claim:'Serves as the synthetic team president.',sourceUrl:'https://example.org/official',observedAt:new Date().toISOString()}],retentionUntil:new Date(Date.now()+6*86400000).toISOString()};
+    assert.throws(()=>store.createProtectedPerson(analyst,scope.id,input),/Active approved scope required/);
+    assert.throws(()=>store.reviewPersonScope(analyst,scope.id,'approved','Synthetic reviewer approval with enough detail.'),/Reviewer role required/);
+    store.reviewPersonScope(reviewer,scope.id,'approved','The synthetic protective nexus and role scope are bounded.');
+    assert.throws(()=>store.createProtectedPerson(analyst,scope.id,{...input,role:'player'}),/role must match/);
+    const person=store.createProtectedPerson(analyst,scope.id,input);
+    assert.equal(person.dissemination,'internal_only');
+    assert.equal(store.getPersonScopes(eventCase.id)[0].people[0].status,'pending_review');
+    store.reviewProtectedPerson(reviewer,person.id,'approved','The synthetic identity source and facts were checked.');
+    store.close();
+    const reopened=new AnalystStore(file);
+    assert.equal(reopened.getPersonScopes(eventCase.id)[0].people[0].status,'approved');
+    reopened.close();
+    const db=new DatabaseSync(file);db.prepare('UPDATE protected_people SET payload_json=? WHERE id=?').run('{}',person.id);db.close();
+    assert.throws(()=>new AnalystStore(file),/protected_people integrity mismatch/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
