@@ -22,7 +22,9 @@ for(const district of [4,7]){
       const item=entry.cctv,lat=Number(item?.location?.latitude),lon=Number(item?.location?.longitude);
       if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<32||lat>42||lon< -125||lon> -114)continue;
       const recordDate=item.recordTimestamp?.recordDate;
-      cameras.push({id:`caltrans-${district}-${item.index}`,agency:'Caltrans',name:item.location?.locationName||'Road camera',lat,lon,route:item.location?.route||null,inService:item.inService==='true',metadataDate:/^\d{4}-\d\d-\d\d$/.test(recordDate||'')?recordDate:null,sourceUrl:url,viewerUrl:'https://quickmap.dot.ca.gov/'});
+      const stillUrl=item.imageData?.static?.currentImageURL;
+      const allowedStill=typeof stillUrl==='string'&&new RegExp(`^https://cwwp2\\.dot\\.ca\\.gov/data/d${district}/cctv/image/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+\\.jpg$`).test(stillUrl);
+      cameras.push({id:`caltrans-${district}-${item.index}`,agency:'Caltrans',name:item.location?.locationName||'Road camera',lat,lon,route:item.location?.route||null,inService:item.inService==='true',metadataDate:/^\d{4}-\d\d-\d\d$/.test(recordDate||'')?recordDate:null,sourceUrl:url,viewerUrl:'https://quickmap.dot.ca.gov/',...(allowedStill?{stillUrl}:{} )});
       count++;
     }
     sources.push({id:`caltrans-d${district}`,url,status:'ok',records:count});
@@ -86,7 +88,7 @@ try{
     const item=feature.attributes||{},lat=Number(item.LATITUDE),lon=Number(item.LONGITUDE),viewerUrl=item.URL;
     if(!Number.isInteger(item.OBJECTID)||item.ACTIVE!==1||!Number.isFinite(lat)||!Number.isFinite(lon)||lat<33.6||lat>34||lon< -84.7||lon> -84.1)continue;
     if(typeof viewerUrl!=='string'||!/^https:\/\/snapshot\.navigator\.dot\.ga\.gov\/thumbs\/[A-Za-z0-9_.-]+\.png$/.test(viewerUrl))continue;
-    cameras.push({id:`gdot-${item.OBJECTID}`,agency:'Georgia DOT GIS',name:item.DEVICE_DESCRIPTION||item.PRIMARY_ROAD||'Road camera',lat,lon,route:item.PRIMARY_ROAD||null,inService:null,operationalStatus:'Listed active in agency inventory; image status unverified',metadataDate:null,sourceUrl:gaLayer,viewerUrl,viewerKind:'still'});
+    cameras.push({id:`gdot-${item.OBJECTID}`,agency:'Georgia DOT GIS',name:item.DEVICE_DESCRIPTION||item.PRIMARY_ROAD||'Road camera',lat,lon,route:item.PRIMARY_ROAD||null,inService:null,operationalStatus:'Listed active in agency inventory; image status unverified',metadataDate:null,sourceUrl:gaLayer,viewerUrl,viewerKind:'unverified_still'});
     count++;
   }
   if(count<100)throw Error('Insufficient valid Atlanta camera records');
