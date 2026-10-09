@@ -32,14 +32,16 @@ for(const district of [4,7]){
 }
 const wsdot='https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0/query';
 try{
-  const params=new URLSearchParams({where:'1=1',geometry:'-122.55,47.35,-122.05,47.85',geometryType:'esriGeometryEnvelope',inSR:'4326',outFields:'OBJECTID,CameraTitle,CompassDirection',returnGeometry:'true',f:'geojson',resultRecordCount:'2000'});
+  const params=new URLSearchParams({where:'1=1',geometry:'-122.55,47.35,-122.05,47.85',geometryType:'esriGeometryEnvelope',inSR:'4326',outFields:'OBJECTID,CameraTitle,CompassDirection,ImageURL',returnGeometry:'true',f:'geojson',resultRecordCount:'2000'});
   const data=await get(`${wsdot}?${params}`);
   if(!Array.isArray(data.features)||data.features.length<20||data.exceededTransferLimit||data.properties?.exceededTransferLimit)throw Error('Incomplete Seattle-area inventory');
   let count=0;
   for(const feature of data.features){
     const [lon,lat]=feature.geometry?.coordinates||[];
     if(!Number.isFinite(lat)||!Number.isFinite(lon)||!Number.isInteger(feature.properties?.OBJECTID))continue;
-    cameras.push({id:`wsdot-${feature.properties.OBJECTID}`,agency:'WSDOT',name:feature.properties.CameraTitle||'Road camera',lat,lon,route:null,inService:null,metadataDate:null,sourceUrl:wsdot.replace(/\/query$/,''),viewerUrl:'https://wsdot.com/travel/real-time/'});
+    const stillUrl=feature.properties.ImageURL;
+    const allowedStill=typeof stillUrl==='string'&&/^https:\/\/images\.wsdot\.wa\.gov\/[a-z0-9_-]+\/[a-z0-9_-]+\.jpg$/i.test(stillUrl);
+    cameras.push({id:`wsdot-${feature.properties.OBJECTID}`,agency:'WSDOT',name:feature.properties.CameraTitle||'Road camera',lat,lon,route:null,inService:null,metadataDate:null,sourceUrl:wsdot.replace(/\/query$/,''),viewerUrl:'https://wsdot.com/travel/real-time/',...(allowedStill?{stillUrl}:{} )});
     count++;
   }
   sources.push({id:'wsdot-seattle',url:wsdot,status:'ok',records:count});
