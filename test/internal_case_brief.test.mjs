@@ -37,4 +37,5 @@ test('brief comparison names changed event fields and reviewed entity IDs',()=>{
   assert.deepEqual(change.addedProtectedPersonIds,['person-2']);
   assert.equal(change.baselineContentHash,prior.contentHash);
   assert.equal(change.publicSituationRefreshed,true);
+  assert.equal(change.evidenceChanges.state,'not_comparable');
 });
