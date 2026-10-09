@@ -25,6 +25,7 @@ jobs:
       - run: npm run build:site
       - run: npm run sync:cameras
       - run: npm run sync:roads
+      - run: npm run sync:ntas
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
