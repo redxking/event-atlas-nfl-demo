@@ -3,8 +3,32 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {randomUUID} from 'node:crypto';
 import {DatabaseSync} from 'node:sqlite';
 import {AnalystStore} from '../lib/analyst_store.mjs';
+
+test('local AI run receipts preserve dispatch and outcome without storing draft prose',()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-ai-receipt-')),file=path.join(dir,'private','analyst.sqlite');
+  try{
+    const store=new AnalystStore(file),token=store.createOperator('ai_analyst','AI Analyst','analyst'),otherToken=store.createOperator('other_ai_analyst','Other Analyst','analyst');
+    const operator=store.authenticate(`Bearer ${token}`),other=store.authenticate(`Bearer ${otherToken}`);
+    const record=store.createCase(operator,{type:'published_event',sourceId:'nfl',id:'nfl:synthetic',sourceUrl:'https://example.org/game'},'Protective review of a synthetic football game.','Synthetic agency','A bounded model trace is needed for a synthetic public source brief.');
+    const requestId=randomUUID(),packetHash='a'.repeat(64),draftHash='b'.repeat(64);
+    const requested=store.recordAiDraftEvent(operator,record.id,{requestId,model:'qwen3.5:9b',packetHash,stage:'requested'});
+    assert.match(requested.auditHead,/^[a-f0-9]{64}$/);
+    const succeeded=store.recordAiDraftEvent(operator,record.id,{requestId,model:'qwen3.5:9b',packetHash,stage:'succeeded',draftHash});
+    assert.equal(store.listAiDraftEventsFor(operator,record.id)[0].draftHash,draftHash);
+    assert.equal(store.listAiDraftEventsFor(other,record.id),null);
+    assert.throws(()=>store.recordAiDraftEvent(operator,record.id,{requestId,model:'qwen3.5:9b',packetHash,stage:'failed',errorCode:'generation_failed'}),/sequence invalid/);
+    const failedId=randomUUID();store.recordAiDraftEvent(operator,record.id,{requestId:failedId,model:'qwen3.5:9b',packetHash,stage:'requested'});store.recordAiDraftEvent(operator,record.id,{requestId:failedId,model:'qwen3.5:9b',packetHash,stage:'failed',errorCode:'generation_failed'});
+    assert.equal(store.listAiDraftEventsFor(operator,record.id).length,4);
+    assert.equal(store.auditSummary().verified,true);
+    store.close();
+    const reopened=new AnalystStore(file);assert.equal(reopened.listAiDraftEventsFor(reopened.authenticate(`Bearer ${token}`),record.id)[2].id,succeeded.id);reopened.close();
+    const db=new DatabaseSync(file);db.prepare('UPDATE ai_draft_events SET packet_hash=? WHERE id=?').run('c'.repeat(64),succeeded.id);db.close();
+    assert.throws(()=>new AnalystStore(file),/AI draft receipt integrity mismatch/);
+  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
 
 test('operator tokens gate event writes and a separate reviewer records a decision',()=>{
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'atlas-store-')),file=path.join(dir,'private','analyst.sqlite');

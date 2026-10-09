@@ -1,11 +1,12 @@
 import http from 'node:http';
+import {randomUUID} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildEventBrief} from './lib/build_event_brief.mjs';
 import {buildInternalCaseBrief,compareBriefSnapshots} from './lib/build_internal_case_brief.mjs';
 import {buildNflCaseContext} from './lib/build_nfl_case_context.mjs';
-import {buildLocalAiPacket,generateLocalAiDraft} from './lib/local_ai_brief.mjs';
+import {LOCAL_MODEL,buildLocalAiPacket,generateLocalAiDraft,localAiDraftHash} from './lib/local_ai_brief.mjs';
 import {AnalystStore} from './lib/analyst_store.mjs';
 import {normalizeGroundZone,screenControlledGroundZones} from './lib/controlled_ground_zone.mjs';
 import {projectVotingSite,caseVotingDrift} from './lib/voting_snapshot.mjs';
@@ -68,6 +69,7 @@ function caseDetail(id,user){
   if(!item)return null;
   item.personScopes=analystStore.getPersonScopesFor(user,id);
   item.briefSnapshots=analystStore.listBriefSnapshotsFor(user,id);
+  item.aiDraftEvents=analystStore.listAiDraftEventsFor(user,id);
   item.reviewers=analystStore.listCaseReviewersFor(user,id);
   item.groundZones=analystStore.listGroundZonesFor(user,id);
   if(item.case.subject.type==='voting_site'){
@@ -139,7 +141,7 @@ if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/review')&
 if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/people')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/person-scopes/'.length,-'/people'.length));const body=await readBody(req);try{return send(res,201,analystStore.createProtectedPerson(user,id,body))}catch(error){return send(res,error.message==='Scope not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/protected-people/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/protected-people/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewProtectedPerson(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Person not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');return brief?send(res,200,brief):send(res,404,{error:'Case not found'})}catch(error){return send(res,400,{error:error.message})}}
-if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ai-draft')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ai-draft'.length));try{const brief=await draftCaseBrief(id,user,false);if(!brief)return send(res,404,{error:'Case not found'});const packet=buildLocalAiPacket(brief);const result=await generateLocalAiDraft(packet);return send(res,200,result)}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ai-draft')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ai-draft'.length));try{const brief=await draftCaseBrief(id,user,false);if(!brief)return send(res,404,{error:'Case not found'});const packet=buildLocalAiPacket(brief),requestId=randomUUID(),packetHash=localAiDraftHash(packet);analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'requested'});let result;try{result=await generateLocalAiDraft(packet)}catch(error){analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'failed',errorCode:'generation_failed'});throw error}const draftHash=localAiDraftHash(result.draft),receipt=analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'succeeded',draftHash});return send(res,200,{...result,draftSha256:draftHash,receiptId:receipt.id,receiptAuditHead:receipt.auditHead})}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length)),items=analystStore.listBriefSnapshotsFor(user,id);if(!items)return send(res,404,{error:'Case not found'});analystStore.recordCaseRead(user,id,'brief_snapshot.listed');return send(res,200,{items})}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');if(!brief)return send(res,404,{error:'Case not found'});return send(res,201,analystStore.saveBriefSnapshot(user,id,brief))}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/brief-snapshots/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/brief-snapshots/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewBriefSnapshot(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Brief snapshot not found'?404:400,{error:error.message})}}
