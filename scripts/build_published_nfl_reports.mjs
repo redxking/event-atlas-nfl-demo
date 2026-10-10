@@ -131,7 +131,7 @@ for(const game of games){
     changeState=buildPublishedReportState(bundle,game,inputs.news,previous,Date.parse(bundle.generatedAt));
     if(previous&&changeState.comparison==='previous published run')previousStates.push(previous);
     changeStates.push(changeState);
-    bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,items:changeState.changes};
+    bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,newItems:changeState.newItems,items:changeState.changes};
   }
   const body=buildNflPublicReport(bundle);
   const frontmatter=`---\ntitle: ${JSON.stringify(`NFL public-source review: ${game.title}`)}\nauthor: Angelis Pseftis\ncreator: Angelis Pseftis\nstatus: Automated public-source compilation; unreviewed\ngenerated_at: ${bundle.generatedAt}\n---\n\n`;

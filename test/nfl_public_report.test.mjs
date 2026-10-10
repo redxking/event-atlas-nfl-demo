@@ -13,6 +13,16 @@ test('public report binds event, current source cues, records, gaps, and source 
   assert.match(report,/not an incident chronology/);
 });
 
+test('report opens with a source-linked current handoff before the detailed review',()=>{
+  const selected=structuredClone(bundle);
+  selected.reportMonitoringMode='near_term_monitoring';
+  selected.picture.reviewQueue={state:'review_candidates',items:[{status:'unreviewed_source_cue',trigger:'Listed lane work',action:'Confirm route effect with the agency.',sourceUrl:'https://example.org/road',sourceAt:'2026-10-10T00:00:00Z'}]};
+  const report=buildNflPublicReport(selected);
+  assert.ok(report.indexOf('## Current briefing handoff')<report.indexOf('## Review summary'));
+  assert.match(report,/Current briefing handoff[\s\S]*Confirm route effect with the agency/);
+  assert.match(report,/Current briefing handoff[\s\S]*\[Publisher record\]\(https:\/\/example.org\/road\)/);
+});
+
 test('review summary does not turn failed or unscreenable sources into zero findings',()=>{
   const failed=structuredClone(bundle);
   failed.picture.sources.push({name:'NWS point alerts',state:'source failed'});

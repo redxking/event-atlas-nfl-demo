@@ -1,3 +1,5 @@
+import {buildNflBriefingHandoff} from './nfl_briefing_handoff.js';
+
 const clean=value=>String(value??'').replace(/[\r\n\t]+/g,' ').replace(/\s{2,}/g,' ').trim().replace(/[\\`*_{}\[\]<>|]/g,'\\$&');
 const iso=value=>{const time=Date.parse(value);return Number.isFinite(time)?new Date(time).toISOString():'not supplied'};
 const source=(url,label='Source')=>{try{const parsed=new URL(url);return parsed.protocol==='https:'?`[${clean(label)}](${parsed.href.replace(/[()]/g,encodeURIComponent)})`:'Source link unavailable'}catch{return 'Source link unavailable'}};
@@ -20,6 +22,7 @@ function transitCount(picture){
 export function buildNflPublicReport(bundle){
   if(bundle?.schema!=='event-atlas.public-evidence-bundle.v1'||!bundle.event||!bundle.venue||!bundle.picture)throw Error('Current NFL public evidence bundle required');
   const {event,venue,picture,publicObservations:observations={},sourceSnapshots={}}=bundle;
+  const handoff=buildNflBriefingHandoff(bundle);
   const rows=[
     `# NFL event public-source review: ${clean(event.title)}`,
     '',
@@ -34,6 +37,14 @@ export function buildNflPublicReport(bundle){
     line('Map point',Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)?`${venue.lat}, ${venue.lon} (unreviewed candidate)`:'unavailable'),
     `- **Schedule source:** ${source(event.sourceUrl,'Publisher event record')}`,
     ...(event.gameState?['Score and period are publisher scoreboard observations. Refresh and confirm with the game source; they do not establish crowd movement, public-safety impact, or a threat.']:[]),
+    '',
+    '## Current briefing handoff',
+    line('State',handoff.state.replaceAll('_',' ')),
+    line('New source changes in this build',handoff.newChangeCount===null?'no comparable change state':`${handoff.newChangeCount}; ${handoff.changeComparison}`),
+    line('Unresolved coverage gaps',handoff.gapCount),
+    ...(handoff.items.length?handoff.items.map((item,index)=>`- **${index+1}. ${clean(item.kind)} — ${clean(item.title)}:** ${clean(item.action)} ${item.sourceAt?`Source or change time ${iso(item.sourceAt)}. `:''}${source(item.sourceUrl,'Publisher record')}`):['No current source-linked verification action was selected.']),
+    clean(handoff.note),
+    'The published report is an hourly snapshot. Direct checks on an open page may be newer and are identified separately. An item disappearing from this handoff does not establish resolution.',
     '',
     '## Review summary',
     line('Assessment','Severity not assessed; confidence not assessed'),
