@@ -9,6 +9,8 @@ test('public report binds event, current source cues, records, gaps, and source 
   for(const expected of ['Away at Home','2026-10-10T01:00:00.000Z','Listed lane work','AZTech WZDx','No verified stadium CCTV stream','https://example.org/road','Severity not assessed','NOAA SPC Day 1–3 outlook','NOAA WPC excessive-rainfall outlook','Not verified; named-person appearances are announced plans'])assert.ok(report.includes(expected),expected);
   assert.ok(!report.includes('Threat level:'));
   assert.ok(report.includes('[Publisher event record](https://example.org/game)'));
+  assert.match(report,/## Dated source timeline[\s\S]*2026-10-10T00:00:00\.000Z — road condition: Listed lane work/);
+  assert.match(report,/not an incident chronology/);
 });
 
 test('Packers exact-game report attributes announced people and flyover without claiming attendance',()=>{

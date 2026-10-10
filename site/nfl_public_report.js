@@ -32,6 +32,23 @@ export function buildNflPublicReport(bundle){
     bundle.reportMonitoringMode==='season_planning'?'Event-window checks have not started. Current source records are planning context and do not establish conditions at kickoff.':'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
     ''
   ];
+  const timeline=[];
+  const addTimeline=(at,label,basis,url)=>{
+    const time=Date.parse(at);
+    try{
+      if(!Number.isFinite(time)||new URL(url).protocol!=='https:')return;
+      timeline.push({at:new Date(time).toISOString(),label,basis,url});
+    }catch{}
+  };
+  for(const cue of (picture.cues||[]).slice(0,20))addTimeline(cue.sourceAt,`${cue.type}: ${cue.title}`,'Publisher time on a review cue; venue impact unverified',cue.sourceUrl);
+  for(const item of (bundle.publishedChanges?.items||[]).slice(0,10))addTimeline(item.observedAt,item.title,'Change first observed by this published report, not the time of the underlying event',item.sourceUrl);
+  for(const item of (observations.nflHeadlines?.articles||[]).slice(0,4))addTimeline(item.publishedAt,item.title,'Publisher article date; team-name discovery match, game relevance unverified',item.url);
+  const article=observations.gameArticle?.article;
+  if(observations.gameArticle?.state==='current_snapshot')addTimeline(article?.publishedAt,article?.headline,'Exact-game publisher article date; content and attendance unverified',article?.url);
+  for(const item of (observations.weather||[]).slice(0,8))addTimeline(item.effective,item.event,'NWS alert effective time, not necessarily issue or observation time',item.sourceUrl);
+  timeline.sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)||a.label.localeCompare(b.label));
+  rows.push(section('Dated source timeline',timeline.slice(0,20).map(item=>`- **${iso(item.at)} — ${clean(item.label)}:** ${clean(item.basis)}. ${source(item.url,'Publisher record')}`),'No dated, source-linked timeline item passed this report’s bounded checks. This does not establish that nothing happened.'));
+  rows.push('This timeline mixes publisher dates, alert effective times, and this system’s first observed change times. It is not an incident chronology; verify each source and time basis before using it for an operational sequence.','');
   const queue=picture.reviewQueue;
   rows.push('## Analyst verification queue',line('State',queue?.state||'unavailable'),...(queue?.items||[]).map((item,index)=>`- **${index+1}. ${clean(item.domain)} — ${clean(item.trigger)}:** ${clean(item.action)} Source basis: ${clean(item.basis)}; source time ${iso(item.sourceAt)}; review phase ${clean(item.phase)}. ${source(item.sourceUrl,'Publisher record')}`),clean(queue?.note||'No generated verification queue is available; inspect the source status and gaps below.'),'');
   if(bundle.publishedChanges){

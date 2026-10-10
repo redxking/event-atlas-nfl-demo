@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {renderPublicReportHtml} from '../scripts/render_public_report_html.mjs';
+import {newerReportRevision} from '../site/report_refresh.js';
 
 test('published report HTML renders cited HTTPS links and escapes untrusted report text',()=>{
   const markdown='# Event <script>alert(1)</script>\n\n- **Source:** [NWS alert](https://api.weather.gov/alerts/123)\n- Publisher says <img src=x onerror=alert(1)>\n';
@@ -10,5 +11,17 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
   assert.ok(!html.includes('<script>'));
   assert.ok(html.includes('name="author" content="Angelis Pseftis"'));
+  assert.ok(html.includes('data-report-path="reports/nfl-123.html"'));
+  assert.ok(html.includes('report_refresh.js?v=20261010-1'));
   assert.throws(()=>renderPublicReportHtml(markdown,{title:'x',generatedAt:'x',markdownPath:'../other.md'}),/Invalid/);
+});
+
+test('published report refresh requires a unique newer matching revision',()=>{
+  const at=Date.now()-60000,earlier=new Date(at-3600000).toISOString(),later=new Date(at).toISOString();
+  const index={status:'ok',builtAt:later,reports:[{path:'reports/nfl-123.html',generatedAt:later}]};
+  assert.equal(newerReportRevision(index,'reports/nfl-123.html',earlier),later);
+  assert.equal(newerReportRevision(index,'reports/nfl-123.html',later),null);
+  assert.equal(newerReportRevision(index,'reports/nfl-456.html',earlier),null);
+  assert.equal(newerReportRevision({...index,reports:[...index.reports,...index.reports]},'reports/nfl-123.html',earlier),null);
+  assert.equal(newerReportRevision(index,'../nfl-123.html',earlier),null);
 });
