@@ -22,6 +22,16 @@ test('Packers exact-game report attributes announced people and flyover without 
   assert.match(report,/not verified attendees or protected persons/);
 });
 
+test('club flyover comparison keeps FAA event listing separate from flight observation',()=>{
+  const selected=structuredClone(bundle);
+  selected.event.id='nfl:401872990';
+  selected.publicObservations.clubAviationComparison={state:'club_plan_and_faa_event_record',summary:'Club plan and FAA listing are published records, not a flight observation.',clubSourceUrl:'https://www.packers.com/news/lambeau-field-ready-for-packers-bears-game-sunday-oct-8-2026',faaSourceUrl:'https://faasysops.maps.arcgis.com/home/item.html?id=9f246af52c4049b99b50a2b97e2e5b2c',tfrSourceUrl:'https://tfr.faa.gov/tfr3/',tfrListState:'current bounded list checked',tfrSpatialCandidates:0,faaRecord:{status:'SCHEDULED',startAt:'2026-10-11T16:00:00Z',endAt:'2026-10-11T21:00:00Z'}};
+  const report=buildNflPublicReport(selected);
+  assert.match(report,/Club flyover and FAA event-record comparison/);
+  assert.match(report,/2026-10-11T16:00:00.000Z/);
+  assert.match(report,/A missing bounded TFR candidate is not an all-clear/);
+});
+
 test('season planning report does not imply live event checks',()=>{
   const planning={...structuredClone(bundle),reportMonitoringMode:'season_planning'};
   const report=buildNflPublicReport(planning);

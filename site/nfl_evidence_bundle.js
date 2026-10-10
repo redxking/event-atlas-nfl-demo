@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-56';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-57';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-2';
 
@@ -46,6 +46,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       greenBayCityAlerts:picture.greenBayAlertContext,
       lambeauPublishedPlan:picture.lambeauPlanContext,
       packersGameSpecificAnnouncements:picture.packersReleaseContext,
+      clubAviationComparison:picture.clubAviationContext,
       earthquakes:picture.usgsContext.state==='current_snapshot'?picture.usgsContext.events:null,
       nationalAdvisory:{state:ntasCurrent?'current national snapshot':'stale or unavailable',sourceUrl:inputs.ntas?.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml',active:ntasCurrent?inputs.ntas.active.map(item=>pick(item,['type','start','end','locations','sectors','summary','url'])):null},
       roads:Array.isArray(roads)?roads.map(item=>pick(item,['id','agency','kind','name','detail','lat','lon','distanceKm','startAt','endAt','sourceRecordDate','sourceUrl'])):null,
