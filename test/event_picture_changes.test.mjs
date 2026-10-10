@@ -103,6 +103,16 @@ test('Philadelphia notice changes are reported only across complete city checks,
   assert.equal(diffEventPicture({...before,citywideAlertsContext:{...city([notice]),state:'partial'}},after,null,null,game,game).some(item=>item.kind==='new_city_notice'),false);
 });
 
+test('Green Bay city notice changes require two newer complete category checks',()=>{
+  const notice={kind:'police',title:'City notice',detail:'Public city update',url:'https://www.greenbaywi.gov/AlertCenter.aspx?AID=123',publishedAt:'2026-10-10T06:00:00Z'};
+  const before={...picture('checked'),greenBayAlertContext:{state:'current_snapshot',asOf:'2026-10-10T06:10:00Z',alerts:[]}};
+  const after={...before,greenBayAlertContext:{state:'current_snapshot',asOf:'2026-10-10T06:20:00Z',alerts:[notice]}};
+  const found=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='new_city_notice');
+  assert.equal(found?.sourceUrl,notice.url);
+  assert.match(found.detail,/not a stadium incident/);
+  assert.equal(diffEventPicture({...before,greenBayAlertContext:{...before.greenBayAlertContext,state:'partial'}},after,null,null,game,game).some(item=>item.kind==='new_city_notice'),false);
+});
+
 test('schedule change blocks old-window cue comparison',()=>{
   const moved={...game,kickoff:'2026-10-11T21:00:00Z'};
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,moved);

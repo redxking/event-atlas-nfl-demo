@@ -35,6 +35,7 @@ jobs:
       - run: npm run sync:charlotte-police
       - run: npm run sync:denver-police
       - run: npm run sync:philly-alerts
+      - run: npm run sync:green-bay-alerts
       - run: npm run sync:philly-permits
       - run: npm run sync:njtransit-rail
       - run: npm run sync:nj511

@@ -72,6 +72,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(!previous||previous.detail!==item.detail)changes.push({kind:previous?'city_notice_changed':'new_city_notice',observedAt,title:`Philadelphia city notice: ${item.title}`,detail:'A city website-wide notice was added or its displayed text changed between two checked snapshots. Verify its current content and event relevance; this is not a stadium incident, impact, or threat finding.',sourceUrl:item.url||newCity.sourceUrl||null});
     }
   }
+  const oldGreenBay=before.greenBayAlertContext,newGreenBay=after.greenBayAlertContext;
+  if(!eventWindowChanged&&oldGreenBay?.state==='current_snapshot'&&newGreenBay?.state==='current_snapshot'&&Number.isFinite(Date.parse(oldGreenBay.asOf))&&Date.parse(newGreenBay.asOf)>Date.parse(oldGreenBay.asOf)&&Array.isArray(oldGreenBay.alerts)&&Array.isArray(newGreenBay.alerts)&&oldGreenBay.alerts.length<=20&&newGreenBay.alerts.length<=20){
+    const prior=new Map(oldGreenBay.alerts.map(item=>[item.url,item]));
+    for(const item of newGreenBay.alerts){
+      if(!/^https:\/\/www\.greenbaywi\.gov\/AlertCenter\.aspx(?:\?|$)/.test(item?.url||'')||!['emergency','police'].includes(item.kind))continue;
+      const old=prior.get(item.url);
+      if(!old||old.title!==item.title||old.detail!==item.detail)changes.push({kind:old?'city_notice_changed':'new_city_notice',observedAt,title:`Green Bay ${item.kind} website notice: ${item.title}`.slice(0,300),detail:`${old?'Displayed text changed':'Newly displayed in the checked active city RSS category'}; publisher date ${item.publishedAt||'not supplied'}. Verify the current city notice and its event relevance. The feed has no incident geometry; this is not a stadium incident, impact, or threat finding.`,sourceUrl:item.url});
+    }
+  }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
   if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));

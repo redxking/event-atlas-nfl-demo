@@ -29,6 +29,17 @@ test('local AI packet accepts only publisher-linked CBS fallback headlines',()=>
   assert.equal(buildLocalAiPacket(withNews).evidence.find(item=>item.id==='N1')?.sourceUrl,cbs.url);
 });
 
+test('local AI packet admits only current official Green Bay city notices',()=>{
+  const at=Date.parse('2026-10-10T06:30:00Z');
+  const notice={kind:'police',title:'City notice',detail:'City context',url:'https://www.greenbaywi.gov/AlertCenter.aspx?AID=123',publishedAt:'2026-10-10T06:00:00Z'};
+  const evidence={...brief.nflContext.evidence,venue:{id:'3798',name:'Lambeau Field'},picture:{...brief.nflContext.evidence.picture,greenBayAlertContext:{state:'current_snapshot',asOf:'2026-10-10T06:20:00Z',alerts:[notice,{...notice,url:'https://example.org/notice'}]}}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='B1')?.sourceUrl,notice.url);
+  assert.equal(packet.evidence.find(item=>item.id==='B2'),undefined);
+  assert.match(validateLocalAiDraft('B1',packet).reviewQuestions[0].question,/issuing city/);
+  assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+3*3600000}).evidence.some(item=>item.id==='B1'),false);
+});
+
 test('local AI packet can cite exact-game ESPN article metadata without article body',()=>{
   const gameArticle={state:'current_snapshot',article:{type:'Preview',headline:'Bears at Packers preview',url:'https://www.espn.com/nfl/preview?gameId=401872990',modifiedAt:'2026-10-09T20:00:00Z',story:'PRIVATE BODY'}};
   const withArticle={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{gameArticle}}}};
