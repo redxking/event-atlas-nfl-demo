@@ -1,3 +1,4 @@
+import {sourceCoverageRow,buildSourceCoverage,renderSourceCoverage} from '../lib/published_source_coverage.mjs';
 import fs from 'node:fs/promises';
 import {buildPublishedEvidenceArtifact} from '../lib/published_evidence_artifact.mjs';
 import path from 'node:path';
@@ -112,7 +113,7 @@ async function previousChangeFeed(){
   }catch{return null}
 }
 const priorChangeFeed=await previousChangeFeed();
-const entries=[],changeStates=[],previousStates=[];
+const entries=[],changeStates=[],previousStates=[],coverageRows=[];
 for(const game of games){
   if(!/^nfl:\d+$/.test(game.id))throw Error('Unexpected NFL game ID');
   const id=game.id.replace(':','-');
@@ -133,6 +134,7 @@ for(const game of games){
     changeStates.push(changeState);
     bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,newItems:changeState.newItems,items:changeState.changes};
   }
+  coverageRows.push(sourceCoverageRow(bundle));
   const evidence=buildPublishedEvidenceArtifact(bundle);
   await fs.writeFile(path.join(outDir,evidence.filename),evidence.bytes,'utf8');
   const body=buildNflPublicReport(bundle)+evidence.section;
@@ -149,4 +151,7 @@ await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','ut
 const changeFeed=buildPublishedChangeFeed(entries,changeStates,Date.now(),previousStates,priorChangeFeed);
 await fs.writeFile(path.join(outDir,'changes.json'),JSON.stringify(changeFeed)+'\n','utf8');
 await fs.writeFile(path.join(outDir,'changes.xml'),renderPublishedChangeAtom(changeFeed),'utf8');
+const coverage=buildSourceCoverage(coverageRows,now);
+await fs.writeFile(path.join(outDir,'source-coverage.json'),JSON.stringify(coverage)+'\n','utf8');
+await fs.writeFile(path.join(outDir,'source-coverage.html'),renderSourceCoverage(coverage),'utf8');
 console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);
