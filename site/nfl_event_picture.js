@@ -38,6 +38,7 @@ import {selectAnnouncedPeople} from './announced_people.js?v=20261010-3';
 import {compareJetsTravelPlan} from './jets_travel_context.js?v=20261010-1';
 import {compareClubAviation} from './club_aviation_context.js?v=20261010-2';
 import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';
+import {cameraSourceIdsForVenue} from './venue_source_scope.js?v=20261010-1';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -53,6 +54,10 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const faa=airspace?.byGame?.[game.id];
   const cameraItems=cameras?.byVenue?.[venueId];
   const cameraFresh=fresh(cameras?.builtAt,now,12*HOUR);
+  const scopedCameraSources=(cameras?.sources||[]).filter(source=>cameraSourceIdsForVenue(game.venue).includes(source.id));
+  const cameraSourceFailed=scopedCameraSources.length>0&&scopedCameraSources.every(source=>source.status==='failed');
+  const checkedPlaylists=Array.isArray(cameraItems)?cameraItems.filter(item=>item.videoPlaylistStatus):[];
+  const reachablePlaylists=checkedPlaylists.filter(item=>item.videoPlaylistStatus==='playlist_reachable_at_sync').length;
   const faaFresh=fresh(airspace?.builtAt,now,12*HOUR);
   const tfrFresh=fresh(tfr?.builtAt,now,12*HOUR);
   const tfrMatches=tfr?.byVenue?.[venueId]||[];
@@ -162,7 +167,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     ...(game.id==='nfl:401872983'?[row('Jets access, rail and road plan comparison',jetsTravelContext.state,jetsGuideContext.asOf,jetsTravelContext.summary,jetsGamedayGuideUrl)]:[]),
     ...(['nfl:401872990','nfl:401872992'].includes(game.id)?[row('Club flyover and FAA record comparison',clubAviationContext.state,clubAviationContext.checkedAt||null,clubAviationContext.summary,clubAviationContext.clubSourceUrl)]:[]),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
-    row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
+    row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':cameraSourceFailed?'source failed':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed roadway camera is not a verified stadium view. Source inventory freshness and video capture time may be unknown.',cameraItems?.[0]?.sourceUrl||scopedCameraSources[0]?.url),
+    ...(cameraFresh&&checkedPlaylists.length?[row('Roadway camera stream check',`${reachablePlaylists}/${checkedPlaylists.length} playlists reachable at sync`,cameras.builtAt,'Playlist and browser playback checks show public roadway access only; they do not verify capture time, direction, stadium visibility, or current frame content.',cameraItems.find(item=>item.videoPlaylistStatus)?.viewerUrl||null)]:[]),
     row('NFL publisher headlines',newsContext.state==='current_snapshot'?`${newsContext.publisher}: ${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}${newsContext.coverage==='partial'?'; partial publisher coverage':''}`:newsContext.state,newsContext.asOf,`Publisher headline checks: ${newsContext.sources.map(item=>`${item.publisher||'unknown'} ${item.state}`).join('; ')}. Name matching does not verify game relevance, attendance, venue impact, or a threat.`,newsContext.sourceUrl),
     row('ESPN event article',gameArticleContext.state==='current_snapshot'?`${gameArticleContext.article.type.toLowerCase()} headline linked to game ID`:gameArticleContext.state,gameArticleContext.asOf,'Publisher article metadata is tied to this game ID. The headline is not an attendance, venue-impact, or threat finding.',gameArticleContext.article?.url||gameArticleContext.sourceUrl),
     ...(directGameContext?[row('ESPN selected-game direct check',directGameContext.state==='checked'?'direct check completed':directGameContext.state,directGameContext.checkedAt,'Direct publisher check for this selected game. Publisher score, reported attendance and article metadata are observations, not security findings; compare any schedule discrepancy with the NFL or host club.',directGameContext.sourceUrl)]:[]),

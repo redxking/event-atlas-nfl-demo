@@ -5,7 +5,7 @@ import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-75';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-76';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-69';
 import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-42';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
@@ -20,6 +20,7 @@ import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_al
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
 import {publicRoadVideoAgency} from './camera_video.js?v=20261010-5';
+import {failedSourcesForVenue} from './venue_source_scope.js?v=20261010-1';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {fetchNwsStationObservation} from './nws_observation.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
@@ -353,7 +354,7 @@ function renderCameras(game){
   const sources=cameraSnapshot.sources||[];
   const covered=Object.hasOwn(cameraSnapshot.byVenue||{},game.venue.id);
   const items=covered?cameraSnapshot.byVenue[game.venue.id]:[];
-  const failed=sources.filter(source=>source.status==='failed');
+  const failed=failedSourcesForVenue(game.venue,sources,'camera');
   const builtAt=Date.parse(cameraSnapshot.builtAt);
   const stale=!Number.isFinite(builtAt)||Date.now()-builtAt>12*3600000;
   target.innerHTML=`<p class="feed-state">PUBLIC ROADWAY CAMERAS · SNAPSHOT ${esc(fmt(cameraSnapshot.builtAt))}</p>`+
@@ -391,7 +392,7 @@ function renderRoads(game){
   const roadsData=selectedRoadSnapshot(game);
   if(!roadsData){target.innerHTML='<p>Road condition snapshot unavailable.</p>';appendPhillyPermitPlanning(game,target);return}
   const context=selectRoadContext(game,roadsData);
-  const failed=roadsData.sources.filter(source=>source.status==='failed');
+  const failed=failedSourcesForVenue(game.venue,roadsData.sources,'road');
   const ilSource=game.venue.address.endsWith('IL, USA')?roadsData.sources.find(source=>source.id==='idot-closure-incidents'):null;
   const wiSource=game.venue.address.endsWith('WI, USA')?roadsData.sources.find(source=>source.id==='wisdot-511-events-green-bay'):null;
   const laSource=game.venue.address.endsWith('LA, USA')?roadsData.sources.find(source=>source.id==='ladotd-511-new-orleans'):null;
