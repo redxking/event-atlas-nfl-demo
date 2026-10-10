@@ -100,7 +100,8 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     {key:'patriotsPreviewContext',eventId:'nfl:401872986',url:'https://www.patriots.com/news/game-preview-patriots-vs-raiders-nfl-week-5',states:['current_published_announcements','partial_published_announcements'],max:3,label:'Patriots'},
     {key:'jetsGuideContext',eventId:'nfl:401872983',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',states:['current_published_plan','partial_published_plan'],max:5,label:'Jets'},
     {key:'seahawksGuideContext',eventId:'nfl:401872992',url:'https://www.seahawks.com/game-day/',states:['current_published_plan','partial_published_plan'],max:7,label:'Seahawks'},
-    {key:'titansGuideContext',eventId:'nfl:401872984',url:'https://www.tennesseetitans.com/stadium/gameday/',states:['current_published_plan','partial_published_plan'],max:6,label:'Titans'}
+    {key:'titansGuideContext',eventId:'nfl:401872984',url:'https://www.tennesseetitans.com/stadium/gameday/',states:['current_published_plan','partial_published_plan'],max:6,label:'Titans'},
+    {key:'falconsGuideContext',eventId:'nfl:401872993',url:'https://www.atlantafalcons.com/tickets/gameday',states:['current_published_plan','partial_published_plan'],max:9,label:'Falcons'}
   ]){
     const prior=before[spec.key],next=after[spec.key];
     if(eventWindowChanged||after.eventId!==spec.eventId||!spec.states.includes(prior?.state)||!spec.states.includes(next?.state)||prior.sourceUrl!==spec.url||next.sourceUrl!==spec.url||!Number.isFinite(Date.parse(prior.asOf))||Date.parse(next.asOf)<=Date.parse(prior.asOf)||!Array.isArray(prior.claims)||!Array.isArray(next.claims)||prior.claims.length>spec.max||next.claims.length>spec.max)continue;
