@@ -10,4 +10,8 @@ test('Louisiana road feed excludes old and unbounded incidents, and deduplicates
   assert.equal(rows.length,1);
   assert.equal(rows[0].id,'ladotd-511-1');
   assert.equal(rows[0].startAt,'2026-10-11T16:00:00.000Z');
+  const recordUrl=new URL(rows[0].sourceUrl);
+  assert.equal(recordUrl.pathname,'/source/query');
+  assert.equal(recordUrl.searchParams.get('where'),'EventID=1');
+  assert.equal(recordUrl.searchParams.get('returnGeometry'),'false');
 });
