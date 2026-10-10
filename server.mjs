@@ -19,6 +19,7 @@ import {fetchSelectedGame} from './site/espn_game_summary.js';
 import {selectKickoffForecast,selectEventHourForecast} from './site/nws_forecast.js';
 import {buildEonetNflSnapshot} from './site/eonet_nfl.js';
 import {soundTransitAlertsFeed,summarizeSoundTransitAlerts} from './site/sound_transit_alerts.js';
+import {seattleFireAggregateQuery,seattleFireMetadataUrl,summarizeSeattleFireAggregate} from './site/seattle_fire_aggregate.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||4173);
 const snapshot=JSON.parse(await fs.readFile(path.join(root,'data/venues.json'),'utf8'));
@@ -27,8 +28,8 @@ const byId=new Map(venues.map(v=>[v.id,v]));
 const municipal=JSON.parse(await fs.readFile(path.join(root,'data/public_events.json'),'utf8'));
 const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
 async function readSiteSnapshot(name){try{return JSON.parse(await fs.readFile(path.join(root,'site',name),'utf8'))}catch{return null}}
-const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflEonet,nflNews,nflGameArticles,nflNtas,nflIndianapolis,nflCharlotte,nflArlington,nflDenver,nflPhillyAlerts,nflPhillyPermits,nflGreenBayAlerts,nflLambeauPlan,nflPackersRelease,nflPatriotsPreview,nflJetsGuide,nflSeahawksGuide,nflSoundTransitSeahawks,nflSoundTransitAlerts,nflSepta,nflNjTransitRail]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','eonet.json','news.json','game_articles.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','arlington_public_safety.json','denver_public_safety.json','philly_city_alerts.json','philly_lane_permits.json','green_bay_alerts.json','lambeau_gameday.json','packers_game_release.json','patriots_game_preview.json','jets_gameday_guide.json','seahawks_gameday.json','sound_transit_seahawks.json','sound_transit_alerts.json','septa_b_alerts.json','njtransit_event_rail.json'].map(readSiteSnapshot));
-const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,eonet:nflEonet,news:nflNews,gameArticles:nflGameArticles,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,arlington:nflArlington,denver:nflDenver,phillyAlerts:nflPhillyAlerts,phillyPermits:nflPhillyPermits,greenBayAlerts:nflGreenBayAlerts,lambeauPlan:nflLambeauPlan,packersGameRelease:nflPackersRelease,patriotsGamePreview:nflPatriotsPreview,jetsGamedayGuide:nflJetsGuide,seahawksGameday:nflSeahawksGuide,soundTransitSeahawks:nflSoundTransitSeahawks,soundTransitAlerts:nflSoundTransitAlerts,septa:nflSepta,njTransitRail:nflNjTransitRail};
+const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflEonet,nflNews,nflGameArticles,nflNtas,nflIndianapolis,nflCharlotte,nflArlington,nflDenver,nflPhillyAlerts,nflPhillyPermits,nflGreenBayAlerts,nflLambeauPlan,nflPackersRelease,nflPatriotsPreview,nflJetsGuide,nflSeahawksGuide,nflSoundTransitSeahawks,nflSoundTransitAlerts,nflSeattleFireAggregate,nflSepta,nflNjTransitRail]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','eonet.json','news.json','game_articles.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','arlington_public_safety.json','denver_public_safety.json','philly_city_alerts.json','philly_lane_permits.json','green_bay_alerts.json','lambeau_gameday.json','packers_game_release.json','patriots_game_preview.json','jets_gameday_guide.json','seahawks_gameday.json','sound_transit_seahawks.json','sound_transit_alerts.json','seattle_fire_aggregate.json','septa_b_alerts.json','njtransit_event_rail.json'].map(readSiteSnapshot));
+const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,eonet:nflEonet,news:nflNews,gameArticles:nflGameArticles,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,arlington:nflArlington,denver:nflDenver,phillyAlerts:nflPhillyAlerts,phillyPermits:nflPhillyPermits,greenBayAlerts:nflGreenBayAlerts,lambeauPlan:nflLambeauPlan,packersGameRelease:nflPackersRelease,patriotsGamePreview:nflPatriotsPreview,jetsGamedayGuide:nflJetsGuide,seahawksGameday:nflSeahawksGuide,soundTransitSeahawks:nflSoundTransitSeahawks,soundTransitAlerts:nflSoundTransitAlerts,seattleFireAggregate:nflSeattleFireAggregate,septa:nflSepta,njTransitRail:nflNjTransitRail};
 const voting=JSON.parse(await fs.readFile(path.join(root,'data/voting_locations.json'),'utf8'));
 const votingHistory=readVotingHistory(path.join(root,'data/voting_history'));
 const votingById=new Map(voting.locations.map(v=>[v.id,v]));
@@ -139,18 +140,24 @@ async function draftCaseBrief(id,user,includeContext){
       if(!predictionResponse.stale&&predictionResponse.data)try{transitPredictions=summarizeMbtaFoxboroPredictions(predictionResponse.data,predictionResponse.at)}catch{transitPredictions={state:'failed',checkedAt:Date.now()}}
       else transitPredictions={state:'failed',checkedAt:Date.now()};
     }
-    let eonet=await readSiteSnapshot('eonet.json'),conditions=null,soundTransitAlerts=nflSnapshots.soundTransitAlerts;
+    let eonet=await readSiteSnapshot('eonet.json'),conditions=null,soundTransitAlerts=nflSnapshots.soundTransitAlerts,seattleFireAggregate=nflSnapshots.seattleFireAggregate;
     if(game?.id==='nfl:401872992'){
       const check=await remote('sound-transit:alerts',soundTransitAlertsFeed,300000);
       if(!check.stale&&check.data)try{soundTransitAlerts=summarizeSoundTransitAlerts(check.data,check.at)}catch{soundTransitAlerts=null}
       else soundTransitAlerts=null;
+    }
+    if(game?.venue?.id==='3673'){
+      const query=seattleFireAggregateQuery();
+      const [count,metadata]=await Promise.all([remote('seattle:fire:count',query.url,300000),remote('seattle:fire:metadata',seattleFireMetadataUrl,300000)]);
+      if(!count.stale&&!metadata.stale&&count.data&&metadata.data)try{seattleFireAggregate=summarizeSeattleFireAggregate(count.data,metadata.data,query,Math.max(count.at,metadata.at))}catch{seattleFireAggregate=null}
+      else seattleFireAggregate=null;
     }
     if(game){
       const [eonetCheck,usgsCheck]=await Promise.all([remote('eonet',sources.eonet.url,900000),remote('usgs',sources.usgs.url,300000)]);
       if(!eonetCheck.stale&&eonetCheck.data)try{eonet=buildEonetNflSnapshot(eonetCheck.data,nflSnapshots.schedule.games)}catch{eonet=null}
       conditions={at:usgsCheck.at,quakes:usgsCheck.stale?null:usgsCheck.data,quakesError:usgsCheck.stale?usgsCheck.error||'USGS source unavailable':null};
     }
-    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,nifc:await readSiteSnapshot('nifc_wildfire.json'),airnow:await readSiteSnapshot('airnow_pm25.json'),hmsSmoke:await readSiteSnapshot('hms_smoke.json'),conditions,septa:await readSiteSnapshot('septa_b_alerts.json'),soundTransitAlerts,transit,transitSchedule,transitPredictions});
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,nifc:await readSiteSnapshot('nifc_wildfire.json'),airnow:await readSiteSnapshot('airnow_pm25.json'),hmsSmoke:await readSiteSnapshot('hms_smoke.json'),conditions,septa:await readSiteSnapshot('septa_b_alerts.json'),soundTransitAlerts,seattleFireAggregate,transit,transitSchedule,transitPredictions});
   }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});

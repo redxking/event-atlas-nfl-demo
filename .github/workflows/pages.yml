@@ -44,6 +44,7 @@ jobs:
       - run: npm run sync:seahawks-guide
       - run: npm run sync:sound-transit-seahawks
       - run: npm run sync:sound-transit-alerts
+      - run: npm run sync:seattle-fire
       - run: npm run sync:philly-permits
       - run: npm run sync:njtransit-rail
       - run: npm run sync:nj511
