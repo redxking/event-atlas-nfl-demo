@@ -69,6 +69,18 @@ test('current kickoff forecast enters source status without becoming a threat cu
   assert.ok(!picture.gaps.some(item=>item.includes('hourly kickoff forecast')));
 });
 
+test('nearby station measurement enters source context without becoming a threat cue',()=>{
+  const observation={state:'current_station_observation',checkedAt:new Date(now).toISOString(),observedAt:new Date(now-20*60000).toISOString(),stationId:'KDFW',stationName:'Dallas Fort Worth Airport',distanceKm:18.2,description:'Cloudy',temperatureC:24,windKmh:8,humidityPercent:58,sourceUrl:'https://api.weather.gov/stations/KDFW/observations/2026-10-09T17:40:00+00:00',interpretation:'Nearby station, not at stadium.'};
+  const picture=buildNflEventPicture(game,{...inputs,conditions:{...inputs.conditions,observation}},now);
+  assert.equal(picture.observationContext.stationId,'KDFW');
+  assert.equal(picture.sources.find(item=>item.name==='NWS nearby station observation').sourceUrl,observation.sourceUrl);
+  assert.equal(picture.cues.length,2);
+  assert.equal(picture.gaps.some(item=>item.includes('nearby NWS station')),false);
+  const stale=buildNflEventPicture(game,{...inputs,conditions:{...inputs.conditions,observation:{...observation,checkedAt:new Date(now-11*60000).toISOString()}}},now);
+  assert.equal(stale.observationContext,null);
+  assert.ok(stale.gaps.some(item=>item.includes('nearby NWS station')));
+});
+
 test('live game labels the current hourly forecast separately from the kickoff forecast',()=>{
   const liveNow=Date.parse('2026-10-11T21:15:00Z');
   const liveGame={...game,status:'in progress in source'};

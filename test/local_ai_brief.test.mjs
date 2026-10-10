@@ -52,6 +52,17 @@ test('local AI packet includes fresh exact-game status and current forecast with
   assert.equal(mismatch.evidence.some(item=>item.id==='D1'),false);
 });
 
+test('local AI packet distinguishes current nearby station observation from forecast and stadium conditions',()=>{
+  const at=Date.parse('2026-10-10T04:00:00Z');
+  const observationContext={state:'current_station_observation',checkedAt:new Date(at).toISOString(),observedAt:new Date(at-20*60000).toISOString(),stationId:'KGRB',stationName:'Green Bay airport',distanceKm:6.4,description:'Cloudy',temperatureC:14,windKmh:0,humidityPercent:72,sourceUrl:'https://api.weather.gov/stations/KGRB/observations/2026-10-10T03:40:00+00:00'};
+  const withReading={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,observationContext}}}};
+  const packet=buildLocalAiPacket(withReading,{now:at});
+  assert.equal(packet.evidence[0].id,'O1');
+  assert.match(packet.evidence[0].text,/not a stadium reading/);
+  assert.equal(packet.evidence[0].sourceUrl,observationContext.sourceUrl);
+  assert.equal(buildLocalAiPacket(withReading,{now:at+91*60000}).evidence.some(item=>item.id==='O1'),false);
+});
+
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
   const draft=validateLocalAiDraft('C1,S1,G1',packet);
