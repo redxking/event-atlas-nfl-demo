@@ -29,6 +29,7 @@ jobs:
       - run: npm run sync:news
       - run: npm run sync:roads
       - run: npm run sync:spc
+      - run: npm run sync:wpc-rain
       - run: npm run sync:police
       - run: npm run sync:charlotte-police
       - run: npm run sync:ntas

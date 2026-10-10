@@ -128,3 +128,12 @@ test('failed direct Tennessee road check is visible as a gap',()=>{
   assert.ok(picture.gaps.some(gap=>gap.includes('Direct Tennessee DOT SmartWay check failed')));
   assert.equal(picture.cueCounts.road,0);
 });
+
+test('WPC rainfall forecast appears as a source-linked planning cue, not an assessed threat',()=>{
+  const wpcRain={status:'ok',builtAt:new Date(now).toISOString(),sources:[{day:3,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z'}],byVenue:{[game.venue.id]:[{day:3,category:'Marginal',categoryRank:1,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z',issuedAt:'2026-10-09T20:05:00Z',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/hazards/wpc_precip_hazards/MapServer/2'}]}};
+  const picture=buildNflEventPicture(game,{schedule:inputs.schedule,wpcRain},now);
+  assert.equal(picture.cueCounts.rainfall,1);
+  assert.equal(picture.cues.find(item=>item.type==='excessive rainfall outlook').sourceAt,'2026-10-09T20:05:00Z');
+  assert.equal(picture.sources.find(item=>item.name==='NOAA WPC excessive-rainfall outlook').state,'published outlook at kickoff');
+  assert.equal(picture.assessment.severity,'not_assessed');
+});
