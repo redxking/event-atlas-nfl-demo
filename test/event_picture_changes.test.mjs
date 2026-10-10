@@ -39,6 +39,14 @@ test('headline addition requires two current publisher snapshots',()=>{
   assert.equal(diffEventPicture(picture('checked'),picture('checked'),{state:'unavailable',articles:[]},current,game,game).length,0);
 });
 
+test('game-linked article revisions require two newer current snapshots',()=>{
+  const article={type:'Preview',headline:'Game preview',url:'https://www.espn.com/nfl/preview?gameId=401872990',modifiedAt:'2026-10-09T20:00:00Z'};
+  const before={...picture('checked'),gameArticle:{state:'current_snapshot',asOf:'2026-10-10T01:00:00Z',article}};
+  const after={...before,gameArticle:{state:'current_snapshot',asOf:'2026-10-10T02:00:00Z',article:{...article,headline:'Updated game preview'}}};
+  assert.equal(diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='game_article_changed')?.sourceUrl,article.url);
+  assert.ok(!diffEventPicture(before,{...after,gameArticle:{...after.gameArticle,asOf:before.gameArticle.asOf}},null,null,game,game).some(item=>item.kind==='game_article_changed'));
+});
+
 test('changed kickoff forecast is logged only across comparable current checks',()=>{
   const base={state:'current forecast',sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{startTime:'2026-10-11T16:00:00Z',endTime:'2026-10-11T18:00:00Z',shortForecast:'Sunny',temperature:74,temperatureUnit:'F'}};
   const before={...picture('checked'),forecastContext:base};

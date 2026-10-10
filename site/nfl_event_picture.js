@@ -2,6 +2,7 @@ import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
+import {selectNflGameArticle} from './nfl_game_article.js';
 import {selectSeptaForGame} from './septa_b_alerts.js';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
@@ -15,7 +16,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,ntas,news}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,ntas,news,gameArticles}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -45,6 +46,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const septaContext=selectSeptaForGame(game,septa,now);
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
   const newsContext=selectNflNews(game,news,now);
+  const gameArticleContext=selectNflGameArticle(game,gameArticles,now);
   const usgsFresh=!conditions?.quakesError&&Array.isArray(conditions?.quakes?.features)&&Number.isFinite(conditions?.at)&&conditions.at<=now+60000&&now-conditions.at<=5*60000;
   const zoneReview=[
     {name:'Stadium ground perimeter',state:footprint?'unreviewed mapped candidate':'no mapped candidate',owner:'Venue operator approval required',purpose:'Entrances, queues, parking and controlled areas need separate operator geometry.',sourceUrl:footprint?.sourceUrl||null},
@@ -65,6 +67,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
     row('NFL publisher headlines',newsContext.state==='current_snapshot'?`${newsContext.publisher}: ${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}`:newsContext.state,newsContext.asOf,'Publisher RSS headlines are team news context. Name matching does not verify game relevance, attendance, venue impact, or a threat.',newsContext.sourceUrl),
+    row('ESPN event article',gameArticleContext.state==='current_snapshot'?`${gameArticleContext.article.type.toLowerCase()} headline linked to game ID`:gameArticleContext.state,gameArticleContext.asOf,'Publisher article metadata is tied to this game ID. The headline is not an attendance, venue-impact, or threat finding.',gameArticleContext.article?.url||gameArticleContext.sourceUrl),
     row('VIP attendance and protective intelligence','not verified',null,'No authoritative attendee or protection roster is connected for this event. Public sports news and player rosters do not establish attendance, protected status, or a threat.',null),
     row('DHS NTAS',!ntas?'not yet loaded':ntasFresh?'current national snapshot':'stale or unavailable',ntas?.retrievedAt,'National advisories are not venue-specific findings.',ntas?.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml'),
     row('Local police activity',!policeConnected?'no connector':police?.state==='failed'?'source failed':policeFresh?['3933','3812','3628'].includes(venueId)?'delayed historical count checked':'public call count checked':'not current',policeFresh?new Date(police.checkedAt).toISOString():null,venueId==='3673'?'Seattle publishes closed CAD responses; these are not active police alerts or threat findings.':venueId==='3687'?'Arlington public calls are delayed; these are not threat findings.':venueId==='3933'?'Chicago excludes recent records and some records lack coordinates; this historical count is not a current alert or threat finding.':venueId==='3812'?'Indianapolis CFS is a seven-day area aggregate with a separately checked citywide source lag; it is not a current alert or threat finding.':venueId==='3628'?'Charlotte-Mecklenburg incident reports include criminal, noncriminal and potentially unfounded cases; this historical count is not a current alert or threat finding.':'No jurisdictional source connected.',venueId==='3673'?'https://experience.arcgis.com/experience/6ee2574e047d4cdb9cb5ad287b76d091':venueId==='3687'?'https://policeincidents.arlingtontx.gov/':venueId==='3933'?'https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2':venueId==='3812'?'https://gis.indy.gov/server/rest/services/IMPD/IMPD_Public_Data/FeatureServer/0':venueId==='3628'?'https://gis.charlottenc.gov/arcgis/rest/services/CMPD/CMPDIncidents/MapServer/0':null),
@@ -119,6 +122,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(!tfrFresh)gaps.push('FAA TFR list and geometry snapshot is absent or stale.');
   if(!ntasFresh)gaps.push('Current DHS NTAS national advisory context is unavailable.');
   if(newsContext.state!=='current_snapshot')gaps.push('Current NFL publisher headline context is unavailable; team news may be missing.');
+  if(['stale_or_unavailable','source_failed','not_checked','invalid_article'].includes(gameArticleContext.state))gaps.push('Current ESPN game article metadata is unavailable or unverified; event-specific publisher context may be missing.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,forecastContext:kickoffForecast,convectiveOutlook,excessiveRainOutlook,policeContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,forecastContext:kickoffForecast,gameArticle:gameArticleContext,convectiveOutlook,excessiveRainOutlook,policeContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }

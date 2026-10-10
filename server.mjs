@@ -23,8 +23,8 @@ const byId=new Map(venues.map(v=>[v.id,v]));
 const municipal=JSON.parse(await fs.readFile(path.join(root,'data/public_events.json'),'utf8'));
 const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
 async function readSiteSnapshot(name){try{return JSON.parse(await fs.readFile(path.join(root,'site',name),'utf8'))}catch{return null}}
-const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflNews,nflNtas,nflIndianapolis,nflCharlotte,nflSepta]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','news.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','septa_b_alerts.json'].map(readSiteSnapshot));
-const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,news:nflNews,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,septa:nflSepta};
+const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflNews,nflGameArticles,nflNtas,nflIndianapolis,nflCharlotte,nflSepta]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','news.json','game_articles.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','septa_b_alerts.json'].map(readSiteSnapshot));
+const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,news:nflNews,gameArticles:nflGameArticles,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,septa:nflSepta};
 const voting=JSON.parse(await fs.readFile(path.join(root,'data/voting_locations.json'),'utf8'));
 const votingHistory=readVotingHistory(path.join(root,'data/voting_history'));
 const votingById=new Map(voting.locations.map(v=>[v.id,v]));

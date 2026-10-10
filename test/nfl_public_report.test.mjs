@@ -52,3 +52,12 @@ test('publisher scoreboard state is attributed without implying security impact'
   assert.match(report,/Publisher game state.*Away 20, Home 17; period 3, clock 05:14/);
   assert.match(report,/do not establish crowd movement, public-safety impact, or a threat/);
 });
+
+test('exact-game publisher headline is linked separately from broad RSS mentions',()=>{
+  const linked=structuredClone(bundle);
+  linked.publicObservations.gameArticle={state:'current_snapshot',asOf:'2026-10-10T02:00:00Z',article:{type:'Preview',headline:'Game preview',publishedAt:'2026-10-09T18:00:00Z',modifiedAt:'2026-10-09T20:00:00Z',url:'https://www.espn.com/nfl/preview?gameId=401872990'}};
+  const report=buildNflPublicReport(linked);
+  assert.match(report,/Game-linked publisher article/);
+  assert.match(report,/Preview: Game preview/);
+  assert.match(report,/exact game ID/);
+});

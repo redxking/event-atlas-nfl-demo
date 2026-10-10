@@ -27,6 +27,7 @@ jobs:
       - run: npm run build:site
       - run: npm run sync:cameras
       - run: npm run sync:news
+      - run: npm run sync:game-articles
       - run: npm run sync:roads
       - run: npm run sync:spc
       - run: npm run sync:wpc-rain

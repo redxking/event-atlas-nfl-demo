@@ -13,6 +13,7 @@
     "sync:sports": "node scripts/sync_sports_events.mjs",
     "sync:cameras": "node scripts/sync_road_cameras.mjs",
     "sync:news": "python3 scripts/sync_nfl_news.py",
+    "sync:game-articles": "node scripts/sync_nfl_game_articles.mjs",
     "sync:roads": "node scripts/sync_road_conditions.mjs",
     "sync:spc": "node scripts/sync_spc_outlooks.mjs",
     "sync:wpc-rain": "node scripts/sync_wpc_rain_outlooks.mjs",

@@ -29,6 +29,14 @@ test('local AI packet accepts only publisher-linked CBS fallback headlines',()=>
   assert.equal(buildLocalAiPacket(withNews).evidence.find(item=>item.id==='N1')?.sourceUrl,cbs.url);
 });
 
+test('local AI packet can cite exact-game ESPN article metadata without article body',()=>{
+  const gameArticle={state:'current_snapshot',article:{type:'Preview',headline:'Bears at Packers preview',url:'https://www.espn.com/nfl/preview?gameId=401872990',modifiedAt:'2026-10-09T20:00:00Z',story:'PRIVATE BODY'}};
+  const withArticle={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{gameArticle}}}};
+  const packet=buildLocalAiPacket(withArticle);
+  assert.equal(packet.evidence.find(item=>item.id==='A1')?.sourceUrl,gameArticle.article.url);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE BODY'));
+});
+
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
   const draft={selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Is the road condition relevant to event access?',evidenceIds:['C1']}]};
