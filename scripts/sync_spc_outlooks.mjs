@@ -7,7 +7,7 @@ const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()];
 const now=Date.now(),sources=[],byVenue={};
-for(const layer of SPC_LAYERS){
+async function readLayer(layer){
   const sourceUrl=`${SPC_BASE}/${layer.id}`;
   const query=new URL(`${sourceUrl}/query`);
   query.search=new URLSearchParams({where:'1=1',outFields:'objectid,dn,valid,expire,issue,label,idp_ingestdate',outSR:'4326',f:'geojson'}).toString();
@@ -21,9 +21,20 @@ for(const layer of SPC_LAYERS){
   if(!validAt||!expiresAt||Date.parse(expiresAt)<=Date.parse(validAt)||body.features.some(item=>stamp(item.properties?.valid)!==validAt||stamp(item.properties?.expire)!==expiresAt))throw Error(`SPC day ${layer.day} validity window inconsistent`);
   if(!sourceIssueAt||now-Date.parse(sourceIssueAt)>24*3600000||Date.parse(sourceIssueAt)>now+60000)throw Error(`SPC day ${layer.day} issue time stale or invalid`);
   const matches=matchSpcOutlook(body.features,venues,layer.day,sourceUrl);
-  for(const [venueId,items] of Object.entries(matches))(byVenue[venueId]??=[]).push(...items);
-  sources.push({day:layer.day,sourceUrl,sourceIssueAt,validAt,expiresAt,features:body.features.length,matchedVenues:Object.keys(matches).length});
+  return {matches,source:{day:layer.day,sourceUrl,sourceIssueAt,validAt,expiresAt,features:body.features.length,matchedVenues:Object.keys(matches).length}};
 }
-const snapshot={status:'ok',builtAt:new Date().toISOString(),sourceUrl:SPC_BASE,basis:'NOAA SPC Day 1–3 categorical forecast polygons matched to unreviewed NFL venue candidate points. Compare published UTC validity to listed kickoff only. These are regional forecasts, not warnings, observed weather, route or venue impacts, or threat assessments. No point match is not an all-clear.',sources,byVenue};
+let failure=null;
+for(const layer of SPC_LAYERS){
+  let result;
+  for(let attempt=0;attempt<3;attempt++){
+    try{result=await readLayer(layer);break}
+    catch(error){failure=`SPC day ${layer.day}: ${String(error.message).slice(0,120)}`;if(attempt<2)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)))}
+  }
+  if(!result)break;
+  failure=null;
+  for(const [venueId,items] of Object.entries(result.matches))(byVenue[venueId]??=[]).push(...items);
+  sources.push(result.source);
+}
+const snapshot={status:failure?'failed':'ok',builtAt:new Date().toISOString(),sourceUrl:SPC_BASE,basis:'NOAA SPC Day 1–3 categorical forecast polygons matched to unreviewed NFL venue candidate points. Compare published UTC validity to listed kickoff only. These are regional forecasts, not warnings, observed weather, route or venue impacts, or threat assessments. No point match is not an all-clear.',sources:failure?[]:sources,byVenue:failure?{}:byVenue,...(failure?{error:failure}:{})};
 await fs.writeFile(path.join(site,'spc_outlooks.json'),JSON.stringify(snapshot));
-console.log(`SPC outlooks: ${sources.map(x=>`day${x.day} ${x.features} features`).join(', ')}; ${Object.keys(byVenue).length} venue candidates with a polygon match`);
+console.log(failure?`SPC outlook unavailable: ${failure}`:`SPC outlooks: ${sources.map(x=>`day${x.day} ${x.features} features`).join(', ')}; ${Object.keys(byVenue).length} venue candidates with a polygon match`);
