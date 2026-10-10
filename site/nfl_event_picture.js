@@ -19,6 +19,8 @@ import {selectGreenBayAlertsForGame} from './green_bay_alerts.js?v=20261010-1';
 import {selectLambeauGamedayForGame} from './lambeau_gameday.js?v=20261010-1';
 import {selectPackersGameRelease,packersGameReleaseUrls} from './packers_game_release.js?v=20261010-1';
 import {selectPatriotsGamePreview,patriotsPreviewUrl} from './patriots_game_preview.js?v=20261010-1';
+import {selectJetsGamedayGuide,jetsGamedayGuideUrl} from './jets_gameday_guide.js?v=20261010-1';
+import {compareJetsTravelPlan} from './jets_travel_context.js?v=20261010-1';
 import {compareClubAviation} from './club_aviation_context.js?v=20261010-1';
 import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';
 
@@ -30,7 +32,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,eonet,nifc,airnow,hmsSmoke,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,njTransitRail,nj511,phillyAlerts,phillyPermits,greenBayAlerts,lambeauPlan,packersGameRelease,patriotsGamePreview,ntas,news,gameArticles,directGame}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,eonet,nifc,airnow,hmsSmoke,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,njTransitRail,nj511,phillyAlerts,phillyPermits,greenBayAlerts,lambeauPlan,packersGameRelease,patriotsGamePreview,jetsGamedayGuide,ntas,news,gameArticles,directGame}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -60,6 +62,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const lambeauPlanContext=selectLambeauGamedayForGame(game,lambeauPlan,now);
   const packersReleaseContext=selectPackersGameRelease(game,packersGameRelease,now);
   const patriotsPreviewContext=selectPatriotsGamePreview(game,patriotsGamePreview,now);
+  const jetsGuideContext=selectJetsGamedayGuide(game,jetsGamedayGuide,now);
   const clubAviationContext=compareClubAviation(game,packersReleaseContext,airspace,tfr,now);
   const usgsContext=selectUsgsForGame(game,conditions,now,queueMode);
   const policeConnected=['3687','3673','3933','3812','3628','3937'].includes(venueId);
@@ -80,6 +83,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const septaContext=selectSeptaForGame(game,septa,now);
   const njTransitRailContext=selectNjTransitRailForGame(game,njTransitRail,now);
   const nj511Context=selectNj511ForGame(game,nj511,now);
+  const jetsTravelContext=compareJetsTravelPlan(game,jetsGuideContext,njTransitRailContext,nj511Context);
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
   const newsContext=selectNflNews(game,news,now);
   const gameArticleContext=selectNflGameArticle(game,gameArticles,now);
@@ -109,6 +113,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     ...(venueId==='3798'?[row('Lambeau published game-day plan',lambeauPlanContext.state,lambeauPlanContext.asOf,`${lambeauPlanContext.claims.length} bounded venue-published operating details. Plans require current venue and agency confirmation; no live closure or bus run is verified.`,lambeauPlanContext.sourceUrl)]:[]),
     ...(game.id==='nfl:401872990'?[row('Packers game-specific announcements',packersReleaseContext.state,packersReleaseContext.asOf,`${packersReleaseContext.claims.length} source-checked club announcements. Named appearances, ceremonies, fireworks and flyover are planned, not observed or confirmed.`,packersGameReleaseUrls.event)]:[]),
     ...(game.id==='nfl:401872986'?[row('Patriots game-specific preview',patriotsPreviewContext.state,patriotsPreviewContext.asOf,`${patriotsPreviewContext.claims.length} source-checked club announcements. The pregame and halftime ceremonies are announced plans, not verified attendance or execution.`,patriotsPreviewUrl)]:[]),
+    ...(game.id==='nfl:401872983'?[row('Jets game-specific guide',jetsGuideContext.state,jetsGuideContext.asOf,`${jetsGuideContext.claims.length} source-checked club plans. Parking and entry instructions, anthem, tailgate, and giveaway are published plans or recommendations, not verified operations or attendance.`,jetsGamedayGuideUrl)]:[]),
+    ...(game.id==='nfl:401872983'?[row('Jets access, rail and road plan comparison',jetsTravelContext.state,jetsGuideContext.asOf,jetsTravelContext.summary,jetsGamedayGuideUrl)]:[]),
     ...(game.id==='nfl:401872990'?[row('Club flyover and FAA record comparison',clubAviationContext.state,clubAviationContext.checkedAt||null,clubAviationContext.summary,clubAviationContext.clubSourceUrl)]:[]),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
@@ -171,6 +177,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(venueId==='3798'&&lambeauPlanContext.state!=='current_published_plan')gaps.push('The Lambeau venue-published game-day operations page is incomplete or stale; confirm gates, traffic plan, and bus service with venue and agencies.');
   if(game.id==='nfl:401872990'&&packersReleaseContext.state!=='current_published_announcements')gaps.push('The Packers game-specific release or alumni announcement is incomplete or stale; confirm current named appearances and production plans with the club.');
   if(game.id==='nfl:401872986'&&patriotsPreviewContext.state!=='current_published_announcements')gaps.push('The Patriots game-specific preview is incomplete or stale; confirm current ceremony plans with the club.');
+  if(game.id==='nfl:401872983'&&jetsGuideContext.state!=='current_published_plan')gaps.push('The Jets game-specific guide is incomplete or stale; confirm current parking, entry, and event plans with the club.');
   if(!cameraFresh||!cameraItems)gaps.push('No current roadway-camera metadata coverage is available for this venue.');
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
   if(venueId==='3810'&&roadDirect?.state==='failed')gaps.push('Direct Tennessee DOT SmartWay check failed; the scheduled road snapshot may be stale.');
@@ -193,5 +200,5 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(queueMode==='near_term_monitoring'&&airQualityContext.state!=='current_station_observation')gaps.push('A current nearby EPA AirNow PM2.5 station reading is unavailable; no air-quality finding follows.');
   if(queueMode==='near_term_monitoring'&&smokeContext.state!=='recent_daily_analysis')gaps.push('Recent NOAA HMS daily smoke-polygon analysis is unavailable or stale; no negative finding follows.');
   const reviewQueue=buildNflReviewQueue(game,{cues,sources},queueMode,now);
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,naturalEventsContext,wildfireContext,airQualityContext,smokeContext,environmentalCorrelation,greenBayAlertContext,lambeauPlanContext,packersReleaseContext,patriotsPreviewContext,clubAviationContext,usgsContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,naturalEventsContext,wildfireContext,airQualityContext,smokeContext,environmentalCorrelation,greenBayAlertContext,lambeauPlanContext,packersReleaseContext,patriotsPreviewContext,jetsGuideContext,jetsTravelContext,clubAviationContext,usgsContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }
