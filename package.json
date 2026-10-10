@@ -26,6 +26,7 @@
     "sync:nj511": "node scripts/sync_nj511_events.mjs",
     "sync:ntas": "python3 scripts/sync_dhs_ntas.py",
     "sync:eonet": "node scripts/sync_nasa_eonet.mjs",
+    "sync:nifc": "node scripts/sync_nifc_wildfire.mjs",
     "sync:septa": "node scripts/sync_septa_b_alerts.mjs",
     "sync:seams": "node scripts/sync_faa_seams.mjs",
     "sync:tfr": "node scripts/sync_faa_tfr.mjs",
