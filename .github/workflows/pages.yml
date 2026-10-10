@@ -46,6 +46,7 @@ jobs:
       - run: npm run sync:seahawks-guide
       - run: npm run sync:titans-guide
       - run: npm run sync:falcons-guide
+      - run: npm run sync:dolphins-crucial-catch
       - run: npm run sync:saints-guide
       - run: npm run sync:nola-ready-event
       - run: npm run sync:nola-ready-active

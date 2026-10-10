@@ -1,4 +1,4 @@
-const allowedHosts=new Set(['www.packers.com','www.patriots.com','www.newyorkjets.com','www.seahawks.com','www.atlantafalcons.com','www.neworleanssaints.com']);
+const allowedHosts=new Set(['www.packers.com','www.patriots.com','www.newyorkjets.com','www.seahawks.com','www.atlantafalcons.com','www.miamidolphins.com','www.neworleanssaints.com']);
 const currentStates=new Set(['current_published_announcements','partial_published_announcements','current_published_plan','partial_published_plan']);
 const validName=name=>typeof name==='string'&&name.length>1&&name.length<=80&&/^[\p{L}\p{M}][\p{L}\p{M}\p{N} .,'’\-]*$/u.test(name);
 const validSource=url=>{try{const parsed=new URL(url);return parsed.protocol==='https:'&&allowedHosts.has(parsed.hostname)}catch{return false}};
@@ -11,6 +11,7 @@ export function selectAnnouncedPeople(game,contexts,now=Date.now()){
     ['Jets','nfl:401872983','3839',contexts?.jetsGuideContext],
     ['Seahawks','nfl:401872992','3673',contexts?.seahawksGuideContext],
     ['Falcons','nfl:401872993','5348',contexts?.falconsGuideContext],
+    ['Dolphins','nfl:401872982','3948',contexts?.dolphinsCrucialCatchContext],
     ['Saints','nfl:401872987','3493',contexts?.saintsGuideContext]
   ];
   const records=[],seen=new Set();
