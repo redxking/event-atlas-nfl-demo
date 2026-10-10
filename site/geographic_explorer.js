@@ -1,3 +1,4 @@
+import {setGeographicTrail,showWorkspaceView} from './workspace_views.js?v=breadcrumbs-1';
 // FEMA state groupings: https://www.fema.gov/about/organization/regions
 export const regions={1:['CT','ME','MA','NH','RI','VT'],2:['NJ','NY','PR','VI'],3:['DE','DC','MD','PA','VA','WV'],4:['AL','FL','GA','KY','MS','NC','SC','TN'],5:['IL','IN','MI','MN','OH','WI'],6:['AR','LA','NM','OK','TX'],7:['IA','KS','MO','NE'],8:['CO','MT','ND','SD','UT','WY'],9:['AZ','CA','HI','NV','AS','GU','MP'],10:['AK','ID','OR','WA']};
 export const stateOf=game=>game.venue?.address?.match(/,\s*([A-Z]{2}),\s*USA$/)?.[1]||null;
@@ -15,23 +16,29 @@ export function createGeographicExplorer({openGame,onScopeChange}){
  const controls=node('div',undefined,'geo-controls');
  for(const [key,label] of [['start','From'],['end','Through']]){const wrap=node('label',label);const input=node('input');input.type='date';input.value=scope[key];input.setAttribute('aria-label',label+' event date');input.onchange=()=>{scope[key]=input.value;render();};wrap.append(input);controls.append(wrap);}
  controls.append(button('National view',()=>{scope.region=scope.state=scope.venue='';currentEvent='';history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();}));container.append(controls);
- const breadcrumb=node('nav');breadcrumb.setAttribute('aria-label','Geographic navigation');container.append(breadcrumb);
+
  const totals=node('div',undefined,'geo-totals');totals.setAttribute('aria-live','polite');container.append(totals);
  const layout=node('div',undefined,'geo-layout'),mapElement=node('div');mapElement.id='venue-map';mapElement.setAttribute('aria-label','Map of events in selected geographic view');const panel=node('section',undefined,'geo-selection');panel.setAttribute('aria-label','Geographic selection');layout.append(mapElement,panel);container.append(layout);
  const status=node('p');status.id='overview-map-status';status.setAttribute('role','status');container.append(status);
  const note=node('details'),label=node('summary','How to read this overview');note.append(label,node('p','Counts cover U.S. NFL games for the selected dates in Eastern time. Regional and state markers group event locations; they are not incident locations. Assessed high-threat reporting is not connected. Potential concerns are source reports requiring assessment, not confirmed threats. Shared source concerns are counted once in the source total; affected games are counted separately. Gray markers have no current concern flag or are not yet assessed. FEMA regions are geographic navigation groups, not event command assignments.'));
  const source=node('a','FEMA regional organization');source.href='https://www.fema.gov/about/organization/regions';source.target='_blank';source.rel='noopener noreferrer';note.append(source);container.append(note);
- function jump(level,value){if(level==='region'){scope.region=value;scope.state=scope.venue='';}if(level==='state'){scope.state=value;scope.venue='';}if(level==='venue')scope.venue=value;currentEvent='';history.pushState({workspaceView:'overview',geo:{...scope}},'','#'+level+'-'+value);render();}
+ function navigate(next){Object.assign(scope,next);currentEvent='';showWorkspaceView('overview',{record:false});history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();window.scrollTo({top:0,behavior:'instant'});}
+ function makeTrail(area,venueName){
+  const item=(label,next)=>({label,go:()=>navigate(next)});
+  const trail=[item('United States',{...area,region:'',state:'',venue:''})];
+  if(area.region)trail.push(item('FEMA Region '+area.region,{...area,state:'',venue:''}));
+  if(area.state)trail.push(item(area.state,{...area,venue:''}));
+  if(area.venue)trail.push(item(venueName||games.find(g=>g.venue.id===area.venue)?.venue.name||'Venue',{...area}));
+  return trail;
+ }
+ function jump(level,value){const next={...scope};if(level==='region'){next.region=value;next.state=next.venue='';}if(level==='state'){next.state=value;next.venue='';}if(level==='venue')next.venue=value;navigate(next);}
  window.addEventListener('popstate',()=>{if(history.state?.geo){Object.assign(scope,history.state.geo);currentEvent='';render();}else if(!history.state?.workspaceView||history.state.workspaceView==='overview'){scope.region=scope.state=scope.venue='';currentEvent='';render();}});
  function render(){
   if(!scope.start||!scope.end||scope.end<scope.start){status.textContent='Choose an end date on or after the start date.';scopeSignature='';onScopeChange?.([]);panel.replaceChildren();totals.replaceChildren();markers?.clearLayers();return;}
   status.textContent='';const selected=scopeGames(games,scope),count=rollup(selected,summaries);
   const nextScope=JSON.stringify([scope,selected.map(game=>game.id)]);if(scopeSignature!==nextScope){scopeSignature=nextScope;onScopeChange?.(selected);}
   container.querySelector('h2').textContent=scope.venue?(selected[0]?.venue.name||'Venue events'):scope.state?scope.state+' event overview':scope.region?'FEMA Region '+scope.region+' overview':'National event overview';
-  breadcrumb.replaceChildren(button('United States',()=>{scope.region=scope.state=scope.venue='';currentEvent='';history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();}));
-  if(scope.region)breadcrumb.append(node('span',' › '),button('FEMA Region '+scope.region,()=>jump('region',scope.region)));
-  if(scope.state)breadcrumb.append(node('span',' › '),button(scope.state,()=>jump('state',scope.state)));
-  if(scope.venue)breadcrumb.append(node('span',' › '+(selected[0]?.venue.name||'Venue')));
+  setGeographicTrail(makeTrail(scope));
   totals.replaceChildren(...[`${count.events} events`,`${count.venues} venues`,`${count.affected} games with potential concerns`,`${count.urgent} games with urgent weather concerns`,`${count.sourceConcerns} distinct source concerns`,`${count.pending} games awaiting screening`].map(text=>node('span',text)));
   panel.replaceChildren(node('h3',scope.venue?'Select an event':scope.state?'Select a venue':scope.region?'Select a state':'Select a FEMA region'));
   const groups=new Map();const level=scope.venue?'event':scope.state?'venue':scope.region?'state':'region';
@@ -52,5 +59,5 @@ export function createGeographicExplorer({openGame,onScopeChange}){
   }
   const nextSignature=[scope.region,scope.state,scope.venue,scope.start,scope.end].join('|');if(signature!==nextSignature){signature=nextSignature;if(!scope.region||!mapped.length)map.fitBounds([[24,-125],[50,-66]],{padding:[16,16],animate:false});else map.fitBounds(mapped.map(g=>[g.venue.lat,g.venue.lon]),{padding:[45,45],maxZoom:scope.venue?14:scope.state?8:6,animate:false});}
  }
- return {update(nextGames,nextSummaries){games=nextGames;summaries=nextSummaries;render();}};
+ return {eventTrail(game){return makeTrail({...scope,region:regionOf(game)||'',state:stateOf(game)||'',venue:game.venue.id},game.venue.name);},update(nextGames,nextSummaries){games=nextGames;summaries=nextSummaries;render();}};
 }
