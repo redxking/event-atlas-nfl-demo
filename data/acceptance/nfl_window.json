@@ -1,0 +1,4465 @@
+{
+  "schema": "event-atlas.window-acceptance.v1",
+  "author": "Angelis Pseftis",
+  "scope": {
+    "startsAt": "2026-10-10T04:00:00Z",
+    "endsBefore": "2026-10-24T04:00:00Z",
+    "timeZone": "America/New_York",
+    "label": "October 10 through October 23, 2026 (America/New_York)",
+    "frozenAt": "2026-10-10T14:45:12.821Z"
+  },
+  "updatedAt": "2026-10-10T17:56:24.225Z",
+  "completion": "incomplete",
+  "evidence": {
+    "engine": {
+      "command": "node --test test/window_feed_engine.test.mjs",
+      "result": "31 passed; 0 failed",
+      "boundary": "Local Node execution; no browser, model or deployed validation"
+    }
+  },
+  "games": [
+    {
+      "id": "nfl:401872981",
+      "title": "Philadelphia Eagles at Jacksonville Jaguars",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872982",
+      "title": "Cincinnati Bengals at Miami Dolphins",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872983",
+      "title": "Cleveland Browns at New York Jets",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872984",
+      "title": "Houston Texans at Tennessee Titans",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872985",
+      "title": "Indianapolis Colts at Pittsburgh Steelers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872986",
+      "title": "Las Vegas Raiders at New England Patriots",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872987",
+      "title": "Minnesota Vikings at New Orleans Saints",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872988",
+      "title": "New York Giants at Washington Commanders",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872990",
+      "title": "Chicago Bears at Green Bay Packers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872989",
+      "title": "Denver Broncos at Los Angeles Chargers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872991",
+      "title": "Detroit Lions at Arizona Cardinals",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872992",
+      "title": "San Francisco 49ers at Seattle Seahawks",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872993",
+      "title": "Baltimore Ravens at Atlanta Falcons",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872994",
+      "title": "Buffalo Bills at Los Angeles Rams",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872995",
+      "title": "Seattle Seahawks at Denver Broncos",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872996",
+      "title": "Houston Texans at Jacksonville Jaguars",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872997",
+      "title": "Baltimore Ravens at Cleveland Browns",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872998",
+      "title": "Carolina Panthers at Philadelphia Eagles",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401872999",
+      "title": "Chicago Bears at Atlanta Falcons",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873000",
+      "title": "New Orleans Saints at New York Giants",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873001",
+      "title": "New York Jets at New England Patriots",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873002",
+      "title": "Pittsburgh Steelers at Tampa Bay Buccaneers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873003",
+      "title": "Tennessee Titans at Indianapolis Colts",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873004",
+      "title": "Arizona Cardinals at Los Angeles Rams",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873005",
+      "title": "Buffalo Bills at Las Vegas Raiders",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873006",
+      "title": "Los Angeles Chargers at Kansas City Chiefs",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873007",
+      "title": "Dallas Cowboys at Green Bay Packers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873008",
+      "title": "Washington Commanders at San Francisco 49ers",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    },
+    {
+      "id": "nfl:401873010",
+      "title": "New England Patriots at Chicago Bears",
+      "datasets": [
+        {
+          "id": "feed-1-1",
+          "name": "Public social posts and hashtags",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-2",
+          "name": "Geofenced social or bystander media",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-3",
+          "name": "Public protest announcements",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-1-4",
+          "name": "Local media and transit notices",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-1",
+          "name": "Underground forum monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-2",
+          "name": "Authorized channel monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-2-3",
+          "name": "Leak and paste monitoring",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-1",
+          "name": "Fusion-center or FBI partner bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-2",
+          "name": "CISA or ISAC advisory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-3-3",
+          "name": "Jurisdictional CAD and historical incident data",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-1",
+          "name": "PACS badge events",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-2",
+          "name": "VMS visitor and delivery records",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-4-3",
+          "name": "On-site security dispatch",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-1",
+          "name": "STIX/TAXII threat intelligence",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-2",
+          "name": "Passive DNS and attack-surface inventory",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-5-3",
+          "name": "Venue firewall, NetFlow and SIEM",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-1",
+          "name": "GIS routes, facilities and work zones",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-2",
+          "name": "FAA and authorized C-UAS telemetry",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-6-3",
+          "name": "NWS and USGS hazards",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        }
+      ],
+      "workflows": {
+        "feed_replay": "local_test_pass",
+        "corrections_and_duplicates": "local_test_pass",
+        "staleness_and_outage": "local_test_pass",
+        "source_linked_synthetic_export": "implemented_browser_verification_pending",
+        "maps_and_editable_areas": "pending",
+        "camera_presentation": "pending",
+        "analyst_review": "pending",
+        "cross_event_relationships": "pending",
+        "public_participant_roles": "pending",
+        "actual_model_execution": "pending",
+        "desktop_mobile_keyboard": "pending",
+        "deployed_end_to_end": "pending"
+      }
+    }
+  ],
+  "remainingSubtypeChecks": [
+    "Camera stream simulation",
+    "Separate FAA restriction and drone sensor records",
+    "Separate weather and environmental hazard records",
+    "Subtype mapping against complete user attachment"
+  ]
+}
