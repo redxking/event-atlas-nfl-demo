@@ -6,7 +6,7 @@ const bundle={schema:'event-atlas.public-evidence-bundle.v1',generatedAt:'2026-1
 
 test('public report binds event, current source cues, records, gaps, and source links without a threat claim',()=>{
   const report=buildNflPublicReport(bundle);
-  for(const expected of ['Away at Home','2026-10-10T01:00:00.000Z','Listed lane work','AZTech WZDx','No verified stadium CCTV stream','https://example.org/road','Severity not assessed','named-person records are not collected'])assert.ok(report.includes(expected),expected);
+  for(const expected of ['Away at Home','2026-10-10T01:00:00.000Z','Listed lane work','AZTech WZDx','No verified stadium CCTV stream','https://example.org/road','Severity not assessed','NOAA SPC Day 1–3 outlook','named-person records are not collected'])assert.ok(report.includes(expected),expected);
   assert.ok(!report.includes('Threat level:'));
   assert.ok(report.includes('[Publisher event record](https://example.org/game)'));
 });

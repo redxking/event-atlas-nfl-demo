@@ -22,6 +22,7 @@ export function buildNflPublicReport(bundle){
     '## Review summary',
     line('Assessment','Severity not assessed; confidence not assessed'),
     line('NWS alert review candidates',picture.cueCounts?.weather??0),
+    line('SPC forecast review candidates',picture.cueCounts?.outlook??0),
     line('Roadway time overlaps',picture.cueCounts?.road??0),
     line('Transit alert time overlaps',picture.cueCounts?.transit??0),
     'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
@@ -29,6 +30,8 @@ export function buildNflPublicReport(bundle){
   ];
   const forecast=observations.kickoffForecast;
   if(forecast?.state==='current forecast')rows.push('## Kickoff forecast',line('NWS hourly forecast',`${forecast.period?.shortForecast||'description unavailable'} · ${forecast.period?.temperature??'temperature unavailable'}°${forecast.period?.temperatureUnit||''} · wind ${forecast.period?.windSpeed||'unavailable'} ${forecast.period?.windDirection||''} · precipitation ${forecast.period?.precipitationPercent??'unavailable'}%`),line('Checked',iso(forecast.checkedAt)),`- **Source:** ${source(forecast.sourceUrl,'NWS hourly forecast')}`,'Forecast, not an observed condition.','');
+  const outlook=observations.convectiveOutlook;
+  rows.push('## NOAA SPC Day 1–3 outlook',line('State',outlook?.state||'unavailable'),...(outlook?.match?[line('Published category',`${outlook.match.category} on Day ${outlook.match.day}`),line('Issued',iso(outlook.match.issuedAt)),line('Valid',`${iso(outlook.match.validAt)} to ${iso(outlook.match.expiresAt)}`)]:[]),`- **Source:** ${source(outlook?.sourceUrl,'NOAA SPC categorical outlook')}`,'Regional forecast context at the candidate point and listed kickoff; not a warning, observed condition, venue impact, or threat finding.','');
   rows.push(section('Time-screened review cues',(picture.cues||[]).map(item=>`- **${clean(item.type)} — ${clean(item.title)}:** ${clean(item.basis)}. Source time: ${iso(item.sourceAt)}. ${source(item.sourceUrl)}`),'No time-screened cue is present in the current bounded sample; this is not an all-clear.'));
   rows.push(section('Public source status',(picture.sources||[]).map(item=>`- **${clean(item.name)}:** ${clean(item.state)}; as of ${iso(item.asOf)}. ${clean(item.detail)} ${source(item.sourceUrl)}`),'Source status unavailable.'));
   rows.push(section('Publisher NFL headlines',(observations.nflHeadlines?.articles||[]).map(item=>`- **${clean(item.title)}:** ${clean(item.publisher)}; published ${iso(item.publishedAt)}; match basis ${clean(item.matchBasis)}. ${source(item.url,'Article')}`),'No current team-name headline match in the connected snapshot. This does not establish an absence of relevant reporting.'));
@@ -58,6 +61,6 @@ export function buildNflPublicReport(bundle){
   const advisory=observations.nationalAdvisory;
   rows.push(section('DHS national advisory context',(advisory?.active||[]).map(item=>`- **${clean(item.type)}:** ${clean(item.summary)}; ${iso(item.start)} to ${iso(item.end)}. ${source(item.url,'DHS advisory')}`),`${clean(advisory?.state||'unavailable')}; no venue-specific conclusion follows. ${source(advisory?.sourceUrl,'DHS feed')}`));
   rows.push(section('Coverage and verification gaps',(picture.gaps||[]).map(item=>`- ${clean(item)}`),'Coverage gaps unavailable.'));
-  rows.push('## Provenance and limits',line('Schedule snapshot',iso(sourceSnapshots.schedule)),line('Road snapshot',iso(sourceSnapshots.roads)),line('Camera snapshot',iso(sourceSnapshots.cameras)),line('FAA airspace snapshot',iso(sourceSnapshots.airspace)),line('FAA TFR snapshot',iso(sourceSnapshots.tfr)),line('NFL news snapshot',iso(sourceSnapshots.news)),line('VIP attendance','Not verified; named-person records are not collected in the public demo'),'',clean(bundle.useLimit),'');
+  rows.push('## Provenance and limits',line('Schedule snapshot',iso(sourceSnapshots.schedule)),line('Road snapshot',iso(sourceSnapshots.roads)),line('Camera snapshot',iso(sourceSnapshots.cameras)),line('SPC snapshot',iso(sourceSnapshots.spc)),line('FAA airspace snapshot',iso(sourceSnapshots.airspace)),line('FAA TFR snapshot',iso(sourceSnapshots.tfr)),line('NFL news snapshot',iso(sourceSnapshots.news)),line('VIP attendance','Not verified; named-person records are not collected in the public demo'),'',clean(bundle.useLimit),'');
   return rows.join('\n')+'\n';
 }

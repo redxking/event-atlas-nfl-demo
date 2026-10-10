@@ -21,6 +21,15 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.ok(picture.gaps.some(gap=>gap.includes('active jurisdictional police alert')));
 });
 
+test('current SPC categorical forecast enters brief as an unassessed planning cue',()=>{
+  const spc={status:'ok',builtAt:'2026-10-09T17:50:00Z',byVenue:{3687:[{day:3,category:'Marginal',categoryRank:3,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z',issuedAt:'2026-10-09T17:30:00Z',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/MapServer/17'}]}};
+  const picture=buildNflEventPicture(game,{...inputs,spc},now);
+  assert.equal(picture.cueCounts.outlook,1);
+  assert.equal(picture.convectiveOutlook.match.category,'Marginal');
+  assert.ok(picture.cues.some(item=>item.type==='convective outlook'&&item.sourceUrl.includes('weather.noaa.gov')));
+  assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
+});
+
 test('current kickoff forecast enters source status without becoming a threat cue',()=>{
   const forecast={state:'ok',checkedAt:now,kickoff:game.kickoff,sourceUrl:'https://api.weather.gov/gridpoints/FWD/82,107/forecast/hourly',period:{startTime:'2026-10-11T19:00:00Z',endTime:'2026-10-11T21:00:00Z',shortForecast:'Partly Cloudy',temperature:78,temperatureUnit:'F',windSpeed:'10 mph',windDirection:'S',probabilityOfPrecipitation:{value:20}}};
   const picture=buildNflEventPicture(game,{...inputs,forecast},now);
