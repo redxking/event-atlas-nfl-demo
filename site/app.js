@@ -347,15 +347,21 @@ function loadHls(){
   }).catch(error=>{hlsLoader=null;throw error});
   return hlsLoader;
 }
-async function playCameraVideo(button,game){
+async function playCameraVideo(button,game,onFailure){
   const url=button.dataset.videoUrl,container=button.nextElementSibling,video=container?.querySelector('video'),status=container?.querySelector('.camera-video-status');
   const agency=publicRoadVideoAgency({agency:button.dataset.agency,id:button.dataset.cameraId,inService:button.dataset.inService==='true',videoUrl:url});
   if(!agency||!video||!status)return;
   if(cameraPlayer?.video===video){stopCameraVideo();container.hidden=true;button.textContent='Play public roadway video';return}
   stopCameraVideo();stopCameraFrame();container.hidden=false;button.textContent='Stop public roadway video';status.textContent=`Connecting to ${agency} public roadway stream…`;
   cameraPlayer={video,hls:null};
+  let failed=false;
+  const reportFailure=()=>{
+    if(cameraPlayer?.video!==video)return;
+    status.textContent=`Inline playback failed in this browser. The ${agency} stream may still be available in the official camera viewer linked below.`;
+    if(!failed){failed=true;onFailure?.()}
+  };
   video.onplaying=()=>{if(cameraPlayer?.video===video)status.textContent='Playing agency roadway stream. Capture latency and field of view are not independently verified.'};
-  video.onerror=()=>{if(cameraPlayer?.video===video)status.textContent=`Inline playback failed in this browser. The ${agency} stream may still be available in the official camera viewer linked below.`};
+  video.onerror=reportFailure;
   try{
     if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=url;await video.play()}
     else{
@@ -365,10 +371,10 @@ async function playCameraVideo(button,game){
       const hls=new Hls({enableWorker:true,maxBufferLength:20});cameraPlayer.hls=hls;
       hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
       hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{status.textContent='Press play to start the public roadway stream.'}));
-      hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal&&cameraPlayer?.video===video)status.textContent=`Inline playback failed in this browser. The ${agency} stream may still be available in the official camera viewer linked below.`});
+      hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal)reportFailure()});
       hls.attachMedia(video);
     }
-  }catch{if(cameraPlayer?.video===video)status.textContent=`Inline playback failed in this browser. The ${agency} stream may still be available in the official camera viewer linked below.`}
+  }catch{reportFailure()}
 }
 function appendFloridaPublisherMap(target,game){
   const url=fl511EmbedUrl(game);
@@ -398,11 +404,14 @@ function renderCameras(game){
   const images=[...target.querySelectorAll('.camera-still')];
   for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle):not(.fl511-map-toggle)'))button.onclick=()=>playCameraVideo(button,game);
   for(const button of target.querySelectorAll('.camera-frame-toggle'))button.onclick=()=>toggleCameraFrame(button);
-  const primaryVideo=items.find(item=>item.videoPlaylistStatus==='playlist_reachable_at_sync'&&publicRoadVideoAgency(item));
-  if(primaryVideo&&document.visibilityState==='visible'){
-    const button=[...target.querySelectorAll('.camera-video-toggle[data-camera-id]')].find(candidate=>candidate.dataset.cameraId===primaryVideo.id);
-    if(button)playCameraVideo(button,game);
-  }
+  const verifiedButtons=items.filter(item=>item.videoPlaylistStatus==='playlist_reachable_at_sync'&&publicRoadVideoAgency(item))
+    .map(item=>[...target.querySelectorAll('.camera-video-toggle[data-camera-id]')].find(button=>button.dataset.cameraId===item.id)).filter(Boolean);
+  const startVerifiedVideo=index=>{
+    if(selected!==game.id||document.visibilityState!=='visible')return;
+    const button=verifiedButtons[index];
+    if(button)playCameraVideo(button,game,()=>startVerifiedVideo(index+1));
+  };
+  startVerifiedVideo(0);
   for(const img of images)img.addEventListener('error',()=>{img.closest('.camera-image').querySelector('small').textContent='Agency image unavailable. Use the agency viewer.';img.hidden=true});
   if(images.length)cameraRefreshTimer=setInterval(()=>{
     if(selected!==game.id){clearInterval(cameraRefreshTimer);cameraRefreshTimer=null;return}
