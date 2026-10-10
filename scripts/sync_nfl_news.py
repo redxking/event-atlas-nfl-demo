@@ -15,7 +15,6 @@ SOURCES = [
     {"publisher": "ESPN", "url": "https://www.espn.com/espn/rss/nfl/news", "hosts": {"www.espn.com", "espn.com"}, "articlePrefix": "/nfl/", "description": True},
     {"publisher": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "hosts": {"www.cbssports.com", "cbssports.com"}, "articlePrefix": "/nfl/", "description": False},
 ]
-FEED = SOURCES[0]["url"]
 MAX_BYTES = 150_000
 
 
@@ -120,18 +119,16 @@ def fetch_feed(source=SOURCES[0]):
 def main():
     now = datetime.now(timezone.utc)
     games = json.loads((ROOT / "site/nfl.json").read_text())["games"]
-    failures = []
-    result = None
+    results = []
     for source in SOURCES:
         try:
-            result = parse_feed(fetch_feed(source), games, now, source)
-            break
+            results.append(parse_feed(fetch_feed(source), games, now, source))
         except Exception as error:
-            failures.append(f"{source['publisher']}: {str(error)[:120]}")
-    if result is None:
-        result = {"status": "failed", "sourceUrl": FEED, "publisher": None, "retrievedAt": now.isoformat().replace("+00:00", "Z"), "error": "; ".join(failures)[:300], "byGame": {}}
+            results.append({"status": "failed", "publisher": source["publisher"], "sourceUrl": source["url"], "retrievedAt": now.isoformat().replace("+00:00", "Z"), "error": str(error)[:120], "byGame": {}})
+    healthy = sum(item["status"] == "ok" for item in results)
+    result = {"schema": "event-atlas.nfl-news.v2", "status": "ok" if healthy == len(results) else "partial" if healthy else "failed", "retrievedAt": now.isoformat().replace("+00:00", "Z"), "sources": results, "interpretation": "Each publisher RSS feed is checked independently. Team-name matches are discovery cues, not confirmation of game relevance, attendance, venue impact, or a threat. Open the linked articles and verify claims."}
     (ROOT / "site/news.json").write_text(json.dumps(result, separators=(",", ":")) + "\n")
-    print(f"NFL RSS {result['publisher'] or 'unavailable'}: {result['status']}; {len(result['byGame'])} games with team mentions")
+    print(f"NFL RSS: {healthy}/{len(results)} publishers current; " + ", ".join(f"{item['publisher']} {item['status']} ({len(item['byGame'])} games)" for item in results))
     return 0
 
 

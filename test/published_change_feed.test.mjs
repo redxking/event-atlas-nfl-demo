@@ -5,7 +5,7 @@ import {buildPublishedChangeFeed,renderPublishedChangeAtom} from '../lib/publish
 const now=Date.parse('2026-10-10T04:00:00Z');
 const report={eventId:'nfl:123',title:'Bears at Packers',path:'reports/nfl-123.html'};
 const change={kind:'newly_displayed_cue',title:'NWS <alert> & update',detail:'Source says "review"',observedAt:'2026-10-10T03:00:00Z',sourceUrl:'https://api.weather.gov/alerts/123'};
-const state={schema:'event-atlas.published-report-state.v4',eventId:'nfl:123',changes:[change,change,{...change,sourceUrl:'http://example.com/insecure'},{...change,observedAt:'2026-09-20T03:00:00Z'}]};
+const state={schema:'event-atlas.published-report-state.v5',eventId:'nfl:123',changes:[change,change,{...change,sourceUrl:'http://example.com/insecure'},{...change,observedAt:'2026-09-20T03:00:00Z'}]};
 
 test('change subscription deduplicates bounded recent entries and escapes Atom text',()=>{
   const feed=buildPublishedChangeFeed([report],[state],now);

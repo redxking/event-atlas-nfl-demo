@@ -1,7 +1,7 @@
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
-import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
+import {selectNflNews} from './nfl_news_context.js?v=20261010-2';
 import {selectNflGameArticle} from './nfl_game_article.js';
 import {selectSeptaForGame} from './septa_b_alerts.js';
 import {selectNjTransitRailForGame} from './njtransit_event_rail.js?v=20261010-2';
@@ -95,7 +95,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('NOAA HMS smoke polygons',smokeContext.state==='recent_daily_analysis'?'recent daily satellite analysis':smokeContext.state==='not_started'?'not screened outside near-term window':'stale or unavailable',smokeContext.polygons[0]?.endAt||smokeContext.asOf,`${smokeContext.polygons.length} dated polygon point match${smokeContext.polygons.length===1?'':'es'} in the latest bounded daily analysis. A satellite polygon is not a ground concentration or verified venue impact.`,smokeContext.sourceUrl),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
-    row('NFL publisher headlines',newsContext.state==='current_snapshot'?`${newsContext.publisher}: ${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}`:newsContext.state,newsContext.asOf,'Publisher RSS headlines are team news context. Name matching does not verify game relevance, attendance, venue impact, or a threat.',newsContext.sourceUrl),
+    row('NFL publisher headlines',newsContext.state==='current_snapshot'?`${newsContext.publisher}: ${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}${newsContext.coverage==='partial'?'; partial publisher coverage':''}`:newsContext.state,newsContext.asOf,`Publisher RSS checks: ${newsContext.sources.map(item=>`${item.publisher||'unknown'} ${item.state}`).join('; ')}. Name matching does not verify game relevance, attendance, venue impact, or a threat.`,newsContext.sourceUrl),
     row('ESPN event article',gameArticleContext.state==='current_snapshot'?`${gameArticleContext.article.type.toLowerCase()} headline linked to game ID`:gameArticleContext.state,gameArticleContext.asOf,'Publisher article metadata is tied to this game ID. The headline is not an attendance, venue-impact, or threat finding.',gameArticleContext.article?.url||gameArticleContext.sourceUrl),
     ...(directGameContext?[row('ESPN selected-game direct check',directGameContext.state==='checked'?'direct check completed':directGameContext.state,directGameContext.checkedAt,'Direct publisher check for this selected game. Publisher score, reported attendance and article metadata are observations, not security findings; compare any schedule discrepancy with the NFL or host club.',directGameContext.sourceUrl)]:[]),
     row('VIP attendance and protective intelligence','not verified',null,'No authoritative attendee or protection roster is connected for this event. Public sports news and player rosters do not establish attendance, protected status, or a threat.',null),
@@ -162,6 +162,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(!tfrFresh)gaps.push('FAA TFR list and geometry snapshot is absent or stale.');
   if(!ntasFresh)gaps.push('Current DHS NTAS national advisory context is unavailable.');
   if(newsContext.state!=='current_snapshot')gaps.push('Current NFL publisher headline context is unavailable; team news may be missing.');
+  else if(newsContext.coverage==='partial')gaps.push(`NFL publisher headline coverage is partial: ${newsContext.sources.filter(item=>item.state!=='current_snapshot').map(item=>item.publisher||'unknown source').join(', ')} unavailable or stale.`);
   if(['stale_or_unavailable','source_failed','not_checked','invalid_article'].includes(gameArticleContext.state))gaps.push('Current ESPN game article metadata is unavailable or unverified; event-specific publisher context may be missing.');
   if(directGameContext&&directGameContext.state!=='checked')gaps.push('The selected-game direct ESPN check is unavailable, stale, or has an identity mismatch; use the dated published snapshot and verify the game source.');
   if(directGameContext?.state==='checked'&&directGameContext.scheduleDiffers)gaps.push('The direct ESPN game-summary date differs from the published schedule; verify kickoff with NFL or host club and repeat event-window screening.');

@@ -33,3 +33,26 @@ test('CBS Sports fallback retains its own publisher and article host',()=>{
   assert.equal(result.publisher,'CBS Sports');
   assert.deepEqual(result.articles,[cbs]);
 });
+
+test('two current publishers contribute separately attributed headlines',()=>{
+  const cbs={...article,title:'Packers update',publisher:'CBS Sports',description:'',url:'https://www.cbssports.com/nfl/news/packers-update',matchBasis:'both_teams_in_title'};
+  const base={status:'ok',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z'};
+  const result=selectNflNews(game,{schema:'event-atlas.nfl-news.v2',sources:[
+    {...base,publisher:'ESPN',sourceUrl:'https://www.espn.com/espn/rss/nfl/news',byGame:{'nfl:1':[article]}},
+    {...base,publisher:'CBS Sports',sourceUrl:'https://www.cbssports.com/rss/headlines/nfl/',byGame:{'nfl:1':[cbs]}}
+  ]},now);
+  assert.equal(result.coverage,'complete');
+  assert.deepEqual(result.articles.map(item=>item.publisher),['CBS Sports','ESPN']);
+  assert.equal(result.sources.length,2);
+});
+
+test('one failed publisher leaves partial coverage without suppressing current headlines',()=>{
+  const result=selectNflNews(game,{schema:'event-atlas.nfl-news.v2',sources:[
+    {status:'ok',publisher:'ESPN',sourceUrl:'https://www.espn.com/espn/rss/nfl/news',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z',byGame:{'nfl:1':[article]}},
+    {status:'failed',publisher:'CBS Sports',sourceUrl:'https://www.cbssports.com/rss/headlines/nfl/',byGame:{}}
+  ]},now);
+  assert.equal(result.state,'current_snapshot');
+  assert.equal(result.coverage,'partial');
+  assert.equal(result.articles.length,1);
+  assert.equal(result.sources[1].state,'unavailable');
+});
