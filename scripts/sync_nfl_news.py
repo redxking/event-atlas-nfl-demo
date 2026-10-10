@@ -1,4 +1,4 @@
-"""Snapshot attributable NFL publisher RSS headlines as team news context."""
+"""Snapshot bounded NFL publisher RSS and headline API discovery context."""
 
 import json
 import re
@@ -16,6 +16,7 @@ SOURCES = [
     {"publisher": "CBS Sports", "url": "https://www.cbssports.com/rss/headlines/nfl/", "hosts": {"www.cbssports.com", "cbssports.com"}, "articlePrefix": "/nfl/", "description": False},
 ]
 MAX_BYTES = 150_000
+API_SOURCE = {"publisher": "ESPN news API", "url": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=50"}
 
 
 def iso(value):
@@ -116,6 +117,61 @@ def fetch_feed(source=SOURCES[0]):
     return body
 
 
+def parse_api(body, games, now):
+    if not body or len(body) > 1_500_000:
+        raise ValueError("ESPN news API response exceeds bound")
+    data = json.loads(body)
+    rows = data.get("articles") if isinstance(data, dict) else None
+    if not isinstance(rows, list) or not 1 <= len(rows) <= 100:
+        raise ValueError("ESPN news API article array invalid")
+    articles = []
+    seen = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        title = row.get("headline")
+        published = row.get("published")
+        links = row.get("links")
+        web = links.get("web") if isinstance(links, dict) else None
+        url = web.get("href") if isinstance(web, dict) else None
+        if not isinstance(title, str) or not title.strip() or len(title) > 300 or not isinstance(published, str) or not isinstance(url, str):
+            continue
+        parsed = urlparse(url)
+        if parsed.scheme != "https" or parsed.hostname != "www.espn.com" or not parsed.path.startswith("/nfl/story/") or url in seen:
+            continue
+        try:
+            at = datetime.fromisoformat(published.replace("Z", "+00:00"))
+            if at.tzinfo is None or at > now + timedelta(minutes=5) or now - at > timedelta(days=7):
+                continue
+        except ValueError:
+            continue
+        seen.add(url)
+        articles.append({"title": title.strip(), "description": "", "url": url, "publishedAt": at.astimezone(timezone.utc).isoformat().replace("+00:00", "Z"), "publisher": API_SOURCE["publisher"]})
+    if not articles:
+        raise ValueError("ESPN news API returned no current NFL story links")
+    by_game = {}
+    rank = {"matchup_phrase_in_title": 4, "both_teams_in_title": 3, "both_teams_mentioned": 2, "one_team_mentioned": 1}
+    for game in games:
+        matches = [{**article, "matchBasis": basis} for article in articles if (basis := match_article(game, article, now))]
+        if matches:
+            by_game[game["id"]] = sorted(matches, key=lambda item: (rank[item["matchBasis"]], item["publishedAt"]), reverse=True)[:8]
+    return {"status": "ok", "sourceUrl": API_SOURCE["url"], "publisher": API_SOURCE["publisher"], "sourceBuiltAt": None, "sourceTimeBasis": "retrieval_only", "retrievedAt": now.isoformat().replace("+00:00", "Z"), "articleCount": len(articles), "byGame": by_game, "interpretation": "ESPN API headline metadata is matched by team names. This undocumented public endpoint provides no feed build time; retrieval time is not article publication time. A match is discovery context, not proof of game relevance or attendance."}
+
+
+def fetch_api():
+    source = API_SOURCE
+    response = subprocess.run(["curl", "--fail", "--silent", "--show-error", "--location", "--max-redirs", "2", "--proto-redir", "=https", "--compressed", "--max-time", "25", "--max-filesize", "1500000", "--write-out", "\n__EA_META__%{http_code} %{url_effective}", "--header", "User-Agent: EventAtlas/0.4 public-NFL-headline-context", source["url"]], capture_output=True, timeout=30, check=True)
+    body, marker, metadata = response.stdout.rpartition(b"\n__EA_META__")
+    if not marker:
+        raise ValueError("ESPN news API response lacks HTTP metadata")
+    status, effective = metadata.decode("utf-8", "replace").split(" ", 1)
+    final_url = urlparse(effective)
+    expected = urlparse(source["url"])
+    if status != "200" or final_url.scheme != "https" or final_url.hostname != expected.hostname or final_url.path != expected.path or final_url.query != expected.query:
+        raise ValueError("ESPN news API response URL or status changed")
+    return body
+
+
 def main():
     now = datetime.now(timezone.utc)
     games = json.loads((ROOT / "site/nfl.json").read_text())["games"]
@@ -125,10 +181,14 @@ def main():
             results.append(parse_feed(fetch_feed(source), games, now, source))
         except Exception as error:
             results.append({"status": "failed", "publisher": source["publisher"], "sourceUrl": source["url"], "retrievedAt": now.isoformat().replace("+00:00", "Z"), "error": str(error)[:120], "byGame": {}})
+    try:
+        results.append(parse_api(fetch_api(), games, now))
+    except Exception as error:
+        results.append({"status": "failed", "publisher": API_SOURCE["publisher"], "sourceUrl": API_SOURCE["url"], "retrievedAt": now.isoformat().replace("+00:00", "Z"), "error": str(error)[:120], "byGame": {}})
     healthy = sum(item["status"] == "ok" for item in results)
-    result = {"schema": "event-atlas.nfl-news.v2", "status": "ok" if healthy == len(results) else "partial" if healthy else "failed", "retrievedAt": now.isoformat().replace("+00:00", "Z"), "sources": results, "interpretation": "Each publisher RSS feed is checked independently. Team-name matches are discovery cues, not confirmation of game relevance, attendance, venue impact, or a threat. Open the linked articles and verify claims."}
+    result = {"schema": "event-atlas.nfl-news.v3", "status": "ok" if healthy == len(results) else "partial" if healthy else "failed", "retrievedAt": now.isoformat().replace("+00:00", "Z"), "sources": results, "interpretation": "ESPN and CBS RSS plus ESPN headline API are checked independently. Team-name matches are discovery cues, not confirmation of game relevance, attendance, venue impact, or a threat. Open the linked articles and verify claims."}
     (ROOT / "site/news.json").write_text(json.dumps(result, separators=(",", ":")) + "\n")
-    print(f"NFL RSS: {healthy}/{len(results)} publishers current; " + ", ".join(f"{item['publisher']} {item['status']} ({len(item['byGame'])} games)" for item in results))
+    print(f"NFL headline feeds: {healthy}/{len(results)} sources current; " + ", ".join(f"{item['publisher']} {item['status']} ({len(item['byGame'])} games)" for item in results))
     return 0
 
 

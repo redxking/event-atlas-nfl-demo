@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
@@ -52,6 +53,21 @@ class NflNewsTests(unittest.TestCase):
             NEWS.parse_feed(b"<!DOCTYPE rss>" + feed(), [GAME], NOW)
         with self.assertRaisesRegex(ValueError, "stale"):
             NEWS.parse_feed(feed().replace(b"9 Oct 2026 23:45", b"8 Oct 2026 08:45"), [GAME], NOW)
+
+    def test_espn_api_retains_only_current_story_headline_metadata(self):
+        rows = {"articles": [
+            {"headline": "Bears RB out vs. Packers", "published": "2026-10-09T18:30:00Z", "links": {"web": {"href": "https://www.espn.com/nfl/story/_/id/123/bears-packers"}}, "private": "discard"},
+            {"headline": "Bears video", "published": "2026-10-09T18:30:00Z", "links": {"web": {"href": "https://www.espn.com/video/clip/_/id/124"}}},
+            {"headline": "Old Bears story", "published": "2026-09-01T18:30:00Z", "links": {"web": {"href": "https://www.espn.com/nfl/story/_/id/125/old"}}},
+        ]}
+        result = NEWS.parse_api(json.dumps(rows).encode(), [GAME], NOW)
+        self.assertEqual(result["sourceBuiltAt"], None)
+        self.assertEqual(result["sourceTimeBasis"], "retrieval_only")
+        self.assertEqual(result["byGame"]["nfl:1"][0]["matchBasis"], "matchup_phrase_in_title")
+        self.assertNotIn("private", json.dumps(result))
+        self.assertEqual(result["articleCount"], 1)
+        with self.assertRaisesRegex(ValueError, "bound"):
+            NEWS.parse_api(b"x" * 1_500_001, [GAME], NOW)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-61';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-64';
 import {buildVenueZoneRegistry} from './zone_registry.js';
-import {selectNflNews} from './nfl_news_context.js?v=20261010-2';
+import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
 
 const pick=(value,fields)=>Object.fromEntries(fields.filter(key=>value?.[key]!==undefined).map(key=>[key,value[key]]));
 

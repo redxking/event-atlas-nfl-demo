@@ -14,7 +14,7 @@ test('fresh ESPN RSS team mentions enter the event context with attribution',()=
 
 test('title matching tiers remain labeled publisher discovery context',()=>{
   const base={status:'ok',publisher:'ESPN',sourceUrl:'https://www.espn.com/espn/rss/nfl/news',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z'};
-  const articles=['matchup_phrase_in_title','both_teams_in_title','both_teams_mentioned'].map(matchBasis=>({...article,matchBasis}));
+  const articles=['matchup_phrase_in_title','both_teams_in_title','both_teams_mentioned'].map((matchBasis,index)=>({...article,matchBasis,url:`https://www.espn.com/nfl/story/_/id/${index+1}/example`}));
   const result=selectNflNews(game,{...base,byGame:{'nfl:1':articles}},now);
   assert.deepEqual(result.articles.map(item=>item.matchBasis),articles.map(item=>item.matchBasis));
 });
@@ -55,4 +55,17 @@ test('one failed publisher leaves partial coverage without suppressing current h
   assert.equal(result.coverage,'partial');
   assert.equal(result.articles.length,1);
   assert.equal(result.sources[1].state,'unavailable');
+});
+
+test('ESPN headline API adds fresh linked stories without inventing publisher build time',()=>{
+  const apiArticle={...article,publisher:'ESPN news API',description:'',title:'Bears RB out vs. Packers',matchBasis:'matchup_phrase_in_title'};
+  const result=selectNflNews(game,{schema:'event-atlas.nfl-news.v3',sources:[
+    {status:'ok',publisher:'ESPN',sourceUrl:'https://www.espn.com/espn/rss/nfl/news',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z',byGame:{'nfl:1':[article]}},
+    {status:'failed',publisher:'CBS Sports',sourceUrl:'https://www.cbssports.com/rss/headlines/nfl/',byGame:{}},
+    {status:'ok',publisher:'ESPN news API',sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/news?limit=50',sourceBuiltAt:null,sourceTimeBasis:'retrieval_only',retrievedAt:'2026-10-09T23:45:00Z',byGame:{'nfl:1':[apiArticle]}}
+  ]},now);
+  assert.equal(result.coverage,'partial');
+  assert.equal(result.articles[0].publisher,'ESPN news API');
+  assert.equal(result.articles.length,1);
+  assert.equal(result.sources[2].state,'current_snapshot');
 });
