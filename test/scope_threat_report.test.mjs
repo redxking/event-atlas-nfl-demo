@@ -32,3 +32,19 @@ test('same venue across dates shares one task while retaining both game identiti
  const report=buildScopeThreatReport({title:'Venue',level:'venue',games:[games[0],atSameVenue],summaries:new Map([['a',summary],['b',summary]])});
  assert.equal(report.decisions.length,1);assert.equal(report.decisions[0].games.length,2);assert.equal(report.decisions[0].findings.length,1);
 });
+
+test('timeline separates scheduled events from source timestamps and deduplicates shared findings',()=>{
+ const timed={...cue,sourceAt:'2026-10-10T14:00:00Z'};
+ const report=buildScopeThreatReport({title:'Region',level:'region',games,summaries:new Map(games.map(g=>[g.id,{...summary,items:[timed]}]))});
+ assert.equal(report.timeline.length,3);assert.equal(report.timeline[0].sourceUrl,timed.sourceUrl);assert.deepEqual(report.timeline[0].gameIds,['a','b']);
+ assert.match(report.timeline[0].kind,/incident occurrence not established/);
+ assert.ok(report.timeline.slice(1).every(item=>item.kind==='Scheduled kickoff'));
+ assert.equal(report.assessments.length,1);assert.match(report.assessments[0].confidence,/Independent verification.*not supplied/);
+});
+test('unknown evidence times are retained without inventing a clock or corroboration',()=>{
+ const missing={...cue,sourceAt:null,domain:'transit access'};
+ const report=buildScopeThreatReport({title:'Event',level:'event',games:[games[0]],summaries:new Map([['a',{...summary,items:[missing]}]])});
+ assert.equal(report.timeline.at(-1).at,null);assert.match(report.assessments[0].alternative,/added service/);
+ assert.match(report.sections.find(s=>s.heading==='Outstanding questions and handoff').paragraphs.join(' '),/does not|not included/);
+ assert.equal(report.timeline.filter(t=>t.findingNumber).length,1);
+});

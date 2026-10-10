@@ -24,3 +24,16 @@ export function groupFindingDecisions(findings){
  });
  return [...groups.values()].map(group=>({...group,finding:group.findings[0],verificationSteps:[...new Set(group.findings.map(c=>c.action||group.verify))],interpretation:'Grouped for coordination at this venue. Separate records do not establish independent corroboration or a shared cause.'}));
 }
+
+// Analytical context; none of these fields asserts an observed venue impact.
+export function findingAssessment(cue){
+ const domain=cue.domain;
+ const context=domain==='weather alert'||domain==='weather forecast'
+ ?{operations:'Outdoor activities, attendee welfare, access and event staffing',openQuestion:'Does the current hazard footprint cover occupied event areas during the activity period, and which approved weather threshold applies?',alternative:'The forecast or alert may be superseded, outside occupied event areas, or outside the actual activity period.'}
+ :domain==='transit access'
+ ?{operations:'Attendee arrival and departure, station queues and transport capacity',openQuestion:'Is this added service or a disruption, which event passengers use it, and is alternative capacity sufficient?',alternative:'The notice may describe added service or a station attendees do not use; a published change is not necessarily a disruption.'}
+ :['road access','regional road access','pregame access'].includes(domain)
+ ?{operations:'Attendee and emergency access, arrival routes and departure routes',openQuestion:'Which approved attendee or emergency route uses the affected segment during event travel, and what diversion capacity is available?',alternative:'The notice may describe planned work, an unaffected route, or a period when event traffic is absent; active closure and venue impact remain unverified.'}
+ :{operations:'Event operations; the affected function is not established',alternative:'The record may be unrelated, outdated or describe a routine condition; event relevance needs confirmation.'};
+ return {...context,confidence:'The record is linked to its stated publisher. Independent verification of source accuracy and current venue impact is not supplied in this briefing.',openQuestion:context.openQuestion||'Does the current source condition affect an actual event operation, at the reported place and time?',...findingDecision(cue)};
+}
