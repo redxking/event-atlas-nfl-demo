@@ -46,6 +46,7 @@
     "sync:jets-guide": "python3 scripts/sync_jets_gameday_guide.py",
     "sync:seahawks-guide": "python3 scripts/sync_seahawks_gameday.py",
     "sync:titans-guide": "python3 scripts/sync_titans_gameday.py",
+    "sync:cardinals-lions": "python3 scripts/sync_cardinals_lions_broadcast.py",
     "sync:falcons-guide": "python3 scripts/sync_falcons_gameday.py",
     "sync:commanders-guide": "python3 scripts/sync_commanders_gameday.py",
     "sync:dolphins-crucial-catch": "python3 scripts/sync_dolphins_crucial_catch.py",

@@ -102,6 +102,7 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     {key:'jetsGuideContext',eventId:'nfl:401872983',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',states:['current_published_plan','partial_published_plan'],max:5,label:'Jets'},
     {key:'seahawksGuideContext',eventId:'nfl:401872992',url:'https://www.seahawks.com/game-day/',states:['current_published_plan','partial_published_plan'],max:7,label:'Seahawks'},
     {key:'titansGuideContext',eventId:'nfl:401872984',url:'https://www.tennesseetitans.com/stadium/gameday/',states:['current_published_plan','partial_published_plan'],max:6,label:'Titans'},
+    {key:'cardinalsContext',eventId:'nfl:401872991',url:'https://www.azcardinals.com/news/how-to-watch-cardinals-vs-lions-week-5',states:['current_exact_game_article','partial_exact_game_article'],max:3,label:'Cardinals'},
     {key:'commandersGuideContext',eventId:'nfl:401872988',url:'https://www.commanders.com/matchups/giants',states:['current_published_plan','partial_published_plan'],max:9,label:'Commanders'},
     {key:'falconsGuideContext',eventId:'nfl:401872993',url:'https://www.atlantafalcons.com/tickets/gameday',states:['current_published_plan','partial_published_plan'],max:9,label:'Falcons'},
     {key:'dolphinsCrucialCatchContext',eventId:'nfl:401872982',url:'https://www.miamidolphins.com/news/dolphins-cancer-challenge-celebrates-100-million-lifetime-raised-at-crucial-catch-game',states:['current_published_plan','partial_published_plan'],max:6,label:'Dolphins'},

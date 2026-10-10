@@ -47,6 +47,7 @@ jobs:
       - run: npm run sync:jets-guide
       - run: npm run sync:seahawks-guide
       - run: npm run sync:titans-guide
+      - run: npm run sync:cardinals-lions
       - run: npm run sync:falcons-guide
       - run: npm run sync:commanders-guide
       - run: npm run sync:dolphins-crucial-catch
