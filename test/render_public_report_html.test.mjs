@@ -5,7 +5,7 @@ import {newerReportRevision} from '../site/report_refresh.js';
 
 test('published report HTML renders cited HTTPS links and escapes untrusted report text',()=>{
   const markdown='# Event <script>alert(1)</script>\n\n- **Source:** [NWS alert](https://api.weather.gov/alerts/123)\n- Publisher says <img src=x onerror=alert(1)>\n';
-  const html=renderPublicReportHtml(markdown,{title:'Event report',generatedAt:'2026-10-10T00:00:00Z',markdownPath:'nfl-123.md',liveContext:{monitoringMode:'near_term_monitoring',venueId:'3810',lat:38.9,lon:-76.8,kickoff:'2026-10-11T17:00:00Z',status:'scheduled'}});
+  const html=renderPublicReportHtml(markdown,{title:'Event report',generatedAt:'2026-10-10T00:00:00Z',markdownPath:'nfl-123.md',liveContext:{monitoringMode:'near_term_monitoring',gameId:'nfl:401872984',home:'Tennessee Titans',away:'Houston Texans',venueId:'3810',lat:38.9,lon:-76.8,kickoff:'2026-10-11T17:00:00Z',status:'scheduled'}});
   assert.ok(html.includes('<a href="https://api.weather.gov/alerts/123"'));
   assert.ok(html.includes('&lt;script&gt;alert(1)&lt;/script&gt;'));
   assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
@@ -15,8 +15,11 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('report_refresh.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
+  assert.ok(html.includes('report_live_game.js?v=20261010-1'));
   assert.ok(html.includes('report_live_public_safety.js?v=20261010-1'));
   assert.ok(html.includes('data-venue-id="3810"'));
+  assert.ok(html.includes('data-game-id="nfl:401872984" data-home="Tennessee Titans" data-away="Houston Texans"'));
+  assert.ok(html.includes('id="direct-game"'));
   assert.ok(html.includes('id="direct-public-safety"'));
   assert.ok(html.includes('data-venue-lat="38.9" data-venue-lon="-76.8"'));
   assert.ok(html.includes('id="direct-nws"'));
