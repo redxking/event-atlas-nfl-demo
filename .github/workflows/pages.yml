@@ -29,6 +29,7 @@ jobs:
       - run: python3 -m unittest discover -s test -p 'test_*.py'
       - run: npm run sync:sports
       - run: npm run build:site
+      - run: npm run build:nfl-window
       - run: npm run sync:cameras
       - run: npm run sync:news
       - run: npm run sync:game-articles

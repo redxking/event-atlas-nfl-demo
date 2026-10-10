@@ -37,6 +37,7 @@
     "sync:seams": "node scripts/sync_faa_seams.mjs",
     "sync:tfr": "node scripts/sync_faa_tfr.mjs",
     "build:site": "node scripts/build_public_site.mjs",
+    "build:nfl-window": "node scripts/build_nfl_demo_window.mjs",
     "build:reports": "node scripts/build_published_nfl_reports.mjs",
     "sync:voting": "node scripts/sync_all_voting.mjs",
     "operator:create": "node scripts/create_local_operator.mjs",
