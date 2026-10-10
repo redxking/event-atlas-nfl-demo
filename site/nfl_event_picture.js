@@ -10,6 +10,7 @@ import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
 import {buildNflReviewQueue} from './nfl_review_queue.js?v=20261010-2';
+import {selectEonetForGame} from './eonet_nfl.js?v=20261010-1';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -19,7 +20,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,njTransitRail,nj511,phillyAlerts,phillyPermits,ntas,news,gameArticles,directGame}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,eonet,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,njTransitRail,nj511,phillyAlerts,phillyPermits,ntas,news,gameArticles,directGame}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -32,12 +33,15 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const road=selectRoadContext(game,roads,now);
   const weather=conditions?.alertsError||!Array.isArray(conditions?.alerts?.features)?null:selectWeatherContext(game,conditions.alerts.features,conditions.at,now);
   const activeGame=game.status==='in progress in source';
+  const kickoff=Date.parse(game.kickoff);
+  const queueMode=inputs.monitoringMode||(activeGame||!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now-18*HOUR&&kickoff-now<=7*24*HOUR?'near_term_monitoring':'season_planning');
   const kickoffForecast=activeGame?selectEventHourForecast(game,forecast,now):selectKickoffForecast(game,forecast,now);
   const stationObservation=conditions?.observation;
   const observationFresh=stationObservation?.state==='current_station_observation'&&fresh(stationObservation.checkedAt,now,10*60000)&&fresh(stationObservation.observedAt,now,90*60000)&&/^https:\/\/api\.weather\.gov\/stations\/[A-Z0-9]{3,6}\/observations\/[^/?#]+$/.test(stationObservation.sourceUrl||'');
   const observationContext=observationFresh?Object.fromEntries(['state','checkedAt','observedAt','stationId','stationName','distanceKm','description','temperatureC','windKmh','humidityPercent','sourceUrl','interpretation'].map(key=>[key,stationObservation[key]])):null;
   const convectiveOutlook=selectSpcForGame(game,spc,now);
   const excessiveRainOutlook=selectWpcRainForGame(game,wpcRain,now);
+  const naturalEventsContext=selectEonetForGame(game,eonet,now,queueMode);
   const policeConnected=['3687','3673','3933','3812','3628','3937'].includes(venueId);
   const policeFresh=police?.state==='retrieved'&&Number.isFinite(police.checkedAt)&&police.checkedAt<=now+60000&&now-police.checkedAt<=(['3812','3628','3937'].includes(venueId)?12*HOUR:15*60000);
   const policeContext=policeFresh?Object.fromEntries(Object.entries(police.context||{}).filter(([key,value])=>key==='gameWindowCurrent'?typeof value==='boolean':key==='windowCount'?value===null||Number.isSafeInteger(value)&&value>=0:['nearby','newestUpdate','periodHours','radiusKm','checkedAt','sourceLatestAt','sourceLagHours'].includes(key)&&Number.isFinite(value)&&value>=0||['start','end'].includes(key)&&/^\d{4}-\d{2}-\d{2}$/.test(value))):null;
@@ -78,6 +82,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('NOAA SPC convective outlook',convectiveOutlook.state,convectiveOutlook.match?.issuedAt||spc?.builtAt,convectiveOutlook.match?`Day ${convectiveOutlook.match.day} ${convectiveOutlook.match.category} categorical regional forecast at the candidate point and listed kickoff. Not a warning, observed condition, or venue impact.`:'Day 1–3 categorical forecast polygons; absence of a point match is not an all-clear.',convectiveOutlook.sourceUrl),
     row('NOAA WPC excessive-rainfall outlook',excessiveRainOutlook.state,excessiveRainOutlook.match?.issuedAt||wpcRain?.builtAt,excessiveRainOutlook.match?`Day ${excessiveRainOutlook.match.day} ${excessiveRainOutlook.match.category} regional flash-flood forecast at the candidate point and listed kickoff. Not a warning, observed flood, or venue impact.`:'Day 1–3 excessive-rainfall forecast polygons; absence of a point match is not an all-clear.',excessiveRainOutlook.sourceUrl),
     row('USGS earthquakes',conditions?.quakesError?'source failed':!conditions?'not yet checked':usgsFresh?'checked':'stale or unavailable',usgsFresh?new Date(conditions.at).toISOString():null,'Magnitude 2.5+ weekly feed; proximity does not establish event impact.','https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson'),
+    row('NASA EONET natural events',naturalEventsContext.state==='current_snapshot'?`${naturalEventsContext.events.length} regional point candidate${naturalEventsContext.events.length===1?'':'s'}`:naturalEventsContext.state==='not_started'?'not screened outside near-term window':'stale or unavailable',naturalEventsContext.asOf,'Latest open-event points within 250 km and dated within seven days. Source curation, point-only geometry and a 500-event query are incomplete; proximity does not establish a current incident, forecast, venue impact, or threat.',naturalEventsContext.sourceUrl),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
     row('NFL publisher headlines',newsContext.state==='current_snapshot'?`${newsContext.publisher}: ${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}`:newsContext.state,newsContext.asOf,'Publisher RSS headlines are team news context. Name matching does not verify game relevance, attendance, venue impact, or a threat.',newsContext.sourceUrl),
@@ -151,8 +156,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(directGameContext&&directGameContext.state!=='checked')gaps.push('The selected-game direct ESPN check is unavailable, stale, or has an identity mismatch; use the dated published snapshot and verify the game source.');
   if(directGameContext?.state==='checked'&&directGameContext.scheduleDiffers)gaps.push('The direct ESPN game-summary date differs from the published schedule; verify kickoff with NFL or host club and repeat event-window screening.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  const kickoff=Date.parse(game.kickoff);
-  const queueMode=inputs.monitoringMode||(game.status==='in progress in source'||!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now-18*HOUR&&kickoff-now<=7*24*HOUR?'near_term_monitoring':'season_planning');
+  if(queueMode==='near_term_monitoring'&&naturalEventsContext.state!=='current_snapshot')gaps.push('NASA EONET natural-event point context is unavailable or older than 12 hours; no negative finding follows.');
   const reviewQueue=buildNflReviewQueue(game,{cues,sources},queueMode,now);
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,naturalEventsContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }

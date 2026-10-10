@@ -16,6 +16,17 @@ test('new source cue is linked only across comparable current checks',()=>{
   assert.equal(diffEventPicture(picture('source failed'),picture('checked',[weatherCue]),null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
 });
 
+test('NASA regional point changes require two current snapshots and preserve provenance',()=>{
+  const point={id:'EONET_42',title:'Wildfire example',distanceKm:68,sourceAt:'2026-10-10T01:00:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/EONET_42/geojson'};
+  const before={...picture('checked'),naturalEventsContext:{state:'current_snapshot',events:[]}};
+  const after={...picture('checked'),naturalEventsContext:{state:'current_snapshot',events:[point]}};
+  const added=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='new_natural_event_point');
+  assert.equal(added?.sourceUrl,point.sourceUrl);
+  assert.match(added.detail,/does not establish current conditions, venue impact, or a threat/);
+  assert.equal(diffEventPicture({...before,naturalEventsContext:{state:'stale_or_unavailable',events:[]}},after,null,null,game,game).some(item=>item.kind==='new_natural_event_point'),false);
+  assert.equal(diffEventPicture(after,{...after,naturalEventsContext:{state:'current_snapshot',events:[{...point,sourceAt:'2026-10-10T02:00:00Z'}]}},null,null,game,game).find(item=>item.kind==='natural_event_point_updated')?.sourceUrl,point.sourceUrl);
+});
+
 test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
   const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
   const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});

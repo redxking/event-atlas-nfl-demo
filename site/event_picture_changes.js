@@ -59,5 +59,13 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const oldRoads=new Set((oldNj.gameDateRoads||[]).map(item=>JSON.stringify([item.title,item.description,item.publishedAt])));
     for(const item of (newNj.gameDateRoads||[]).slice(0,8))if(!oldRoads.has(JSON.stringify([item.title,item.description,item.publishedAt])))changes.push({kind:'new_511nj_road_entry',observedAt,title:item.title.slice(0,200),detail:`511NJ now lists this road entry within 8 km mentioning the game date: ${item.description.slice(0,500)}. Verify its actual time and route effect; a date mention and proximity do not establish game impact or a threat.`,sourceUrl:newNj.sourceUrl});
   }
+  const oldNatural=before.naturalEventsContext,newNatural=after.naturalEventsContext;
+  if(!eventWindowChanged&&oldNatural?.state==='current_snapshot'&&newNatural?.state==='current_snapshot'&&Array.isArray(oldNatural.events)&&Array.isArray(newNatural.events)){
+    const oldPoints=new Map(oldNatural.events.map(item=>[item.id,item]));
+    for(const item of newNatural.events.slice(0,5)){
+      const prior=oldPoints.get(item.id);
+      if(!prior||Date.parse(item.sourceAt)>Date.parse(prior.sourceAt))changes.push({kind:prior?'natural_event_point_updated':'new_natural_event_point',observedAt,title:`NASA EONET: ${item.title}`.slice(0,300),detail:`NASA EONET ${prior?'updated':'listed'} a natural-event point ${item.distanceKm} km from the candidate venue point, dated ${item.sourceAt}. Verify the NASA record and local authority; proximity does not establish current conditions, venue impact, or a threat.`,sourceUrl:item.sourceUrl});
+    }
+  }
   return changes.slice(0,12);
 }
