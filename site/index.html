@@ -4,23 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0a1425">
-  <title>Event Atlas | NFL 2026</title>
+  <title>Event Atlas | U.S. Events</title>
   <link rel="alternate" type="application/atom+xml" title="NFL public-source changes" href="reports/changes.xml">
   <link rel="stylesheet" href="styles.css?v=workspace-1">
   <link rel="stylesheet" href="workspace.css?v=scope-reports-1">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <script src="vendor/leaflet/leaflet.js"></script>
-<script type="module" src="app.js?v=multi-events-1"></script>
+<script type="module" src="app.js?v=event-monitoring-1"></script>
 <script type="module" src="nfl_demo_window.js?v=20261010-1"></script>
 </head>
 <body>
   <a class="skip-link" href="#schedule">Skip to schedule</a>
   <header class="topbar"><div class="brand"><span class="brand-mark">EA</span><span>EVENT ATLAS <small>EVENTS / 2026</small></span></div><div><a class="source-link" href="window-demo.html">Scenario walkthrough ↗</a> · <a class="source-link" href="https://www.nfl.com/schedules/2026/by-week/reg-5" target="_blank" rel="noopener noreferrer">NFL schedule ↗</a></div></header>
   <main id="main-content">
-    <section class="hero"><div><p class="eyebrow">PUBLIC SOURCES / 2026 SEASON</p><h1>NFL event workspace</h1><p class="intro">Select a game to review potential threats and operational concerns. Open source details when you need the supporting evidence.</p></div><div class="hero-status"><span class="pulse"></span><div><strong>Public source snapshot</strong><small id="freshness">Loading schedule…</small></div></div></section>
+    <section class="hero"><div><p class="eyebrow">PUBLIC SOURCES / U.S. EVENTS</p><h1>Event workspace</h1><p class="intro">Select a game to review potential threats and operational concerns. Open source details when you need the supporting evidence.</p></div><div class="hero-status"><span class="pulse"></span><div><strong>Public source snapshot</strong><small id="freshness">Loading schedule…</small></div></div></section>
     <section class="metrics" aria-label="Snapshot metrics"><div><span>U.S. GAMES</span><strong id="game-count">—</strong></div><div><span>SOURCE VENUES</span><strong id="venue-count">—</strong></div><div><span>NEXT KICKOFF</span><strong id="next-kickoff">—</strong></div><div><span>SOURCE STATE</span><strong id="source-state">—</strong></div></section>
     <nav class="workspace-nav" aria-label="Workspace sections"><a href="#schedule">Schedule</a><a href="#briefing">Event briefing</a></nav>
-    <section class="event-overview-map" id="map-panel" aria-label="NFL events map"><div class="section-head"><div><h2>Explore NFL events</h2><p>Select a stadium marker to see its upcoming games and open a game briefing.</p></div></div><div id="venue-map" aria-label="Interactive map of NFL events"><p>Loading event locations…</p></div><p id="overview-map-status" role="status"></p></section>
+    <section class="event-overview-map" id="map-panel" aria-label="U.S. events map"><div class="section-head"><div><h2>Explore NFL events</h2><p>Select a stadium marker to see its upcoming games and open a game briefing.</p></div></div><div id="venue-map" aria-label="Interactive map of NFL events"><p>Loading event locations…</p></div><p id="overview-map-status" role="status"></p></section>
     <section class="workspace" id="schedule"><div class="game-column"><div class="section-head"><div><p class="eyebrow">01 / SCHEDULE</p><h2>Find an event</h2></div><span id="result-count" class="count">—</span></div><p class="timezone-note">Schedule times shown in America/New_York (Eastern); TBD kickoffs remain unconfirmed.</p><div class="filters"><input id="search" type="search" placeholder="Search event, venue, or city" aria-label="Search events"><select id="week" aria-label="Filter week"><option value="">All weeks</option></select><select id="time" aria-label="Filter time"><option value="upcoming">Upcoming first</option><option value="all">Entire season</option></select></div><div id="games" class="game-list" aria-live="polite"><p class="empty">Loading games…</p></div></div><div class="detail-column" id="briefing"><div class="section-head"><div><p class="eyebrow">02 / EVENT CONTEXT</p><h2>Event briefing</h2></div></div><div id="detail" class="detail"><p class="empty">Select a game to inspect the published schedule and public conditions.</p></div></div></section>
     <details class="workspace-disclosure" id="window-panel" hidden><summary>Two-week schedule & geographic coverage</summary><section class="demo-window" id="demo-window" aria-label="Complete two-week NFL demonstration schedule"><p>Loading two-week NFL schedule and geographic coverage…</p></section></details>
     <details class="workspace-disclosure" id="source-changes" hidden><summary>Published source changes</summary><section class="boundary" aria-label="Latest published source changes"><p class="eyebrow">NEAR-TERM GAMES / PUBLIC SOURCE CHANGES</p><div id="published-changes"><p>Loading change feed…</p></div></section></details>

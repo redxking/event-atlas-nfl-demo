@@ -27,7 +27,7 @@ export function createGeographicExplorer({openGame,onScopeChange}){
  function navigate(next){Object.assign(scope,next);typeSelect.value=scope.eventType||'';container.querySelector('[aria-label="From event date"]').value=scope.start;container.querySelector('[aria-label="Through event date"]').value=scope.end;currentEvent='';showWorkspaceView('overview',{record:false});history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();window.scrollTo({top:0,behavior:'instant'});}
  function makeTrail(area,venueName){
   const item=(label,next)=>({label,go:()=>navigate(next)});
-  const trail=[item('United States',{...area,region:'',state:'',venue:'',eventType:''})];
+  const trail=[item('United States',{...area,region:'',state:'',venue:''})];
   if(area.region)trail.push(item('FEMA Region '+area.region,{...area,state:'',venue:''}));
   if(area.state)trail.push(item(area.state,{...area,venue:''}));
   if(area.venue)trail.push(item(venueName||games.find(g=>g.venue.id===area.venue)?.venue.name||'Venue',{...area}));
