@@ -1,3 +1,4 @@
+import {selectSofiContext} from './sofi_context.js';
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-98';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
@@ -16,6 +17,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
   const ntasCurrent=inputs.ntas?.status==='ok'&&Array.isArray(inputs.ntas.active)&&Number.isFinite(Date.parse(inputs.ntas.retrievedAt))&&now-Date.parse(inputs.ntas.retrievedAt)>=-60000&&now-Date.parse(inputs.ntas.retrievedAt)<=12*3600000;
   const news=selectNflNews(game,inputs.news,now);
   const bundle={
+    ...selectSofiContext(game,inputs,now),
     schema:'event-atlas.public-evidence-bundle.v1',
     status:'unreviewed_public_source_export',
     generatedAt:new Date(now).toISOString(),

@@ -11,11 +11,6 @@ import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from '../site/mbt
 import {fetchSelectedGame} from '../site/espn_game_summary.js';
 import {fetchNwsStationObservation} from '../site/nws_observation.js';
 import {calfireCountyContext} from '../site/calfire_active.js';
-import {selectChargersTheme} from '../site/chargers_themes.js';
-import {selectMetroSofiPlan} from '../site/metro_sofi_plan.js';
-import {selectMetroI105Notice} from '../site/metro_i105_notice.js';
-import {selectSofiEventPage} from '../site/sofi_event_pages.js';
-import {selectInglewoodAlerts} from '../site/inglewood_alerts.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
@@ -128,11 +123,6 @@ for(const game of games){
     :[null,{transit:null,transitSchedule:null},null];
   const bundle=buildNflEvidenceBundle(game,{...inputs,monitoringMode,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
   bundle.calfireRegional=monitoringMode==='near_term_monitoring'?calfireCountyContext(inputs.calfire,game.venue.id,Date.parse(bundle.generatedAt)):null;
-  bundle.chargersTheme=selectChargersTheme(game,inputs.chargersThemes,Date.parse(bundle.generatedAt));
-  bundle.metroSofiPlan=selectMetroSofiPlan(game,inputs.metroSofiPlan,Date.parse(bundle.generatedAt));
-  bundle.metroI105Notice=selectMetroI105Notice(game,inputs.metroI105Notice,Date.parse(bundle.generatedAt));
-  bundle.sofiVenueEvent=selectSofiEventPage(game,inputs.sofiEventPages,Date.parse(bundle.generatedAt));
-  bundle.inglewoodAlerts=selectInglewoodAlerts(game,inputs.inglewoodAlerts,Date.parse(bundle.generatedAt));
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){
