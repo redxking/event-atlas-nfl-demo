@@ -36,7 +36,7 @@ import {selectNflNews} from './nfl_news_context.js?v=20261010-4';
 import {shouldAdoptPublishedSnapshot,validPublishedSnapshotValue} from './published_snapshot_refresh.js?v=20261010-2';
 import {seattleFireAggregateQuery,seattleFireMetadataUrl,seattleFireDataset,summarizeSeattleFireAggregate} from './seattle_fire_aggregate.js?v=20261010-2';
 import {nashvillePoliceLayer,nashvillePolicePage,validateNashvillePoliceCount} from './nashville_police_aggregate.js?v=20261010-1';
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-36';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-37';
 import {fetchSelectedGame} from './espn_game_summary.js?v=20261010-2';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);

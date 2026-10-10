@@ -7,7 +7,7 @@ const allMode=(items)=>items.every(item=>item?.dataMode===EXERCISE_MODE);
 
 export function validateExerciseCatalog(catalog){
   if(catalog?.schema!==EXERCISE_SCHEMA||catalog.dataMode!==EXERCISE_MODE||!isText(catalog.banner,300)||!isText(catalog.seed,100)||!validTime(catalog.clock)||!Array.isArray(catalog.sourceCatalog)||catalog.sourceCatalog.length<6||catalog.sourceCatalog.length>30||!Array.isArray(catalog.scenarios)||catalog.scenarios.length<3||catalog.scenarios.length>12)throw Error('Invalid exercise catalog');
-  if(!allMode(catalog.sourceCatalog)||new Set(catalog.sourceCatalog.map(item=>item.id)).size!==catalog.sourceCatalog.length||catalog.sourceCatalog.some(item=>!/^sx-[a-z0-9-]+$/.test(item.id)||!isText(item.name,100)||!item.name.startsWith('Fictional')||!isText(item.kind,80)))throw Error('Invalid fictional source catalog');
+  if(!allMode(catalog.sourceCatalog)||new Set(catalog.sourceCatalog.map(item=>item.id)).size!==catalog.sourceCatalog.length||catalog.sourceCatalog.some(item=>!/^sx-[a-z0-9-]+$/.test(item.id)||!isText(item.name,100)||!(item.name.startsWith('Fictional')||item.state==='not_connected_in_demo'&&item.name.endsWith('placeholder'))||!isText(item.kind,80)))throw Error('Invalid fictional source catalog');
   const sourceIds=new Set(catalog.sourceCatalog.map(item=>item.id));
   if(!allMode(catalog.scenarios)||new Set(catalog.scenarios.map(item=>item.id)).size!==catalog.scenarios.length)throw Error('Invalid exercise scenarios');
   for(const scenario of catalog.scenarios){

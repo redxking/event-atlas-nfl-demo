@@ -168,6 +168,17 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     for(const item of oldActive.entries)if(!next.has(item.id))changes.push({kind:'city_index_item_unlisted',observedAt,title:`NOLA Ready index no longer lists: ${item.title}`,detail:'The newer city index no longer lists this item. This does not prove the event or incident ended; verify its page and the issuing authority.',sourceUrl:item.url});
   }
   const oldUpdates=before.nolaReadyUpdatesContext,newUpdates=after.nolaReadyUpdatesContext;
+  const oldSpd=before.seattleSpdContext,newSpd=after.seattleSpdContext;
+  const spdArticle=item=>typeof item?.title==='string'&&item.title.length>=3&&item.title.length<=180&&Number.isFinite(Date.parse(item.publishedAt))&&/^https:\/\/spdblotter\.seattle\.gov\/20\d\d\/\d\d\/\d\d\/[a-z0-9-]+\/$/.test(item.url||'');
+  const eventNamedInTitle=title=>/\b(?:Seahawks|49ers|Lumen Field)\b/i.test(title);
+  if(!eventWindowChanged&&currentGame?.venue?.id==='3673'&&oldSpd?.state==='current_citywide_headlines'&&newSpd?.state==='current_citywide_headlines'&&oldSpd.sourceUrl==='https://spdblotter.seattle.gov/feed/'&&newSpd.sourceUrl===oldSpd.sourceUrl&&Number.isFinite(Date.parse(oldSpd.asOf))&&Date.parse(newSpd.asOf)>Date.parse(oldSpd.asOf)&&Array.isArray(oldSpd.recent)&&Array.isArray(newSpd.recent)&&oldSpd.recent.length<=10&&newSpd.recent.length<=10&&oldSpd.recent.every(spdArticle)&&newSpd.recent.every(spdArticle)){
+    const previous=new Map(oldSpd.recent.map(item=>[item.url,item]));
+    for(const item of newSpd.recent){
+      if(!eventNamedInTitle(item.title))continue;
+      const old=previous.get(item.url);
+      if(!old||old.title!==item.title||old.publishedAt!==item.publishedAt)changes.push({kind:old?'spd_event_title_revised':'spd_event_title_added',observedAt,title:`SPD Blotter title names a team or venue: ${item.title}`.slice(0,300),detail:`Official Seattle Police Blotter RSS lists this title as published ${item.publishedAt}. The title names a team or Lumen Field, but does not verify that the article concerns this game, a current incident, stadium impact, or a threat. Open the source and verify scope.`,sourceUrl:item.url});
+    }
+  }
   const oldOem=before.nashvilleOemNewsContext,newOem=after.nashvilleOemNewsContext;
   const oldNdop=before.nashvilleTitansClosureContext,newNdop=after.nashvilleTitansClosureContext;
   const oldWego=before.wegoTitansAlertContext,newWego=after.wegoTitansAlertContext;

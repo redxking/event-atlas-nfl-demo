@@ -69,6 +69,23 @@ test('published state retains dated wildfire and PM2.5 observations for the next
   assert.equal(result.newChangeCount,1);
 });
 
+test('Seattle police title changes enter the feed only after comparable checks and a team or venue title match',()=>{
+  const seattle={...game,id:'nfl:401872992',venue:{id:'3673'}};
+  const item=(title,slug,publishedAt='2026-10-10T00:15:00Z')=>({title,publishedAt,url:`https://spdblotter.seattle.gov/2026/10/10/${slug}/`});
+  const spd=(asOf,recent,state='current_citywide_headlines')=>({state,asOf,sourceUrl:'https://spdblotter.seattle.gov/feed/',recent});
+  const make=context=>({picture:{eventId:seattle.id,sources:[{name:'Seattle Police dated public headlines',state:context.state,sourceUrl:context.sourceUrl}],cues:[],seattleSpdContext:context}});
+  const first=buildPublishedReportState(make(spd('2026-10-10T01:00:00Z',[item('Ballard collision','ballard-collision')])),seattle,null,null,at-3600000);
+  assert.equal(first.newChangeCount,0);
+  const next=buildPublishedReportState(make(spd('2026-10-10T02:00:00Z',[item('Seahawks game traffic plan','seahawks-game-traffic','2026-10-10T01:15:00Z'),item('Ballard collision','ballard-collision')])),seattle,null,first,at);
+  assert.equal(next.changes.find(change=>change.kind==='spd_event_title_added')?.sourceUrl,'https://spdblotter.seattle.gov/2026/10/10/seahawks-game-traffic/');
+  const unrelated=buildPublishedReportState(make(spd('2026-10-10T03:00:00Z',[item('Another Ballard update','another-ballard'),item('Seahawks game traffic plan','seahawks-game-traffic','2026-10-10T01:15:00Z')])),seattle,null,next,at+3600000);
+  assert.equal(unrelated.newChangeCount,0);
+  const failed=buildPublishedReportState(make(spd('2026-10-10T04:00:00Z',[item('Lumen Field notice','lumen-field-notice')],'stale_or_unavailable')),seattle,null,unrelated,at+2*3600000);
+  assert.equal(failed.changes.filter(change=>change.kind==='spd_event_title_added').length,1);
+  assert.equal(failed.newChangeCount,1);
+  assert.equal(failed.changes[0].kind,'source_status_changed');
+});
+
 test('repeated coverage flaps cannot evict a substantive city revision from bounded history',()=>{
   const substantive={kind:'city_regional_notice_revised',title:'Lakefront festival hours revised',detail:'Check city source',observedAt:'2026-10-10T02:00:00Z',sourceUrl:'https://ready.nola.gov/incident/'};
   const status=Array.from({length:40},(_,index)=>({kind:'source_status_changed',title:index%2?'NOPD calls: checked → stale':'NOPD calls: stale → checked',detail:'Check source',observedAt:new Date(Date.parse('2026-10-10T03:00:00Z')+index*60000).toISOString(),sourceUrl:'https://data.nola.gov/'})).reverse();
