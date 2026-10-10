@@ -52,3 +52,19 @@ test('published runs record changes in an identity-checked direct game result',(
   const next=buildPublishedReportState(changed,game,null,baseline,at);
   assert.equal(next.changes.find(item=>item.kind==='direct_game_state_changed')?.sourceUrl,direct.sourceUrl);
 });
+
+test('published state retains dated wildfire and PM2.5 observations for the next hourly comparison',()=>{
+  const sourceUrl='https://ofmpub.epa.gov/rsig/rsigserver?SERVICE=wcs&COVERAGE=airnow.pm25';
+  const air=(asOf,observedAt,value)=>({state:'current_station_observation',asOf,sourceUrl,observation:{stationId:'123',distanceKm:12,pm25UgM3:value,observedAt,sourceUrl}});
+  const base=bundle('checked');
+  base.picture.airQualityContext=air('2026-10-10T01:00:00Z','2026-10-10T00:00:00Z',5);
+  base.picture.wildfireContext={state:'current_snapshot',asOf:'2026-10-10T01:00:00Z',events:[]};
+  const prior=buildPublishedReportState(base,game,null,null,at-3600000);
+  assert.equal(prior.picture.airQualityContext.observation.pm25UgM3,5);
+  const next=bundle('checked');
+  next.picture.airQualityContext=air('2026-10-10T02:00:00Z','2026-10-10T01:00:00Z',11);
+  next.picture.wildfireContext={state:'current_snapshot',asOf:'2026-10-10T02:00:00Z',events:[]};
+  const result=buildPublishedReportState(next,game,null,prior,at);
+  assert.equal(result.changes.find(item=>item.kind==='pm25_observation_changed')?.sourceUrl,sourceUrl);
+  assert.equal(result.newChangeCount,1);
+});

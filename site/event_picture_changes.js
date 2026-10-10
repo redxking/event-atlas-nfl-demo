@@ -21,6 +21,23 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const prior=oldRows.get(name);
     if(prior&&prior.state!==next.state)changes.push({kind:'source_status_changed',observedAt,title:`${name}: ${prior.state} → ${next.state}`,detail:'Source coverage or screening status changed; verify the linked publisher before acting.',sourceUrl:next.sourceUrl||prior.sourceUrl||null});
   }
+  const oldFire=before.wildfireContext,newFire=after.wildfireContext;
+  if(!eventWindowChanged&&oldFire?.state==='current_snapshot'&&newFire?.state==='current_snapshot'&&Number.isFinite(Date.parse(oldFire.asOf))&&Date.parse(newFire.asOf)>Date.parse(oldFire.asOf)&&Array.isArray(oldFire.events)&&Array.isArray(newFire.events)){
+    const priorById=new Map(oldFire.events.map(item=>[item.id,item]));
+    for(const item of newFire.events.slice(0,5)){
+      if(!Number.isInteger(item?.id)||item.sourceUrl!==`https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0/${item.id}`||!Number.isFinite(item.distanceKm)||item.distanceKm<0||item.distanceKm>150)continue;
+      const prior=priorById.get(item.id),updated=prior&&Date.parse(item.updatedAt)>Date.parse(prior.updatedAt)&&(item.acres!==prior.acres||item.containedPercent!==prior.containedPercent||item.lat!==prior.lat||item.lon!==prior.lon);
+      if(!prior||updated)changes.push({kind:prior?'wildfire_point_revised':'new_wildfire_point',observedAt,title:`NIFC wildfire point: ${item.name}`.slice(0,300),detail:`${prior?'Changed source fields for':'Newly displayed in the bounded sample:'} NIFC wildfire point ${item.distanceKm} km from the candidate venue point; source updated ${item.updatedAt}. Confirm the current incident with the responsible fire authority. This point is not a perimeter, smoke measurement, venue impact, or threat finding.`,sourceUrl:item.sourceUrl});
+    }
+  }
+  const oldAir=before.airQualityContext,newAir=after.airQualityContext;
+  if(!eventWindowChanged&&oldAir?.state==='current_station_observation'&&newAir?.state==='current_station_observation'&&Number.isFinite(Date.parse(oldAir.asOf))&&Date.parse(newAir.asOf)>Date.parse(oldAir.asOf)){
+    const first=oldAir.observation,next=newAir.observation;
+    if(first&&next&&first.sourceUrl===oldAir.sourceUrl&&next.sourceUrl===newAir.sourceUrl&&/^https:\/\/ofmpub\.epa\.gov\/rsig\/rsigserver\?/.test(next.sourceUrl||'')&&/^\d{1,8}$/.test(next.stationId||'')&&Number.isFinite(next.pm25UgM3)&&Number.isFinite(first.pm25UgM3)&&Number.isFinite(next.distanceKm)&&next.distanceKm>=0&&next.distanceKm<=50&&Date.parse(next.observedAt)>Date.parse(first.observedAt)){
+      if(first.stationId!==next.stationId)changes.push({kind:'pm25_station_changed',observedAt,title:'Nearby EPA PM2.5 station changed',detail:`The nearest current station changed from ${first.stationId} to ${next.stationId}; the new station is ${next.distanceKm} km from the candidate venue point and measured ${next.pm25UgM3} µg/m³ at ${next.observedAt}. Values from different stations are not a venue trend. Verify the source and local conditions.`,sourceUrl:next.sourceUrl});
+      else if(Math.abs(next.pm25UgM3-first.pm25UgM3)>=5)changes.push({kind:'pm25_observation_changed',observedAt,title:'Nearby EPA PM2.5 station reading changed',detail:`Station ${next.stationId}, ${next.distanceKm} km from the candidate venue point, changed from ${first.pm25UgM3} to ${next.pm25UgM3} µg/m³ between ${first.observedAt} and ${next.observedAt}. The 5 µg/m³ display threshold is a product review filter, not a health threshold. Confirm with the local air-quality authority; this does not attribute smoke or establish stadium impact.`,sourceUrl:next.sourceUrl});
+    }
+  }
   if(!eventWindowChanged)for(const spec of cueSources){
     if(!spec.states.includes(oldRows.get(spec.name)?.state)||!spec.states.includes(newRows.get(spec.name)?.state))continue;
     const matches=cue=>cue.type===spec.type&&(!spec.host||cueHost(cue)===spec.host);

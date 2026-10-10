@@ -40,6 +40,36 @@ test('USGS nearby earthquake changes require two successful newer checks',()=>{
   assert.equal(diffEventPicture(after,revised,null,null,game,game).find(item=>item.kind==='usgs_earthquake_revised')?.sourceUrl,quake.sourceUrl);
 });
 
+test('NIFC change feed distinguishes a new bounded point from a material source revision',()=>{
+  const point={id:42,name:'Example Fire',distanceKm:12,lat:34,lon:-118,updatedAt:'2026-10-10T01:00:00Z',acres:10,containedPercent:20,sourceUrl:'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0/42'};
+  const before={...picture('checked'),wildfireContext:{state:'current_snapshot',asOf:'2026-10-10T01:10:00Z',events:[]}};
+  const after={...picture('checked'),wildfireContext:{state:'current_snapshot',asOf:'2026-10-10T02:10:00Z',events:[point]}};
+  const added=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='new_wildfire_point');
+  assert.equal(added?.sourceUrl,point.sourceUrl);
+  assert.match(added.detail,/not a perimeter, smoke measurement, venue impact, or threat finding/);
+  assert.equal(diffEventPicture({...before,wildfireContext:{...before.wildfireContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='new_wildfire_point'),false);
+  const stamp={...point,updatedAt:'2026-10-10T02:00:00Z'};
+  assert.equal(diffEventPicture(after,{...after,wildfireContext:{...after.wildfireContext,asOf:'2026-10-10T03:10:00Z',events:[stamp]}},null,null,game,game).some(item=>item.kind==='wildfire_point_revised'),false);
+  const revised={...stamp,acres:20};
+  assert.equal(diffEventPicture(after,{...after,wildfireContext:{...after.wildfireContext,asOf:'2026-10-10T03:10:00Z',events:[revised]}},null,null,game,game).find(item=>item.kind==='wildfire_point_revised')?.sourceUrl,point.sourceUrl);
+});
+
+test('EPA PM2.5 change feed uses dated same-station values and a review threshold',()=>{
+  const sourceUrl='https://ofmpub.epa.gov/rsig/rsigserver?SERVICE=wcs&COVERAGE=airnow.pm25';
+  const station={stationId:'123',pm25UgM3:5,distanceKm:12,observedAt:'2026-10-10T01:00:00Z',sourceUrl};
+  const before={...picture('checked'),airQualityContext:{state:'current_station_observation',asOf:'2026-10-10T01:10:00Z',sourceUrl,observation:station}};
+  const next={...before,airQualityContext:{...before.airQualityContext,asOf:'2026-10-10T02:10:00Z',observation:{...station,pm25UgM3:11,observedAt:'2026-10-10T02:00:00Z'}}};
+  const changed=diffEventPicture(before,next,null,null,game,game).find(item=>item.kind==='pm25_observation_changed');
+  assert.equal(changed?.sourceUrl,sourceUrl);
+  assert.match(changed.detail,/product review filter, not a health threshold/);
+  const small={...next,airQualityContext:{...next.airQualityContext,observation:{...next.airQualityContext.observation,pm25UgM3:8}}};
+  assert.equal(diffEventPicture(before,small,null,null,game,game).some(item=>item.kind==='pm25_observation_changed'),false);
+  assert.equal(diffEventPicture({...before,airQualityContext:{...before.airQualityContext,state:'stale_or_unavailable'}},next,null,null,game,game).some(item=>item.kind==='pm25_observation_changed'),false);
+  assert.equal(diffEventPicture(before,{...next,airQualityContext:{...next.airQualityContext,observation:{...next.airQualityContext.observation,observedAt:station.observedAt}}},null,null,game,game).some(item=>item.kind==='pm25_observation_changed'),false);
+  const moved={...next,airQualityContext:{...next.airQualityContext,observation:{...next.airQualityContext.observation,stationId:'456'}}};
+  assert.equal(diffEventPicture(before,moved,null,null,game,game).find(item=>item.kind==='pm25_station_changed')?.sourceUrl,sourceUrl);
+});
+
 test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
   const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
   const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});
