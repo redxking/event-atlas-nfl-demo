@@ -6,15 +6,25 @@ import {MN_CAMERA_URL,parseMinnesotaCameras,requireSourceAge} from '../lib/minne
 import {MASSDOT_CCTV_LAYER,massdotCameraQuery,parseMassdotCameraInventory} from '../lib/massdot_camera_inventory.mjs';
 import {TXDOT_CCTV_LAYER,txdotCameraQuery,parseTxdotCameraInventory} from '../lib/txdot_camera_inventory.mjs';
 import {NJTA_CAMERA_PAGE,parseNjtaCameraInventory} from '../lib/njta_camera_inventory.mjs';
+import {TDOT_CONFIG_URL,TDOT_CAMERA_API,tdotCameraRequestConfig,parseTdotCameraInventory} from '../lib/tdot_camera_inventory.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX|NJ), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX|NJ|TN), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
+try{
+  const config=await get(TDOT_CONFIG_URL);
+  const request=tdotCameraRequestConfig(config);
+  const response=await fetch(request.url,{headers:{...request.headers,'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});
+  if(!response.ok)throw Error(`HTTP ${response.status}`);
+  const records=parseTdotCameraInventory(await response.json());
+  cameras.push(...records);
+  sources.push({id:'tdot-smartway-cameras',url:TDOT_CAMERA_API,status:'ok',records:records.length,imageryAccess:'public roadway HLS; playback on demand; no stadium field of view verified'});
+}catch(error){sources.push({id:'tdot-smartway-cameras',url:TDOT_CAMERA_API,status:'failed',error:String(error)})}
 try{
   const response=await fetch(NJTA_CAMERA_PAGE,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata',Accept:'text/html'},signal:AbortSignal.timeout(25000)});
   if(!response.ok)throw Error(`HTTP ${response.status}`);
@@ -183,7 +193,8 @@ try{
 if(sources.every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
 const byVenue=selectCameraCoverage(venues,cameras,sources);
 const caltransStreams=Object.values(byVenue).flat().filter(item=>item.agency==='Caltrans'&&item.videoUrl);
-const streamChecks=new Map(await Promise.all([...new Set(caltransStreams.map(item=>item.videoUrl))].map(async videoUrl=>{
+const tdotStreams=Object.values(byVenue).flat().filter(item=>item.agency==='TDOT SmartWay'&&item.videoUrl);
+const streamChecks=new Map(await Promise.all([...new Set([...caltransStreams,...tdotStreams].map(item=>item.videoUrl))].map(async videoUrl=>{
   try{
     const response=await fetch(videoUrl,{method:'HEAD',signal:AbortSignal.timeout(8000)});
     const contentType=response.headers.get('content-type')||'';
@@ -191,6 +202,10 @@ const streamChecks=new Map(await Promise.all([...new Set(caltransStreams.map(ite
   }catch{return [videoUrl,false]}
 })));
 for(const item of caltransStreams){
+  item.videoPlaylistStatus=streamChecks.get(item.videoUrl)?'playlist_reachable_at_sync':'playlist_unavailable_at_sync';
+  if(item.videoPlaylistStatus!=='playlist_reachable_at_sync')delete item.videoUrl;
+}
+for(const item of tdotStreams){
   item.videoPlaylistStatus=streamChecks.get(item.videoUrl)?'playlist_reachable_at_sync':'playlist_unavailable_at_sync';
   if(item.videoPlaylistStatus!=='playlist_reachable_at_sync')delete item.videoUrl;
 }

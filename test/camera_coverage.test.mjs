@@ -31,6 +31,13 @@ test('Georgia DOT metadata covers the Atlanta venue only when the agency source 
   assert.equal(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'ok'}]).atlanta.length,1);
 });
 
+test('TDOT Nashville camera inventory covers Nissan Stadium only when source succeeds',()=>{
+  const venue={id:'3810',address:'Nashville, TN, USA',lat:36.1664,lon:-86.7714};
+  const camera={id:'tdot-smartway-3219',agency:'TDOT SmartWay',lat:36.17,lon:-86.77};
+  assert.deepEqual(selectCameraCoverage([venue],[camera],[{id:'tdot-smartway-cameras',status:'failed'}]),{});
+  assert.equal(selectCameraCoverage([venue],[camera],[{id:'tdot-smartway-cameras',status:'ok'}])['3810'].length,1);
+});
+
 test('public video links stay on their agency HLS hosts and camera IDs',()=>{
   const snapshot=JSON.parse(fs.readFileSync(new URL('../site/cameras.json',import.meta.url)));
   const items=snapshot.byVenue?.['3798']||[];
@@ -52,11 +59,17 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
       assert.match(item.id,/^caltrans-([47])-\d{1,6}$/);
       const district=item.id.split('-')[1];
       assert.match(item.videoUrl,new RegExp(`^https://wzmedia\\.dot\\.ca\\.gov/D${district}/[A-Za-z0-9_-]+\\.stream/playlist\\.m3u8$`));
-    }else{
+    }else if(item.agency==='NJTA'){
       assert.equal(item.agency,'NJTA');
       assert.match(item.id,/^njta-\d{1,6}$/);
       assert.match(item.videoUrl,/^https:\/\/wink\.njta\.com\/\d{1,4}\/public\/hls\/[A-Za-z0-9-]+_nj\.m3u8$/);
       assert.equal(item.viewerUrl,'https://www.njta.gov/travel-resources/camera-list/');
+    }else{
+      assert.equal(item.agency,'TDOT SmartWay');
+      assert.equal(item.inService,true);
+      assert.match(item.id,/^tdot-smartway-\d{1,6}$/);
+      assert.match(item.videoUrl,/^https:\/\/mcleansfs[1-9]\d*\.us-east-1\.skyvdn\.com\/rtplive\/R3_\d{3}\/playlist\.m3u8$/);
+      assert.match(item.viewerUrl,/^https:\/\/smartway\.tn\.gov\/allcams\/camera\/\d{1,6}$/);
     }
   }
 });
