@@ -12,3 +12,23 @@ test('unsafe URLs are not rendered as findings and empty scopes are explicit',()
 test('repeated cues in one game do not duplicate its affected-event entry',()=>{const report=buildScopeThreatReport({title:'Test',level:'event',games:[games[0]],summaries:new Map([['a',{...summary,items:[cue,cue]}]])});assert.equal(report.findings[0].games.length,1);});
 
 test('rollup identifies actual venues, decisions and unavailable sources',()=>{const report=buildScopeThreatReport({title:'Region',level:'region',games,summaries:new Map([['a',{...summary,sources:[{name:'NWS alerts',state:'source failed',detail:'Connection unavailable'}]}]])});assert.equal(report.eventRollup.length,1);assert.equal(report.eventRollup[0].game.id,'a');assert.equal(report.eventRollup[0].priority,'Prompt weather review');assert.match(report.sections[1].paragraphs.join(' '),/Venue 1/);assert.match(report.sections[3].paragraphs.join(' '),/NWS alerts: source failed for Game A/);assert.doesNotMatch(report.sections[1].paragraphs.join(' '),/Venue 2/);});
+
+test('related access findings form one venue decision without losing source records',()=>{
+ const roads=[{...cue,sourceId:'r1',domain:'road access',trigger:'Road A',action:'Confirm Road A'},{...cue,sourceId:'r2',domain:'pregame access',trigger:'Road B',action:'Confirm Road B'}];
+ const report=buildScopeThreatReport({title:'Event',level:'event',games:[games[0]],summaries:new Map([['a',{label:'2 concerns',items:roads,urgent:[]} ]])});
+ assert.equal(report.findings.length,2);assert.equal(report.decisions.length,1);
+ assert.deepEqual(report.decisions[0].evidenceNumbers,[1,2]);assert.deepEqual(report.decisions[0].verificationSteps,['Confirm Road A','Confirm Road B']);
+ assert.match(report.decisions[0].interpretation,/do not establish independent corroboration/);
+});
+test('regional coordination keeps different venue decisions and weather tasks separate',()=>{
+ const road={...cue,sourceId:'r1',domain:'road access'};
+ const weather={...cue,sourceId:'w1'};
+ const report=buildScopeThreatReport({title:'Region',level:'region',games,summaries:new Map([['a',{label:'2 concerns',items:[road,weather],urgent:[weather]}],['b',{label:'1 concern',items:[road],urgent:[]} ]])});
+ assert.equal(report.findings.length,2);assert.equal(report.decisions.length,3);
+ assert.ok(report.decisions.every(d=>d.games.every(g=>g.venue.id===d.venue.id)));
+});
+test('same venue across dates shares one task while retaining both game identities',()=>{
+ const atSameVenue={...games[1],venue:games[0].venue};
+ const report=buildScopeThreatReport({title:'Venue',level:'venue',games:[games[0],atSameVenue],summaries:new Map([['a',summary],['b',summary]])});
+ assert.equal(report.decisions.length,1);assert.equal(report.decisions[0].games.length,2);assert.equal(report.decisions[0].findings.length,1);
+});

@@ -8,3 +8,19 @@ export function findingDecision(cue){
  if(['road access','regional road access','pregame access'].includes(domain))return {...common,impact:'If the listed segment serves an event route during its operating period, the condition may delay arrivals, departures or emergency access.',owner:'Venue transport lead with the road authority',verify:'Confirm that the record remains active, overlaps actual event travel and affects an approved attendee or emergency route.',escalate:'The road authority confirms an affected event route and the venue identifies inadequate diversion capacity or blocked emergency access.',close:'The condition ends or a verified diversion preserves event access and emergency passage.'};
  return {...common,impact:'The available record does not establish a specific operational consequence.',owner:'Event lead and the responsible source authority',verify:'Confirm what occurred, where, when and how it relates to this event.',escalate:'Corroborated evidence establishes an event-relevant hazard or explicit threat requiring a response under the event plan.',close:'The source corrects or withdraws the finding, or the event lead verifies resolution.'};
 }
+
+// Coordination groups share a venue and operational task, not a claim of common cause.
+export function groupFindingDecisions(findings){
+ const groups=new Map();
+ findings.forEach((cue,index)=>{
+  const family=['road access','regional road access','pregame access'].includes(cue.domain)?'road access':cue.domain||'other';
+  for(const game of cue.games||[]){
+   const key=JSON.stringify([game.venue.id,family]);
+   if(!groups.has(key))groups.set(key,{title:({ 'road access':'Confirm event access routes','transit access':'Confirm attendee transport service','weather alert':'Review official weather protection instructions','weather forecast':'Review event weather thresholds'})[family]||'Verify reported event concern',venue:game.venue,games:[],findings:[],evidenceNumbers:[],...findingDecision(cue)});
+   const group=groups.get(key);
+   if(!group.games.some(g=>g.id===game.id))group.games.push(game);
+   if(!group.findings.includes(cue)){group.findings.push(cue);group.evidenceNumbers.push(index+1);}
+  }
+ });
+ return [...groups.values()].map(group=>({...group,finding:group.findings[0],verificationSteps:[...new Set(group.findings.map(c=>c.action||group.verify))],interpretation:'Grouped for coordination at this venue. Separate records do not establish independent corroboration or a shared cause.'}));
+}
