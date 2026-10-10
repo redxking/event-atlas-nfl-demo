@@ -34,6 +34,7 @@ jobs:
       - run: npm run sync:police
       - run: npm run sync:charlotte-police
       - run: npm run sync:denver-police
+      - run: npm run sync:philly-alerts
       - run: npm run sync:ntas
       - run: npm run sync:septa
       - run: npm run sync:seams

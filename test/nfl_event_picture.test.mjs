@@ -31,6 +31,16 @@ test('Denver delayed crime aggregate appears as context without generating a thr
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
 });
 
+test('Philadelphia citywide notices are cited as city context without event impact or threat cue',()=>{
+  const phillyGame={...game,venue:{id:'3806',lat:39.90089,lon:-75.16776}};
+  const context={state:'retrieved',checkedAt:now,totalReturned:1,invalidCount:0,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1',alerts:[{title:'City notice',detail:'Citywide information',url:'https://www.phila.gov/notice'}]};
+  const picture=buildNflEventPicture(phillyGame,{schedule:inputs.schedule,phillyAlerts:{status:'retrieved',builtAt:new Date(now).toISOString(),context}},now);
+  assert.equal(picture.citywideAlertsContext.alerts[0].title,'City notice');
+  assert.equal(picture.sources.find(item=>item.name==='Philadelphia citywide notices').state,'citywide notices listed');
+  assert.equal(picture.cues.some(item=>item.title==='City notice'),false);
+  assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
+});
+
 test('current SPC categorical forecast enters brief as an unassessed planning cue',()=>{
   const spc={status:'ok',builtAt:'2026-10-09T17:50:00Z',byVenue:{3687:[{day:3,category:'Marginal',categoryRank:3,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z',issuedAt:'2026-10-09T17:30:00Z',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/MapServer/17'}]}};
   const picture=buildNflEventPicture(game,{...inputs,spc},now);
