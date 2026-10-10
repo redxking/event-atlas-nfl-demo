@@ -37,6 +37,7 @@ jobs:
       - run: npm run sync:wpc-rain
       - run: npm run sync:police
       - run: npm run sync:glendale-police
+      - run: npm run sync:az511-alerts
       - run: npm run sync:charlotte-police
       - run: npm run sync:arlington-police
       - run: npm run sync:denver-police

@@ -3,6 +3,7 @@ const cueSources=[
   {type:'convective outlook',name:'NOAA SPC convective outlook',states:['no point match in current Day 1–3 outlook','published outlook at kickoff']},
   {type:'excessive rainfall outlook',name:'NOAA WPC excessive-rainfall outlook',states:['no point match in current Day 1–3 outlook','published outlook at kickoff']},
   {type:'road condition',name:'Road conditions',states:['time screened']},
+  {type:'regional road advisory',name:'AZ511 public regional alerts',states:['current_date_matched_regional_notice'],host:'az511.gov'},
   {type:'transit alert',name:'MBTA Foxboro station alerts',states:['station alerts checked'],host:'api-v3.mbta.com'},
   {type:'transit alert',name:'SEPTA B Line service alerts',states:['current snapshot'],host:'www.septa.org'}
 ];

@@ -7,6 +7,16 @@ const game={kickoff:'2026-10-11T17:00:00Z',status:'scheduled',timeTbd:false,sour
 const weatherCue={type:'weather alert',title:'NWS warning',basis:'Published window overlaps event',sourceUrl:'https://weather.example/alert',sourceAt:'2026-10-11T16:00:00Z'};
 const picture=(state,cues=[])=>({eventId:'nfl:test',sources:[source('NWS point alerts',state)],cues});
 
+test('newer AZ511 regional advisory text creates a review change only across current checks',()=>{
+  const url='https://az511.gov/List/Alerts';
+  const before={eventId:'nfl:401872991',sources:[{name:'AZ511 public regional alerts',state:'current_date_matched_regional_notice',sourceUrl:url}],cues:[{type:'regional road advisory',sourceId:'az511:aaaa',title:'Phoenix freeway advisory',basis:'Regional corridor notice',sourceUrl:url,sourceAt:'2026-10-08T20:45:00Z'}]};
+  const after={...before,cues:[{...before.cues[0],sourceId:'az511:bbbb'}]};
+  const item=diffEventPicture(before,after,null,null,game,game).find(change=>change.kind==='newly_displayed_cue');
+  assert.equal(item?.sourceUrl,url);
+  assert.match(item.detail,/not a confirmed venue impact or threat/);
+  assert.equal(diffEventPicture({...before,sources:[{...before.sources[0],state:'stale_or_unavailable'}]},after,null,null,game,game).some(change=>change.kind==='newly_displayed_cue'),false);
+});
+
 test('Nashville OEM release additions require newer successful checks',()=>{
   const url='https://www.nashville.gov/departments/emergency-management/news/stadium-advisory';
   const base={state:'current_newsroom_check',sourceUrl:'https://www.nashville.gov/departments/emergency-management/news',asOf:'2026-10-10T05:00:00Z',recent:[]};

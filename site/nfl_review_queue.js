@@ -1,6 +1,7 @@
 const actions={
   'weather alert':{domain:'weather alert',check:'Confirm the current NWS alert, its footprint, validity window, and venue relevance with the issuing office or official alert record.'},
   'road condition':{domain:'road access',check:'Confirm the road record is still active and whether it affects an actual event route with the road agency and venue transport lead.'},
+  'regional road advisory':{domain:'regional road access',check:'Check the current AZ511 and ADOT closure details, exact time, and whether the corridor lies on a real event route. A regional notice alone does not verify an impact.'},
   'access plan overlap':{domain:'pregame access',check:'Confirm the club’s current Champions Square period, the DOTD road record and whether the affected segment lies on a real event route. Do not infer a disruption from distance and time overlap.'},
   'transit alert':{domain:'transit access',check:'Confirm current service and the affected station, line, and event travel window with the transit operator.'},
   'convective outlook':{domain:'weather forecast',check:'Review the latest SPC outlook and local NWS forecast before making an event weather decision.'},

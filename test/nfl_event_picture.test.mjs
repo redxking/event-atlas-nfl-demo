@@ -44,6 +44,18 @@ test('Glendale ZIP calls remain historical context rather than a stadium threat 
   assert.ok(picture.gaps.some(item=>item.includes('ZIP-wide historical')));
 });
 
+test('AZ511 date-matched Phoenix notice enters review without claiming a road impact',()=>{
+  const checkAt='2026-10-09T17:55:00Z';
+  const arizonaGame={...game,venue:{id:'3970',lat:33.5275,lon:-112.2625}};
+  const az511PublicAlerts={schema:'event-atlas.az511-public-alerts.v1',status:'ok',checkedAt:checkAt,sourceUrl:'https://az511.gov/List/Alerts',entries:[{title:'Weekend freeway closures/restrictions in Phoenix area',notes:'PHOENIX - restrictions Friday, Oct. 9-Monday, Oct. 12. EB L-101 (Agua Fria Freeway) closed between 75th and 51st avenues.',updatedAt:'2026-10-08T20:45:00Z',localDateStart:'2026-10-09',localDateEnd:'2026-10-12',sourceTextSha256:'a'.repeat(64),sourceUrl:'https://az511.gov/List/Alerts'}]};
+  const picture=buildNflEventPicture(arizonaGame,{schedule:inputs.schedule,az511PublicAlerts},now);
+  assert.equal(picture.az511AlertContext.state,'current_date_matched_regional_notice');
+  assert.equal(picture.sources.find(item=>item.name==='AZ511 public regional alerts').state,'current_date_matched_regional_notice');
+  assert.ok(picture.cues.some(item=>item.type==='regional road advisory'));
+  assert.equal(picture.cueCounts.road,0);
+  assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
+});
+
 test('Philadelphia citywide notices are cited as city context without event impact or threat cue',()=>{
   const phillyGame={...game,venue:{id:'3806',lat:39.90089,lon:-75.16776}};
   const context={state:'retrieved',checkedAt:now,totalReturned:1,invalidCount:0,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1',alerts:[{title:'City notice',detail:'Citywide information',url:'https://www.phila.gov/notice'}]};
