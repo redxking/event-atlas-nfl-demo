@@ -27,6 +27,19 @@ test('NASA regional point changes require two current snapshots and preserve pro
   assert.equal(diffEventPicture(after,{...after,naturalEventsContext:{state:'current_snapshot',events:[{...point,sourceAt:'2026-10-10T02:00:00Z'}]}},null,null,game,game).find(item=>item.kind==='natural_event_point_updated')?.sourceUrl,point.sourceUrl);
 });
 
+test('USGS nearby earthquake changes require two successful newer checks',()=>{
+  const quake={sourceId:'usgs-1',title:'M 3.0 synthetic',magnitude:3,distanceKm:41,occurredAt:'2026-10-10T01:00:00Z',updatedAt:'2026-10-10T01:05:00Z',sourceUrl:'https://earthquake.usgs.gov/earthquakes/eventpage/usgs-1'};
+  const before={...picture('checked'),usgsContext:{state:'current_snapshot',asOf:'2026-10-10T01:10:00Z',events:[]}};
+  const after={...picture('checked'),usgsContext:{state:'current_snapshot',asOf:'2026-10-10T01:20:00Z',events:[quake]}};
+  const change=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='new_usgs_earthquake');
+  assert.equal(change?.sourceUrl,quake.sourceUrl);
+  assert.match(change.detail,/does not establish stadium impact or a threat/);
+  assert.equal(diffEventPicture({...before,usgsContext:{state:'unavailable',asOf:null,events:[]}},after,null,null,game,game).some(item=>item.kind==='new_usgs_earthquake'),false);
+  assert.equal(diffEventPicture(before,{...after,usgsContext:{...after.usgsContext,asOf:before.usgsContext.asOf}},null,null,game,game).some(item=>item.kind==='new_usgs_earthquake'),false);
+  const revised={...after,usgsContext:{...after.usgsContext,asOf:'2026-10-10T01:30:00Z',events:[{...quake,magnitude:3.2,updatedAt:'2026-10-10T01:25:00Z'}]}};
+  assert.equal(diffEventPicture(after,revised,null,null,game,game).find(item=>item.kind==='usgs_earthquake_revised')?.sourceUrl,quake.sourceUrl);
+});
+
 test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
   const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
   const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});

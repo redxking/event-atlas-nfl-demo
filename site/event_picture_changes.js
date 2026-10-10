@@ -67,5 +67,14 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(!prior||Date.parse(item.sourceAt)>Date.parse(prior.sourceAt))changes.push({kind:prior?'natural_event_point_updated':'new_natural_event_point',observedAt,title:`NASA EONET: ${item.title}`.slice(0,300),detail:`NASA EONET ${prior?'updated':'listed'} a natural-event point ${item.distanceKm} km from the candidate venue point, dated ${item.sourceAt}. Verify the NASA record and local authority; proximity does not establish current conditions, venue impact, or a threat.`,sourceUrl:item.sourceUrl});
     }
   }
+  const oldUsgs=before.usgsContext,newUsgs=after.usgsContext;
+  if(!eventWindowChanged&&oldUsgs?.state==='current_snapshot'&&newUsgs?.state==='current_snapshot'&&Number.isFinite(Date.parse(oldUsgs.asOf))&&Date.parse(newUsgs.asOf)>Date.parse(oldUsgs.asOf)&&Array.isArray(oldUsgs.events)&&Array.isArray(newUsgs.events)){
+    const priorById=new Map(oldUsgs.events.map(item=>[item.sourceId,item]));
+    for(const item of newUsgs.events.slice(0,3)){
+      if(!item?.sourceId||!/^https:\/\/earthquake\.usgs\.gov\/earthquakes\/eventpage\/[A-Za-z0-9_-]+$/.test(item.sourceUrl||''))continue;
+      const prior=priorById.get(item.sourceId),changed=prior&&(prior.magnitude!==item.magnitude||prior.updatedAt!==item.updatedAt);
+      if(!prior||changed)changes.push({kind:prior?'usgs_earthquake_revised':'new_usgs_earthquake',observedAt,title:`USGS: ${item.title}`.slice(0,300),detail:`${prior?'Revised':'Newly displayed'} in the bounded magnitude 2.5+ weekly USGS sample: magnitude ${item.magnitude??'unavailable'}; ${item.distanceKm} km from the candidate venue point; occurred ${item.occurredAt}. Verify the current USGS record and local effects; proximity does not establish stadium impact or a threat.`,sourceUrl:item.sourceUrl});
+    }
+  }
   return changes.slice(0,12);
 }

@@ -87,3 +87,15 @@ test('selected-game direct check is timestamped and distinct from published game
   assert.match(report,/Reported attendance:\*\* 92351/);
   assert.match(report,/publisher observations, not verified venue operations or threat findings/);
 });
+
+test('USGS report separates a successful empty sample from an unavailable feed',()=>{
+  const checked=structuredClone(bundle);
+  checked.picture.usgsContext={state:'current_snapshot',asOf:'2026-10-10T01:00:00Z',publisherAt:'2026-10-10T00:59:00Z',sourceUrl:'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson',events:[]};
+  checked.sourceSnapshots.usgs=checked.picture.usgsContext.asOf;
+  checked.publicObservations.earthquakes=[];
+  assert.match(buildNflPublicReport(checked),/No nearby magnitude 2\.5\+ record in the bounded weekly sample\. This is not an all-clear/);
+  const failed=structuredClone(checked);
+  failed.picture.usgsContext={...checked.picture.usgsContext,state:'stale_or_unavailable',asOf:null};
+  failed.sourceSnapshots.usgs=null;
+  assert.match(buildNflPublicReport(failed),/Current USGS regional events are unavailable or stale; no negative finding follows/);
+});
