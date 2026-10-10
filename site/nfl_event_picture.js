@@ -138,7 +138,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
   if(venueId==='3810'&&roadDirect?.state==='failed')gaps.push('Direct Tennessee DOT SmartWay check failed; the scheduled road snapshot may be stale.');
   if(!weather||weather.state!=='screened')gaps.push('NWS alert event-time screening is unavailable or incomplete.');
-  if(!observationContext)gaps.push('Current nearby NWS station observation is unavailable or stale; present venue weather cannot be inferred.');
+  if(!observationContext)gaps.push(!conditions?'Nearby NWS station observation has not been checked for this event; present venue weather cannot be inferred.':'Current nearby NWS station observation is unavailable or stale; present venue weather cannot be inferred.');
   if(kickoffForecast.state==='unavailable or stale')gaps.push(activeGame?'NWS current event-hour forecast is unavailable or older than 30 minutes.':'NWS hourly kickoff forecast is unavailable or older than 30 minutes.');
   if(convectiveOutlook.state==='stale or unavailable')gaps.push('NOAA SPC Day 1–3 categorical outlook snapshot is unavailable or older than 12 hours.');
   if(excessiveRainOutlook.state==='stale or unavailable')gaps.push('NOAA WPC Day 1–3 excessive-rainfall outlook snapshot is unavailable or older than 12 hours.');
