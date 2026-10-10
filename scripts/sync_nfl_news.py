@@ -89,12 +89,25 @@ def parse_feed(xml, games, now):
     return {"status": "ok", "sourceUrl": FEED, "publisher": "ESPN", "sourceBuiltAt": built, "retrievedAt": now.isoformat().replace("+00:00", "Z"), "articleCount": len(articles), "byGame": by_game, "interpretation": "Publisher RSS headlines and descriptions matched by team-name mentions. A mention does not establish relevance to this specific game, attendance, venue impact, or a threat. Open ESPN for the full article."}
 
 
+def fetch_feed():
+    response = subprocess.run(["curl", "--fail", "--silent", "--show-error", "--location", "--max-redirs", "3", "--proto-redir", "=https", "--compressed", "--max-time", "25", "--write-out", "\n__EA_META__%{http_code} %{url_effective}", "--header", "User-Agent: EventAtlas/0.4 public-NFL-news-context", FEED], capture_output=True, timeout=30, check=True)
+    body, marker, metadata = response.stdout.rpartition(b"\n__EA_META__")
+    if not marker:
+        raise ValueError("ESPN RSS response lacks HTTP metadata")
+    status, effective = metadata.decode("utf-8", "replace").split(" ", 1)
+    final_url = urlparse(effective)
+    if status != "200" or final_url.scheme != "https" or final_url.hostname not in {"www.espn.com", "espn.com"} or final_url.path != "/espn/rss/nfl/news":
+        raise ValueError(f"ESPN RSS unexpected response: HTTP {status}, host {final_url.hostname}, path {final_url.path}")
+    if not body:
+        raise ValueError("ESPN RSS returned an empty HTTP 200 response")
+    return body
+
+
 def main():
     now = datetime.now(timezone.utc)
     games = json.loads((ROOT / "site/nfl.json").read_text())["games"]
     try:
-        response = subprocess.run(["curl", "--fail", "--silent", "--show-error", "--max-time", "25", "--header", "User-Agent: EventAtlas/0.4 public-NFL-news-context", FEED], capture_output=True, timeout=30, check=True)
-        xml = response.stdout
+        xml = fetch_feed()
         result = parse_feed(xml, games, now)
     except Exception as error:
         result = {"status": "failed", "sourceUrl": FEED, "publisher": "ESPN", "retrievedAt": now.isoformat().replace("+00:00", "Z"), "error": str(error)[:200], "byGame": {}}
