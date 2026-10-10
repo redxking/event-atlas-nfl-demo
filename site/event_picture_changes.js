@@ -54,5 +54,10 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const oldRegional=new Set((oldRail.regionalAdvisories||[]).map(item=>item.url));
     for(const item of (newRail.regionalAdvisories||[]).slice(0,4))if(!oldRegional.has(item.url))changes.push({kind:'new_regional_rail_advisory',observedAt,title:item.title.slice(0,280),detail:'NJ TRANSIT added a region-wide schedule notice for the game date. Verify any effect on a specific trip; the listing does not establish stadium access impact or a threat.',sourceUrl:item.url});
   }
+  const oldNj=before.nj511Context,newNj=after.nj511Context;
+  if(!eventWindowChanged&&oldNj?.state==='exact game listed'&&newNj?.state==='exact game listed'&&oldNj.gameDate===newNj.gameDate){
+    const oldRoads=new Set((oldNj.gameDateRoads||[]).map(item=>JSON.stringify([item.title,item.description,item.publishedAt])));
+    for(const item of (newNj.gameDateRoads||[]).slice(0,8))if(!oldRoads.has(JSON.stringify([item.title,item.description,item.publishedAt])))changes.push({kind:'new_511nj_road_entry',observedAt,title:item.title.slice(0,200),detail:`511NJ now lists this road entry within 8 km mentioning the game date: ${item.description.slice(0,500)}. Verify its actual time and route effect; a date mention and proximity do not establish game impact or a threat.`,sourceUrl:newNj.sourceUrl});
+  }
   return changes.slice(0,12);
 }
