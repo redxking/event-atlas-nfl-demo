@@ -103,7 +103,7 @@ test('newer road snapshots publish relationship reclassification without claimin
   const first=buildPublishedReportState(make('excluded_link','2026-10-10T00:00:00Z'),game,null,null,at-3600000);
   const next=buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z'),game,null,first,at);
   const change=next.changes.find(item=>item.kind==='road_event_relationship_reclassified');
-  assert.equal(next.schema,'event-atlas.published-report-state.v8');
+  assert.equal(next.schema,'event-atlas.published-report-state.v9');
   assert.equal(change.sourceUrl,roadUrl);
   assert.match(change.detail,/excluded link to time place candidate/);
   assert.match(change.detail,/not evidence of a road reopening/);
@@ -111,6 +111,25 @@ test('newer road snapshots publish relationship reclassification without claimin
   assert.equal(repeated.newChangeCount,0);
   const excluded=buildPublishedReportState(make('excluded_link','2026-10-10T03:00:00Z'),game,null,repeated,at+2*3600000);
   assert.match(excluded.changes.find(item=>item.kind==='road_event_relationship_reclassified')?.detail||'',/time place candidate to excluded link/);
+});
+
+test('CAL FIRE county revisions enter the dated feed only after comparable successful checks',()=>{
+  const la={...game,venue:{id:'7065'}};
+  const item=(acres,containmentPercent)=>({name:'Bouquet Fire',counties:['Los Angeles'],started:'10/03/2026',acres,containmentPercent,sourceUrl:'https://www.fire.ca.gov/incidents/2026/10/3/bouquet-fire'});
+  const calfire=(checkedAt,incidents,state='current_county_listing')=>state==='unavailable'?{state,county:'Los Angeles',sourceUrl:'https://www.fire.ca.gov/incidents/'}:{state,county:'Los Angeles',checkedAt,sourceUrl:'https://www.fire.ca.gov/incidents/',incidents};
+  const make=context=>({...bundle('checked'),calfireRegional:context});
+  const first=buildPublishedReportState(make(calfire('2026-10-10T01:00:00Z',[])),la,null,null,at-3600000);
+  const listed=buildPublishedReportState(make(calfire('2026-10-10T02:00:00Z',[item(1048,83)])),la,null,first,at);
+  assert.equal(listed.changes.find(change=>change.kind==='calfire_incident_listed')?.sourceUrl,item(1048,83).sourceUrl);
+  const repeated=buildPublishedReportState(make(calfire('2026-10-10T02:00:00Z',[item(1048,83)])),la,null,listed,at+1000);
+  assert.equal(repeated.newChangeCount,0);
+  const revised=buildPublishedReportState(make(calfire('2026-10-10T03:00:00Z',[item(1050,84)])),la,null,repeated,at+3600000);
+  assert.equal(revised.changes.find(change=>change.kind==='calfire_incident_revised')?.sourceUrl,item(1050,84).sourceUrl);
+  const failed=buildPublishedReportState(make(calfire('2026-10-10T04:00:00Z',[],'unavailable')),la,null,revised,at+2*3600000);
+  assert.equal(failed.changes[0].kind,'source_status_changed');
+  const recovered=buildPublishedReportState(make(calfire('2026-10-10T05:00:00Z',[item(1060,85)])),la,null,failed,at+3*3600000);
+  assert.equal(recovered.changes[0].kind,'source_status_changed');
+  assert.equal(recovered.newChangeCount,1);
 });
 
 test('road relationship changes require a comparable schedule and newer successful source check',()=>{

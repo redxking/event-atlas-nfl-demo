@@ -19,8 +19,8 @@ test('change subscription deduplicates bounded recent entries and escapes Atom t
   assert.match(atom,/Unreviewed source change/);
 });
 
-test('current v8 published report states remain in the change subscription',()=>{
-  const feed=buildPublishedChangeFeed([report],[{...state,schema:'event-atlas.published-report-state.v8'}],now);
+test('current v8 and v9 published report states remain in the change subscription',()=>{
+  const feed=buildPublishedChangeFeed([report],[{...state,schema:'event-atlas.published-report-state.v8'},{...state,schema:'event-atlas.published-report-state.v9'}],now);
   assert.equal(feed.items.length,1);
   assert.equal(feed.items[0].sourceUrl,change.sourceUrl);
 });
