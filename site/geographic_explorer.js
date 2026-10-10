@@ -1,3 +1,4 @@
+import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js';
 import {setGeographicTrail,showWorkspaceView} from './workspace_views.js?v=breadcrumbs-1';
 // FEMA state groupings: https://www.fema.gov/about/organization/regions
 export const regions={1:['CT','ME','MA','NH','RI','VT'],2:['NJ','NY','PR','VI'],3:['DE','DC','MD','PA','VA','WV'],4:['AL','FL','GA','KY','MS','NC','SC','TN'],5:['IL','IN','MI','MN','OH','WI'],6:['AR','LA','NM','OK','TX'],7:['IA','KS','MO','NE'],8:['CO','MT','ND','SD','UT','WY'],9:['AZ','CA','HI','NV','AS','GU','MP'],10:['AK','ID','OR','WA']};
@@ -15,7 +16,7 @@ export function createGeographicExplorer({openGame,onScopeChange}){
  container.replaceChildren();container.append(node('h2','Event & threat overview'));
  const controls=node('div',undefined,'geo-controls');
  for(const [key,label] of [['start','From'],['end','Through']]){const wrap=node('label',label);const input=node('input');input.type='date';input.value=scope[key];input.setAttribute('aria-label',label+' event date');input.onchange=()=>{scope[key]=input.value;render();};wrap.append(input);controls.append(wrap);}
- controls.append(button('National view',()=>{scope.region=scope.state=scope.venue='';currentEvent='';history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();}));container.append(controls);
+ controls.append(button('National view',()=>{scope.region=scope.state=scope.venue='';currentEvent='';history.pushState({workspaceView:'overview',geo:{...scope}},'','#overview');render();}));controls.append(createThreatReportButton(()=>({title:scope.venue?(games.find(g=>g.venue.id===scope.venue)?.venue.name||'Stadium'):scope.state?scope.state:scope.region?'FEMA Region '+scope.region:'United States',level:scope.venue?'venue':scope.state?'state':scope.region?'region':'national',games:scopeGames(games,scope),summaries,start:scope.start,end:scope.end})));container.append(controls);
 
  const totals=node('div',undefined,'geo-totals');totals.setAttribute('aria-live','polite');container.append(totals);
  const layout=node('div',undefined,'geo-layout'),mapElement=node('div');mapElement.id='venue-map';mapElement.setAttribute('aria-label','Map of events in selected geographic view');const panel=node('section',undefined,'geo-selection');panel.setAttribute('aria-label','Geographic selection');layout.append(mapElement,panel);container.append(layout);
@@ -38,7 +39,7 @@ export function createGeographicExplorer({openGame,onScopeChange}){
   status.textContent='';const selected=scopeGames(games,scope),count=rollup(selected,summaries);
   const nextScope=JSON.stringify([scope,selected.map(game=>game.id)]);if(scopeSignature!==nextScope){scopeSignature=nextScope;onScopeChange?.(selected);}
   container.querySelector('h2').textContent=scope.venue?(selected[0]?.venue.name||'Venue events'):scope.state?scope.state+' event overview':scope.region?'FEMA Region '+scope.region+' overview':'National event overview';
-  setGeographicTrail(makeTrail(scope));
+  setGeographicTrail(makeTrail(scope));refreshThreatReport();
   totals.replaceChildren(...[`${count.events} events`,`${count.venues} venues`,`${count.affected} games with potential concerns`,`${count.urgent} games with urgent weather concerns`,`${count.sourceConcerns} distinct source concerns`,`${count.pending} games awaiting screening`].map(text=>node('span',text)));
   panel.replaceChildren(node('h3',scope.venue?'Select an event':scope.state?'Select a venue':scope.region?'Select a state':'Select a FEMA region'));
   const groups=new Map();const level=scope.venue?'event':scope.state?'venue':scope.region?'state':'region';
