@@ -16,6 +16,17 @@ test('new source cue is linked only across comparable current checks',()=>{
   assert.equal(diffEventPicture(picture('source failed'),picture('checked',[weatherCue]),null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
 });
 
+test('official game-announcement passage revisions require two newer checked snapshots',()=>{
+  const url='https://www.packers.com/news/lambeau-field-ready-for-packers-bears-game-sunday-oct-8-2026';
+  const claim={id:'flyover',category:'aviation',sourceUrl:url,sourceTextSha256:'a'.repeat(64)};
+  const before={...picture('checked'),packersReleaseContext:{state:'current_published_announcements',asOf:'2026-10-10T05:00:00Z',claims:[claim]}};
+  const after={...picture('checked'),packersReleaseContext:{state:'current_published_announcements',asOf:'2026-10-10T06:00:00Z',claims:[{...claim,sourceTextSha256:'b'.repeat(64)}]}};
+  const item=diffEventPicture(before,after,null,null,game,game).find(change=>change.kind==='club_announcement_revised');
+  assert.equal(item?.sourceUrl,url);
+  assert.match(item.detail,/not confirmed person attendance/);
+  assert.equal(diffEventPicture({...before,packersReleaseContext:{...before.packersReleaseContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(change=>change.kind==='club_announcement_revised'),false);
+});
+
 test('NASA regional point changes require two current snapshots and preserve provenance',()=>{
   const point={id:'EONET_42',title:'Wildfire example',distanceKm:68,sourceAt:'2026-10-10T01:00:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/EONET_42/geojson'};
   const before={...picture('checked'),naturalEventsContext:{state:'current_snapshot',events:[]}};

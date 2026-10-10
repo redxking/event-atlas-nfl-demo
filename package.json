@@ -39,7 +39,8 @@
     "sync:airnow": "node scripts/sync_airnow_pm25.mjs",
     "sync:hms-smoke": "python3 scripts/sync_noaa_hms_smoke.py",
     "sync:green-bay-alerts": "python3 scripts/sync_green_bay_alerts.py",
-    "sync:lambeau-plan": "python3 scripts/sync_lambeau_gameday.py"
+    "sync:lambeau-plan": "python3 scripts/sync_lambeau_gameday.py",
+    "sync:packers-release": "python3 scripts/sync_packers_game_release.py"
   },
   "dependencies": {
     "gtfs-realtime-bindings": "1.1.1"

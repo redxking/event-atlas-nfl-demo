@@ -50,6 +50,18 @@ test('local AI packet treats Arlington public calls as delayed count context',()
   assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+3*3600000}).evidence.some(item=>item.id==='R1'),false);
 });
 
+test('local AI packet keeps Packers game-specific people and production as announced plans',()=>{
+  const at=Date.parse('2026-10-10T06:30:00Z');
+  const eventUrl='https://www.packers.com/news/lambeau-field-ready-for-packers-bears-game-sunday-oct-8-2026';
+  const alumniUrl='https://www.packers.com/news/packers-welcoming-bubba-franks-ryan-longwell-as-featured-alumni-this-week-oct-8-2026';
+  const claims=['flyover','fireworks','featured_alumni','franks_gameday','ruettgers_gameday','titletown_alumni','recognition','anthem','parking'].map(id=>({id,summary:`Club announces ${id}`,sourceUrl:['featured_alumni','franks_gameday','ruettgers_gameday','titletown_alumni'].includes(id)?alumniUrl:eventUrl}));
+  const evidence={...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872990'},venue:{id:'3798',name:'Lambeau Field'},picture:{...brief.nflContext.evidence.picture,packersReleaseContext:{state:'current_published_announcements',asOf:'2026-10-10T06:20:00Z',claims}}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
+  assert.deepEqual(packet.evidence.filter(item=>/^T\d$/.test(item.id)).map(item=>item.id),['T1','T2','T3']);
+  assert.match(validateLocalAiDraft('T2',packet).reviewQuestions[0].question,/does not verify actual attendance/);
+  assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+13*3600000}).evidence.some(item=>item.id==='T1'),false);
+});
+
 test('local AI packet labels the Packers operations page as a published plan',()=>{
   const at=Date.parse('2026-10-10T06:30:00Z');
   const sourceUrl='https://www.packers.com/lambeau-field/gameday-information';

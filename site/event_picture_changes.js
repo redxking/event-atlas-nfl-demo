@@ -87,6 +87,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const changed=newPlan.claims.filter(item=>first.has(item.id)&&first.get(item.id)!==item.sourceTextSha256).map(item=>item.topic);
     if(changed.length)changes.push({kind:'venue_plan_revised',observedAt,title:'Packers game-day operating plan text changed',detail:`The venue page text underlying ${changed.join(', ')} changed between two checks. Review the current page and confirm the applicable game-day plan with the venue and responsible agencies. A publisher text change is not a live closure, bus run, venue impact, or threat finding.`,sourceUrl:newPlan.sourceUrl});
   }
+  const oldRelease=before.packersReleaseContext,newRelease=after.packersReleaseContext;
+  if(!eventWindowChanged&&['current_published_announcements','partial_published_announcements'].includes(oldRelease?.state)&&['current_published_announcements','partial_published_announcements'].includes(newRelease?.state)&&Number.isFinite(Date.parse(oldRelease.asOf))&&Date.parse(newRelease.asOf)>Date.parse(oldRelease.asOf)&&Array.isArray(oldRelease.claims)&&Array.isArray(newRelease.claims)&&oldRelease.claims.length<=9&&newRelease.claims.length<=9){
+    const prior=new Map(oldRelease.claims.map(item=>[item.id,item.sourceTextSha256]));
+    for(const item of newRelease.claims){
+      if(!/^https:\/\/www\.packers\.com\/news\//.test(item?.sourceUrl||'')||!/^\w{3,30}$/.test(item?.id||'')||!/^\w{3,30}$/.test(item?.category||'')||!/^[a-f0-9]{64}$/.test(item?.sourceTextSha256||''))continue;
+      const priorHash=prior.get(item.id);
+      if(priorHash!==item.sourceTextSha256)changes.push({kind:priorHash?'club_announcement_revised':'club_announcement_added',observedAt,title:`Packers ${item.category.replaceAll('_',' ')}: ${item.id.replaceAll('_',' ')}`,detail:`The official game article ${priorHash?'changed text underlying':'added'} this bounded announcement between two checks. Verify the club article before use. It remains a published plan, not confirmed person attendance, aircraft activity, venue impact, or a threat finding.`,sourceUrl:item.sourceUrl});
+    }
+  }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
   if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));

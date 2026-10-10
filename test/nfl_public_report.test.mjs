@@ -6,9 +6,20 @@ const bundle={schema:'event-atlas.public-evidence-bundle.v1',generatedAt:'2026-1
 
 test('public report binds event, current source cues, records, gaps, and source links without a threat claim',()=>{
   const report=buildNflPublicReport(bundle);
-  for(const expected of ['Away at Home','2026-10-10T01:00:00.000Z','Listed lane work','AZTech WZDx','No verified stadium CCTV stream','https://example.org/road','Severity not assessed','NOAA SPC Day 1–3 outlook','NOAA WPC excessive-rainfall outlook','named-person records are not collected'])assert.ok(report.includes(expected),expected);
+  for(const expected of ['Away at Home','2026-10-10T01:00:00.000Z','Listed lane work','AZTech WZDx','No verified stadium CCTV stream','https://example.org/road','Severity not assessed','NOAA SPC Day 1–3 outlook','NOAA WPC excessive-rainfall outlook','Not verified; named-person appearances are announced plans'])assert.ok(report.includes(expected),expected);
   assert.ok(!report.includes('Threat level:'));
   assert.ok(report.includes('[Publisher event record](https://example.org/game)'));
+});
+
+test('Packers exact-game report attributes announced people and flyover without claiming attendance',()=>{
+  const selected=structuredClone(bundle);
+  selected.event.id='nfl:401872990';
+  selected.venue.id='3798';
+  selected.publicObservations.packersGameSpecificAnnouncements={state:'current_published_announcements',asOf:'2026-10-10T06:00:00Z',sources:[{id:'event',state:'checked',publishedAt:'2026-10-08T21:45:51Z',sourceUrl:'https://www.packers.com/news/lambeau-field-ready-for-packers-bears-game-sunday-oct-8-2026'}],claims:[{id:'flyover',category:'aviation',summary:'Packers announce a planned F-35 flyover.',sourceUrl:'https://www.packers.com/news/lambeau-field-ready-for-packers-bears-game-sunday-oct-8-2026'},{id:'featured_alumni',category:'announced_people',summary:'Packers name Ryan Longwell and Bubba Franks as featured alumni.',sourceUrl:'https://www.packers.com/news/packers-welcoming-bubba-franks-ryan-longwell-as-featured-alumni-this-week-oct-8-2026'}]};
+  const report=buildNflPublicReport(selected);
+  assert.match(report,/Packers–Bears club-announced people and production/);
+  assert.match(report,/Ryan Longwell and Bubba Franks/);
+  assert.match(report,/not verified attendees or protected persons/);
 });
 
 test('season planning report does not imply live event checks',()=>{
