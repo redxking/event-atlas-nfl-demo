@@ -1,0 +1,15 @@
+export const ridekcGtfsUrl='https://ridekc.org/static-gtfs';
+export const ridekcAlertsUrl='https://ridekc.org/getting-around/service-alerts/';
+
+export function selectRidekcArrowhead(game,snapshot,now=Date.now()){
+  const empty={state:'outside_source_event',asOf:null,sourceUrl:ridekcGtfsUrl,alertsUrl:ridekcAlertsUrl,routes:[],alertState:'unavailable'};
+  if(game?.id!=='nfl:401873006'||game?.venue?.id!=='3622'||game?.timeTbd||!String(game?.kickoff||'').startsWith('2026-10-18'))return empty;
+  const at=Date.parse(snapshot?.checkedAt);
+  if(snapshot?.schema!=='event-atlas.ridekc-arrowhead.v1'||snapshot.status!=='ok'||snapshot.gameId!==game.id||snapshot.venueId!==game.venue.id||snapshot.kickoff!==game.kickoff||!/^2026-\d\d-\d\d$/.test(snapshot.eventDate||'')||snapshot.timeZone!=='America/Chicago'||snapshot.sourceUrl!==ridekcGtfsUrl||!/^\d\d:\d\d–\d\d:\d\d on [A-Za-z]+ \d{1,2}, 2026$/.test(snapshot.windowLocal||'')||snapshot.radiusKm!==1.2||!/^2026\d{4}$/.test(snapshot.feedStartDate||'')||!/^202[67]\d{4}$/.test(snapshot.feedEndDate||'')||snapshot.feedStartDate>snapshot.eventDate.replaceAll('-','')||snapshot.feedEndDate<snapshot.eventDate.replaceAll('-','')||typeof snapshot.feedVersion!=='string'||snapshot.feedVersion.length>120||!/^[a-f0-9]{64}$/.test(snapshot.feedSha256||'')||!Array.isArray(snapshot.nearbyRoutes)||snapshot.nearbyRoutes.length>5||!Number.isFinite(at)||at>now+60000||now-at>12*3600000)return {...empty,state:'stale_or_unavailable'};
+  const valid=route=>typeof route?.routeShortName==='string'&&/^\d{1,3}$/.test(route.routeShortName)&&Number.isSafeInteger(route.scheduledStopCallsInWindow)&&route.scheduledStopCallsInWindow>0&&route.scheduledStopCallsInWindow<=1000&&Number.isSafeInteger(route.nearbyStopCount)&&route.nearbyStopCount>0&&route.nearbyStopCount<=100&&Array.isArray(route.nearestStops)&&route.nearestStops.length>0&&route.nearestStops.length<=4&&route.nearestStops.every(stop=>Number.isFinite(stop.distanceKm)&&stop.distanceKm>=0&&stop.distanceKm<=1.2&&typeof stop.name==='string'&&stop.name.length<=120);
+  if(!snapshot.nearbyRoutes.every(valid))return {...empty,state:'stale_or_unavailable'};
+  const alert=snapshot.serviceAlerts;
+  const alertAt=Date.parse(alert?.checkedAt);
+  const alertState=alert?.sourceUrl===ridekcAlertsUrl&&Number.isFinite(alertAt)&&Math.abs(alertAt-at)<=60000&&['route_change_notice_listed','no_matching_route_change_notice_on_page'].includes(alert.state)&&((alert.state==='route_change_notice_listed'&&/^[a-f0-9]{64}$/.test(alert.noticeTextSha256||''))||(alert.state==='no_matching_route_change_notice_on_page'&&alert.noticeTextSha256===null))?alert.state:'unavailable';
+  return {state:snapshot.nearbyRoutes.length?'current_static_schedule':'no_nearby_calls_in_static_feed',asOf:snapshot.checkedAt,sourceUrl:ridekcGtfsUrl,alertsUrl:ridekcAlertsUrl,feedVersion:snapshot.feedVersion,feedSha256:snapshot.feedSha256,windowLocal:snapshot.windowLocal,routes:snapshot.nearbyRoutes,alertState,alertTextSha256:alertState==='route_change_notice_listed'?alert.noticeTextSha256:null,interpretation:snapshot.interpretation};
+}

@@ -17,6 +17,17 @@ test('Chiefs game-center passage revisions enter the event change trail only acr
   assert.equal(diffEventPicture({...before,chiefsPlanContext:{...before.chiefsPlanContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='club_passage_revised'),false);
 });
 
+test('RideKC nearby timetable changes require two complete newer checks',()=>{
+  const game={id:'nfl:401873006',kickoff:'2026-10-18T20:25:00Z',status:'scheduled',timeTbd:false};
+  const context={state:'current_static_schedule',asOf:'2026-10-10T12:00:00Z',sourceUrl:'https://ridekc.org/static-gtfs',alertsUrl:'https://ridekc.org/getting-around/service-alerts/',alertState:'route_change_notice_listed',alertTextSha256:'a'.repeat(64),routes:[{routeShortName:'47',scheduledStopCallsInWindow:60}]};
+  const before={...picture('checked'),eventId:game.id,ridekcContext:context};
+  const after={...before,ridekcContext:{...context,asOf:'2026-10-10T13:00:00Z',routes:[{...context.routes[0],scheduledStopCallsInWindow:58}]}};
+  assert.equal(diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='operator_static_schedule_changed')?.sourceUrl,context.sourceUrl);
+  const revisedAlert={...before,ridekcContext:{...context,asOf:'2026-10-10T13:00:00Z',alertTextSha256:'b'.repeat(64)}};
+  assert.equal(diffEventPicture(before,revisedAlert,null,null,game,game).find(item=>item.kind==='operator_alert_listing_changed')?.sourceUrl,context.alertsUrl);
+  assert.equal(diffEventPicture({...before,ridekcContext:{...context,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='operator_static_schedule_changed'),false);
+});
+
 test('new Houston corridor RSS item is observed only across newer complete feed checks',()=>{
   const url='https://traffic.houstontranstar.org/data/rss/incidents_rss.xml';
   const item={id:'1854994_Verified',title:'IH-610 South Loop Eastbound Before Scott St - Stall',sourceTextSha256:'a'.repeat(64),sourceUrl:url};

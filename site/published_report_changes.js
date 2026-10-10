@@ -1,4 +1,4 @@
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-38';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-39';
 import {selectNflNews} from './nfl_news_context.js';
 
 const schema='event-atlas.published-report-state.v7';
