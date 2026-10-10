@@ -1,3 +1,4 @@
+import {createGeographicExplorer} from './geographic_explorer.js';
 import {renderEventGeographicMap} from './event_geographic_map.js';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
@@ -50,7 +51,7 @@ const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Ma
 const cache=new Map(),changeHistory=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,spcSnapshot,wpcRainSnapshot,eonetSnapshot,nifcSnapshot,airnowSnapshot,hmsSmokeSnapshot,greenBayAlertsSnapshot,lambeauPlanSnapshot,packersGameReleaseSnapshot,patriotsGamePreviewSnapshot,jetsGamedayGuideSnapshot,seahawksGamedaySnapshot,titansGamedaySnapshot,chiefsGameCenterSnapshot,ridekcArrowheadSnapshot,cardinalsLionsSnapshot,steelersColtsSnapshot,az511AlertsSnapshot,houstonTranstarSnapshot,houstonActiveIncidentsSnapshot,falconsGamedaySnapshot,commandersGamedaySnapshot,ramsBillsGamedaySnapshot,dolphinsCrucialCatchSnapshot,saintsGamedaySnapshot,nolaReadyEventSnapshot,nolaReadyActiveSnapshot,nolaReadyUpdatesSnapshot,nashvilleOemNewsSnapshot,nashvilleTitansClosuresSnapshot,wegoTitansAlertSnapshot,nolaReadyRegionalSnapshot,nortaAlertsSnapshot,nolaPublicCallsSnapshot,martaRailSnapshot,martaAlertPreviewSnapshot,georgiaTrafficSnapshot,soundTransitSeahawksSnapshot,soundTransitAlertsSnapshot,seattleFireAggregateSnapshot,seattleSpdBlotterSnapshot,nashvillePoliceCountSnapshot,publishedReports,newsSnapshot,gameArticlesSnapshot,directGame,ntasSnapshot,spaceWeatherSnapshot,septaSnapshot,njTransitRailSnapshot,indyPoliceSnapshot,glendalePoliceSnapshot,charlottePoliceSnapshot,denverPoliceSnapshot,phillyAlertsSnapshot,phillyPermitsSnapshot,nj511Snapshot,selected,cameraRefreshTimer,cameraPlayer,cameraFrame,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,conditionsRefreshTimer,conditionsRequestSerial=0,conditionsPendingFor=null,briefConditions,briefForecast,briefPolice,cmpdTraffic,mbtaTransit,mbtaSchedule,mbtaPredictions,transitRefreshTimer,liveTennesseeRoad,tennesseeRoadRefreshTimer,directGameRefreshTimer,directGameRequestSerial=0,seattleFireRefreshTimer,seattleFireRequestSerial=0,lastSeattleFireDirectCheckAt=0,nashvillePoliceRefreshTimer,nashvillePoliceRequestSerial=0,lastNashvillePoliceDirectCheckAt=0,exerciseEnabled=false,exerciseStage=0,exercisePlaybackTimer,publicationRefreshPending=false,lastPublicationCheckAt=0;
 async function json(url,timeoutMs=0){const local=new URL(url,location.href).origin===location.origin;const result=await fetch(url,{headers:{Accept:'application/geo+json, application/json'},cache:local?'no-store':'default',signal:timeoutMs?AbortSignal.timeout(timeoutMs):undefined});if(!result.ok)throw Error('HTTP '+result.status);return result.json()}
 function sorted(games){const now=Date.now(),upcoming=$('time').value==='upcoming';return games.sort((a,b)=>{const at=Date.parse(a.kickoff),bt=Date.parse(b.kickoff);if(!upcoming)return at-bt;const aLive=a.status==='in progress in source',bLive=b.status==='in progress in source';if(aLive!==bLive)return aLive?-1:1;const af=at>=now,bf=bt>=now;return af!==bf?af?-1:1:af?at-bt:bt-at})}
-function renderList(){refreshGameAttention();const q=$('search').value.trim().toLowerCase(),week=$('week').value;const items=sorted(snapshot.games.filter(game=>(!week||String(game.week)===week)&&(!q||[game.title,game.venue.name,game.venue.address].some(value=>value.toLowerCase().includes(q)))));$('result-count').textContent=items.length+' games'+(selected&&!items.some(game=>game.id===selected)?' · Selected briefing is outside these filters':'');$('games').innerHTML=items.length?items.map(game=>`<button class="game ${game.id===selected?'selected':''}" aria-pressed="${game.id===selected}" data-id="${esc(game.id)}"><span class="game-top"><span>WEEK ${game.week}</span><span class="date">${esc(gameTime(game))}</span></span><strong>${esc(game.title)}</strong><small>${esc(game.venue.name)} · ${esc(game.venue.address)}</small><span class="game-attention" data-attention-game="${esc(game.id)}">Assessment pending</span></button>`).join(''):'<p class="empty" style="padding:20px">No games match these filters.</p>';for(const button of $('games').querySelectorAll('.game'))button.onclick=()=>{selectGame(button.dataset.id);const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});if(matchMedia('(max-width:950px)').matches)heading.scrollIntoView({block:'start'})}}
+function renderList(){refreshGameAttention();const q=$('search').value.trim().toLowerCase(),week=$('week').value;const items=sorted(snapshot.games.filter(game=>(!geographicVisibleIds||geographicVisibleIds.has(game.id))&&(!week||String(game.week)===week)&&(!q||[game.title,game.venue.name,game.venue.address].some(value=>value.toLowerCase().includes(q)))));$('result-count').textContent=items.length+' games'+(selected&&!items.some(game=>game.id===selected)?' · Selected briefing is outside these filters':'');$('games').innerHTML=items.length?items.map(game=>`<button class="game ${game.id===selected?'selected':''}" aria-pressed="${game.id===selected}" data-id="${esc(game.id)}"><span class="game-top"><span>WEEK ${game.week}</span><span class="date">${esc(gameTime(game))}</span></span><strong>${esc(game.title)}</strong><small>${esc(game.venue.name)} · ${esc(game.venue.address)}</small><span class="game-attention" data-attention-game="${esc(game.id)}">Assessment pending</span></button>`).join(''):'<p class="empty" style="padding:20px">No games match these filters.</p>';for(const button of $('games').querySelectorAll('.game'))button.onclick=()=>{selectGame(button.dataset.id);const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});if(matchMedia('(max-width:950px)').matches)heading.scrollIntoView({block:'start'})}}
 function fact(label,value){return `<div class="fact"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`}
 function link(url,label){try{const parsed=new URL(url);if(parsed.protocol!=='https:')return '';return `<a href="${esc(parsed.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch{return ''}}
 function sharedRevisionHtml(group){
@@ -259,43 +260,11 @@ function renderCoverage(){
     (result.cameraFailed.length||result.roadFailed.length?`<p>Failed sources: ${esc([...result.cameraFailed,...result.roadFailed].join(', '))}.</p>`:'');
   renderVenueMap(result.rows);
 }
-let overviewMap,overviewMarkers;
-function renderVenueMap(rows){
-  const target=$('venue-map');if(!target||!snapshot)return;
-  if(!window.L){$('overview-map-status').textContent='Map unavailable. Select a game from the list below.';return;}
-  const L=window.L;
-  if(!overviewMap){
-    target.replaceChildren();
-    const usBounds=L.latLngBounds([[24,-125],[50,-66]]);
-    overviewMap=L.map(target,{scrollWheelZoom:false,dragging:false,touchZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,zoomControl:false,zoomSnap:0,zoomAnimation:false});
-    const constrainOverview=()=>{overviewMap.invalidateSize();overviewMap.fitBounds(usBounds,{padding:[18,18],animate:false});};
-    constrainOverview();
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(overviewMap).on('tileerror',()=>{$('overview-map-status').textContent='Street tiles unavailable. Event markers and the game list remain available.';});
-    overviewMarkers=L.layerGroup().addTo(overviewMap);
-    new ResizeObserver(constrainOverview).observe(target);
-  }
-  overviewMarkers.clearLayers();
-  const venues=new Map();
-  for(const game of snapshot.games){const venue=game.venue;if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon))continue;if(!venues.has(venue.id))venues.set(venue.id,[]);venues.get(venue.id).push(game);}
-  for(const games of venues.values()){
-    games.sort((a,b)=>Date.parse(a.kickoff)-Date.parse(b.kickoff));
-    const venue=games[0].venue,upcoming=games.filter(game=>Date.parse(game.kickoff)>=Date.now());
-    const popup=document.createElement('div');popup.className='event-map-popup';
-    const heading=document.createElement('h3');heading.textContent=venue.name;popup.append(heading);
-    const choices=upcoming.length?upcoming:games.slice().reverse();let position=0;
-    const counter=document.createElement('p'),card=document.createElement('div'),title=document.createElement('strong'),time=document.createElement('p');
-    card.className='map-game-card';card.setAttribute('aria-live','polite');card.append(title,time);
-    const navigation=document.createElement('div');navigation.className='map-game-navigation';
-    const previous=document.createElement('button'),next=document.createElement('button'),open=document.createElement('button');
-    for(const button of [previous,next,open])button.type='button';
-    previous.textContent='← Previous';next.textContent='Next →';open.textContent='Open game briefing';open.className='map-game-open';
-    const show=()=>{const game=choices[position];counter.textContent=(upcoming.length?'Upcoming game ':'Past game ')+(position+1)+' of '+choices.length;title.textContent=game.title;time.textContent=gameTime(game);previous.disabled=position===0;next.disabled=position===choices.length-1;};
-    previous.onclick=()=>{if(position>0){position--;show();}};next.onclick=()=>{if(position<choices.length-1){position++;show();}};
-    open.onclick=()=>{selectGame(choices[position].id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});};
-    navigation.append(previous,next);popup.append(counter,card,navigation,open);show();
-    const tooltip=document.createElement('span');tooltip.textContent=venue.name+' · '+upcoming.length+' upcoming games';
-    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:300,minWidth:220,autoPan:false}).addTo(overviewMarkers);
-  }
+let geographicExplorer,geographicVisibleIds;const geographicSummaries=new Map();
+function renderVenueMap(){
+ if(!snapshot)return;
+ geographicExplorer ||= createGeographicExplorer({onScopeChange:games=>{geographicVisibleIds=new Set(games.map(game=>game.id));renderList();},openGame:id=>{selectGame(id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});}});
+ geographicExplorer.update(snapshot.games,geographicSummaries);
 }
 function renderGround(game){
   renderEventGeographicMap(game,groundSnapshot,seamsSnapshot);
@@ -690,9 +659,10 @@ function refreshGameAttention(){
     for(const badge of document.querySelectorAll('[data-attention-game]')){
       const game=snapshot.games.find(item=>item.id===badge.dataset.attentionGame);if(!game)continue;
       const picture=buildNflEventPicture(game,game.id===selected?briefInputs():common);
-      const summary=attentionSummary(picture);badge.textContent=summary.label;badge.dataset.tone=summary.tone;
+      const summary=attentionSummary(picture);geographicSummaries.set(game.id,summary);badge.textContent=summary.label;badge.dataset.tone=summary.tone;
       badge.title='Published source screening. Open the game for current checks; absence of a flag is not an all-clear.';
     }
+    renderVenueMap();
   },350);
 }
 function renderPeopleProtection(picture){

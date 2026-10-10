@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {stateOf,regionOf,scopeGames,rollup} from '../site/geographic_explorer.js';
+const game=(id,state,kickoff='2026-10-11T17:00:00Z')=>({id,kickoff,venue:{id:state,address:`City, ${state}, USA`}});
+test('FEMA grouping follows venue location, including NJ and MD teams',()=>{assert.equal(regionOf(game('a','NJ')),'2');assert.equal(regionOf(game('b','MD')),'3');assert.equal(regionOf(game('c','WA')),'10');assert.equal(stateOf(game('d','CA')),'CA');});
+test('date window uses Eastern date and region/state/venue filters',()=>{const games=[game('a','NJ','2026-10-24T02:00:00Z'),game('b','NJ','2026-10-24T05:00:00Z'),game('c','WA')];assert.deepEqual(scopeGames(games,{start:'2026-10-10',end:'2026-10-23',region:'2',state:'NJ',venue:'NJ'}).map(g=>g.id),['a']);});
+test('shared concern is counted once, affected games separately, unknown not safe',()=>{const item={sourceUrl:'https://weather.gov/alert/1',trigger:'Warning',sourceAt:'2026-10-10'};const summaries=new Map([['a',{items:[item],urgent:[item]}],['b',{items:[item],urgent:[item]}]]);assert.deepEqual(rollup([game('a','NJ'),game('b','NJ'),game('c','WA')],summaries),{events:3,venues:2,affected:2,urgent:2,pending:1,sourceConcerns:1});});
