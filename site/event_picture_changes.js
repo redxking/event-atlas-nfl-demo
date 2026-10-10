@@ -126,6 +126,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(!old||JSON.stringify([old.detail,old.publisherStatus,old.publisherDisplayedUpdated])!==JSON.stringify([item.detail,item.publisherStatus,item.publisherDisplayedUpdated]))changes.push({kind:'county_road_table_changed',observedAt,title:`Georgia DOT Fulton table row ${item.id} ${old?'changed':'appeared'}`,detail:'A Fulton County row appeared or changed in Georgia DOT’s public table between two retrievals. The table uses publisher-displayed wall times with unverified zone and no venue geometry; verify the record and route before assessing event relevance.',sourceUrl:item.sourceUrl});
     }
   }
+  const priorRta=before.nortaAlertContext,nextRta=after.nortaAlertContext;
+  if(!eventWindowChanged&&after.venueId==='3493'&&priorRta?.state==='current_page_preview'&&nextRta?.state==='current_page_preview'&&priorRta.sourceUrl==='https://www.norta.com/ride-with-us/service-alerts'&&nextRta.sourceUrl===priorRta.sourceUrl&&Number.isFinite(Date.parse(priorRta.asOf))&&Date.parse(nextRta.asOf)>Date.parse(priorRta.asOf)&&Array.isArray(priorRta.venueTextCandidates)&&Array.isArray(nextRta.venueTextCandidates)&&priorRta.venueTextCandidates.length<=12&&nextRta.venueTextCandidates.length<=12){
+    const oldByKey=new Map(priorRta.venueTextCandidates.map(item=>[`${item.routeId}:${item.title}`,item]));
+    for(const item of nextRta.venueTextCandidates){
+      if(!/^[A-Za-z0-9-]{1,8}$/.test(item?.routeId||'')||!/^[a-f0-9]{64}$/.test(item?.sourceTextSha256||'')||item.sourceUrl!==priorRta.sourceUrl)continue;
+      const old=oldByKey.get(`${item.routeId}:${item.title}`);
+      if(!old||old.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:old?'transit_notice_revised':'transit_notice_matched',observedAt,title:`RTA ${item.routeId} ${item.title}`.slice(0,300),detail:'A public RTA notice naming a Superdome-area place appeared or changed between page checks. Publisher AS OF time zone and notice end time are unverified. Confirm route geometry, current status and event relevance with RTA before use.',sourceUrl:item.sourceUrl});
+    }
+  }
   const priorMarta=before.martaAlertContext,nextMarta=after.martaAlertContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorMarta?.state==='current_preview'&&nextMarta?.state==='current_preview'&&priorMarta.alertPageUrl==='https://itsmarta.com/ride/alerts'&&nextMarta.alertPageUrl===priorMarta.alertPageUrl&&Number.isFinite(Date.parse(priorMarta.asOf))&&Date.parse(nextMarta.asOf)>Date.parse(priorMarta.asOf)&&Array.isArray(priorMarta.alerts)&&Array.isArray(nextMarta.alerts)&&priorMarta.alerts.length<=5&&nextMarta.alerts.length<=5){
     const oldById=new Map(priorMarta.alerts.map(item=>[item.id,item]));

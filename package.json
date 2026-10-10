@@ -47,6 +47,7 @@
     "sync:titans-guide": "python3 scripts/sync_titans_gameday.py",
     "sync:falcons-guide": "python3 scripts/sync_falcons_gameday.py",
     "sync:saints-guide": "python3 scripts/sync_saints_gameday.py",
+    "sync:norta-alerts": "python3 scripts/sync_norta_alerts.py",
     "sync:marta-rail": "python3 scripts/sync_marta_rail.py",
     "sync:marta-alert-preview": "python3 scripts/sync_marta_alert_preview.py",
     "sync:georgia-traffic": "python3 scripts/sync_georgia_traffic.py",
