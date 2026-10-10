@@ -160,6 +160,10 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
   const oldOem=before.nashvilleOemNewsContext,newOem=after.nashvilleOemNewsContext;
   const oldNdop=before.nashvilleTitansClosureContext,newNdop=after.nashvilleTitansClosureContext;
   const oldWego=before.wegoTitansAlertContext,newWego=after.wegoTitansAlertContext;
+  const oldWegoService=before.wegoTitansServiceContext,newWegoService=after.wegoTitansServiceContext;
+  if(!eventWindowChanged&&currentGame?.id==='nfl:401872984'&&oldWegoService?.state==='current_operator_plan'&&newWegoService?.state==='current_operator_plan'&&Number.isFinite(Date.parse(oldWegoService.asOf))&&Date.parse(newWegoService.asOf)>Date.parse(oldWegoService.asOf)&&oldWegoService.sourceTextSha256!==newWegoService.sourceTextSha256){
+    changes.push({kind:'operator_game_service_plan_revised',observedAt,title:'WeGo Titans game-day service plan revised',detail:'The operator game-day page content changed in a newer successful check. Verify the October 11 service and boarding details with WeGo; this is not observed vehicle movement or a threat.',sourceUrl:newWegoService.sourceUrl});
+  }
   if(!eventWindowChanged&&currentGame?.id==='nfl:401872984'&&oldWego?.state==='current_operator_notice'&&newWego?.state==='current_operator_notice'&&oldWego.sourceUrl==='https://www.wegotransit.com/ride/alerts/'&&newWego.sourceUrl===oldWego.sourceUrl&&Number.isFinite(Date.parse(oldWego.asOf))&&Date.parse(newWego.asOf)>Date.parse(oldWego.asOf)&&oldWego.sourceTextSha256!==newWego.sourceTextSha256){
     changes.push({kind:'operator_service_notice_revised',observedAt,title:'WeGo Nissan Stadium service notice revised',detail:'The operator notice text changed in a newer page check. Verify the current route, stop, and time details with WeGo; this is not a verified vehicle movement or threat.',sourceUrl:newWego.sourceUrl});
   }
