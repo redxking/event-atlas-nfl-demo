@@ -81,6 +81,12 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(!old||old.title!==item.title||old.detail!==item.detail)changes.push({kind:old?'city_notice_changed':'new_city_notice',observedAt,title:`Green Bay ${item.kind} website notice: ${item.title}`.slice(0,300),detail:`${old?'Displayed text changed':'Newly displayed in the checked active city RSS category'}; publisher date ${item.publishedAt||'not supplied'}. Verify the current city notice and its event relevance. The feed has no incident geometry; this is not a stadium incident, impact, or threat finding.`,sourceUrl:item.url});
     }
   }
+  const oldPlan=before.lambeauPlanContext,newPlan=after.lambeauPlanContext;
+  if(!eventWindowChanged&&oldPlan?.state==='current_published_plan'&&newPlan?.state==='current_published_plan'&&Number.isFinite(Date.parse(oldPlan.asOf))&&Date.parse(newPlan.asOf)>Date.parse(oldPlan.asOf)&&oldPlan.sourceUrl===newPlan.sourceUrl&&newPlan.sourceUrl==='https://www.packers.com/lambeau-field/gameday-information'&&Array.isArray(oldPlan.claims)&&Array.isArray(newPlan.claims)&&oldPlan.claims.length===6&&newPlan.claims.length===6){
+    const first=new Map(oldPlan.claims.map(item=>[item.id,item.sourceTextSha256]));
+    const changed=newPlan.claims.filter(item=>first.has(item.id)&&first.get(item.id)!==item.sourceTextSha256).map(item=>item.topic);
+    if(changed.length)changes.push({kind:'venue_plan_revised',observedAt,title:'Packers game-day operating plan text changed',detail:`The venue page text underlying ${changed.join(', ')} changed between two checks. Review the current page and confirm the applicable game-day plan with the venue and responsible agencies. A publisher text change is not a live closure, bus run, venue impact, or threat finding.`,sourceUrl:newPlan.sourceUrl});
+  }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
   if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));

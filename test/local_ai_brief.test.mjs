@@ -40,6 +40,17 @@ test('local AI packet admits only current official Green Bay city notices',()=>{
   assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+3*3600000}).evidence.some(item=>item.id==='B1'),false);
 });
 
+test('local AI packet labels the Packers operations page as a published plan',()=>{
+  const at=Date.parse('2026-10-10T06:30:00Z');
+  const sourceUrl='https://www.packers.com/lambeau-field/gameday-information';
+  const claims=['gates','oneida','lombardi','postgame','bus','rideshare'].map(id=>({id,summary:`Published ${id} plan`}));
+  const evidence={...brief.nflContext.evidence,venue:{id:'3798'},picture:{...brief.nflContext.evidence.picture,lambeauPlanContext:{state:'current_published_plan',asOf:'2026-10-10T06:20:00Z',sourceUrl,claims,derivedTimes:{gatesOpenAt:'2026-10-11T15:00:00Z',oneidaClosureStartAt:'2026-10-11T13:00:00Z'}}}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='P1')?.sourceUrl,sourceUrl);
+  assert.match(packet.evidence.find(item=>item.id==='P1').text,/not a live closure/);
+  assert.match(validateLocalAiDraft('P1',packet).reviewQuestions[0].question,/responsible road or transit agency/);
+});
+
 test('local AI packet can cite exact-game ESPN article metadata without article body',()=>{
   const gameArticle={state:'current_snapshot',article:{type:'Preview',headline:'Bears at Packers preview',url:'https://www.espn.com/nfl/preview?gameId=401872990',modifiedAt:'2026-10-09T20:00:00Z',story:'PRIVATE BODY'}};
   const withArticle={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{gameArticle}}}};

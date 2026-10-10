@@ -113,6 +113,18 @@ test('Green Bay city notice changes require two newer complete category checks',
   assert.equal(diffEventPicture({...before,greenBayAlertContext:{...before.greenBayAlertContext,state:'partial'}},after,null,null,game,game).some(item=>item.kind==='new_city_notice'),false);
 });
 
+test('venue plan text changes require comparable newer complete checks',()=>{
+  const sourceUrl='https://www.packers.com/lambeau-field/gameday-information';
+  const ids=['gates','oneida','lombardi','postgame','bus','rideshare'];
+  const claims=ids.map(id=>({id,topic:id,sourceTextSha256:'a'.repeat(64)}));
+  const before={...picture('checked'),lambeauPlanContext:{state:'current_published_plan',asOf:'2026-10-10T06:00:00Z',sourceUrl,claims}};
+  const after={...before,lambeauPlanContext:{state:'current_published_plan',asOf:'2026-10-10T07:00:00Z',sourceUrl,claims:[{...claims[0],sourceTextSha256:'b'.repeat(64)},...claims.slice(1)]}};
+  const change=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='venue_plan_revised');
+  assert.equal(change?.sourceUrl,sourceUrl);
+  assert.match(change.detail,/gates changed/);
+  assert.equal(diffEventPicture({...before,lambeauPlanContext:{...before.lambeauPlanContext,state:'partial_published_plan'}},after,null,null,game,game).some(item=>item.kind==='venue_plan_revised'),false);
+});
+
 test('schedule change blocks old-window cue comparison',()=>{
   const moved={...game,kickoff:'2026-10-11T21:00:00Z'};
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,moved);
