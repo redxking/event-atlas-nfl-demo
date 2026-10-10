@@ -19,6 +19,22 @@ test('change subscription deduplicates bounded recent entries and escapes Atom t
   assert.match(atom,/Unreviewed source change/);
 });
 
+test('current v8 published report states remain in the change subscription',()=>{
+  const feed=buildPublishedChangeFeed([report],[{...state,schema:'event-atlas.published-report-state.v8'}],now);
+  assert.equal(feed.items.length,1);
+  assert.equal(feed.items[0].sourceUrl,change.sourceUrl);
+});
+
+test('shared regional records are retained when no source-change item was observed',()=>{
+  const quake={sourceId:'ci41345415',sourceUrl:'https://earthquake.usgs.gov/earthquakes/eventpage/ci41345415',title:'M 3.2 near Signal Hill',occurredAt:'2026-10-09T03:00:00Z',updatedAt:'2026-10-10T03:00:00Z',distanceKm:23,point:[-118.1845,33.7875]};
+  const reports=[{...report,eventId:'nfl:1',kickoff:'2026-10-11T20:00:00Z',venueName:'SoFi Stadium',venueLat:33.9535,venueLon:-118.3392},{...report,eventId:'nfl:2',kickoff:'2026-10-12T20:00:00Z',venueName:'SoFi Stadium',venueLat:33.9535,venueLon:-118.3392}];
+  const states=reports.map(item=>({schema:'event-atlas.published-report-state.v8',eventId:item.eventId,changes:[],picture:{usgsContext:{state:'current_snapshot',asOf:'2026-10-10T03:00:00Z',events:[quake]}}}));
+  const feed=buildPublishedChangeFeed(reports,states,now);
+  assert.equal(feed.items.length,0);
+  assert.equal(feed.sharedRegionalRecords.length,1);
+  assert.equal(feed.sharedRegionalRecords[0].linkedEvents.length,2);
+});
+
 test('unmatched states and missing source links do not enter the subscription',()=>{
   const feed=buildPublishedChangeFeed([report],[{...state,eventId:'nfl:other'},{...state,changes:[{...change,sourceUrl:null}]}],now);
   assert.equal(feed.items.length,0);
