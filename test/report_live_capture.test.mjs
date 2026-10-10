@@ -6,6 +6,7 @@ const input={gameId:'nfl:401872989',generatedAt:'2026-10-10T15:48:24Z',capturedA
 
 test('browser capture binds all visible direct panels to one published game revision',()=>{
   const capture=buildLiveObservationCapture(input);
+  assert.equal(capture.schema,'event-atlas.browser-observation-capture.v2');
   assert.equal(capture.gameId,input.gameId);
   assert.equal(capture.publishedReportGeneratedAt,input.generatedAt);
   assert.equal(capture.panels.length,livePanelIds.length);

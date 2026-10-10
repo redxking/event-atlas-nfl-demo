@@ -1,4 +1,4 @@
-export const livePanelIds=['direct-game','direct-nws','direct-nws-forecast','direct-usgs','direct-nifc','direct-tennessee-road','direct-faa','direct-road-camera','direct-public-safety'];
+export const livePanelIds=['direct-game','direct-nws','direct-nws-forecast','direct-nws-station','direct-usgs','direct-nifc','direct-tennessee-road','direct-faa','direct-road-camera','direct-public-safety'];
 
 export function buildLiveObservationCapture({gameId,generatedAt,reportUrl,capturedAt,panels}){
   if(!/^nfl:\d{6,12}$/.test(gameId||'')||!Number.isFinite(Date.parse(generatedAt))||!Number.isFinite(Date.parse(capturedAt))||Date.parse(capturedAt)<Date.parse(generatedAt)||!/^https?:\/\//.test(reportUrl||'')||!Array.isArray(panels)||panels.length!==livePanelIds.length)throw Error('Invalid browser observation capture');
@@ -12,7 +12,7 @@ export function buildLiveObservationCapture({gameId,generatedAt,reportUrl,captur
     });
     return {id:panel.id,present:panel.present,displayText:panel.text,sourceLinks:links};
   });
-  return {schema:'event-atlas.browser-observation-capture.v1',classification:'unreviewed_public_source_context',gameId,publishedReportGeneratedAt:generatedAt,capturedAt,reportUrl,interpretation:'This captures visible browser checks for this exact published report revision. Checks can be in progress, unavailable, or newer than the hourly Markdown. Displayed source text has not been independently verified. This is not an operational threat assessment, incident confirmation, VIP attendance record, or dissemination approval.',panels:entries};
+  return {schema:'event-atlas.browser-observation-capture.v2',classification:'unreviewed_public_source_context',gameId,publishedReportGeneratedAt:generatedAt,capturedAt,reportUrl,interpretation:'This captures visible browser checks for this exact published report revision. Checks can be in progress, unavailable, or newer than the hourly Markdown. Displayed source text has not been independently verified. This is not an operational threat assessment, incident confirmation, VIP attendance record, or dissemination approval.',panels:entries};
 }
 
 if(typeof document!=='undefined'){
