@@ -65,6 +65,19 @@ test('local AI packet admits only fresh linked USGS observations without publish
   assert.equal(buildLocalAiPacket(withQuake,{now:at+6*60000}).evidence.some(item=>item.id==='Q1'),false);
 });
 
+test('local AI packet admits only dated source-linked NIFC wildfire points',()=>{
+  const at=Date.parse('2026-10-10T12:00:00Z');
+  const point={id:42,name:'Example Fire',distanceKm:12.3,updatedAt:'2026-10-10T10:00:00Z',sourceUrl:'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0/42',privateNote:'PRIVATE NOTE'};
+  const wildfireContext={state:'current_snapshot',asOf:'2026-10-10T11:00:00Z',events:[point,{...point,id:43,sourceUrl:'https://unapproved.example/43'}]};
+  const withFire={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,wildfireContext}}}};
+  const packet=buildLocalAiPacket(withFire,{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='W1')?.sourceUrl,point.sourceUrl);
+  assert.equal(packet.evidence.find(item=>item.id==='W2'),undefined);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE NOTE'));
+  assert.match(validateLocalAiDraft('W1',packet).reviewQuestions[0].question,/fire authority/);
+  assert.equal(buildLocalAiPacket(withFire,{now:at+13*3600000}).evidence.some(item=>item.id==='W1'),false);
+});
+
 test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
   const at=Date.parse('2026-10-10T02:00:00Z');
   const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};
