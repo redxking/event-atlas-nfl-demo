@@ -47,6 +47,14 @@ test('game-linked article revisions require two newer current snapshots',()=>{
   assert.ok(!diffEventPicture(before,{...after,gameArticle:{...after.gameArticle,asOf:before.gameArticle.asOf}},null,null,game,game).some(item=>item.kind==='game_article_changed'));
 });
 
+test('direct selected-game score changes are recorded only across newer checks',()=>{
+  const first={state:'checked',checkedAt:'2026-10-10T01:00:00Z',sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401872990',sourceStatus:'In Progress',gameState:{home:{score:7},away:{score:3}},reportedAttendance:null,article:null,scheduleDiffers:false};
+  const next={...first,checkedAt:'2026-10-10T02:00:00Z',gameState:{home:{score:10},away:{score:3}}};
+  const before={...picture('checked'),directGame:first},after={...picture('checked'),directGame:next};
+  assert.equal(diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='direct_game_state_changed')?.sourceUrl,first.sourceUrl);
+  assert.ok(!diffEventPicture(before,{...after,directGame:{...next,checkedAt:first.checkedAt}},null,null,game,game).some(item=>item.kind==='direct_game_state_changed'));
+});
+
 test('changed kickoff forecast is logged only across comparable current checks',()=>{
   const base={state:'current forecast',sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{startTime:'2026-10-11T16:00:00Z',endTime:'2026-10-11T18:00:00Z',shortForecast:'Sunny',temperature:74,temperatureUnit:'F'}};
   const before={...picture('checked'),forecastContext:base};

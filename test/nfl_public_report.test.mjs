@@ -61,3 +61,12 @@ test('exact-game publisher headline is linked separately from broad RSS mentions
   assert.match(report,/Preview: Game preview/);
   assert.match(report,/exact game ID/);
 });
+
+test('selected-game direct check is timestamped and distinct from published game state',()=>{
+  const checked=structuredClone(bundle);
+  checked.publicObservations.selectedGameDirectCheck={state:'checked',checkedAt:'2026-10-10T02:00:00Z',sourceStatus:'Final',sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401872990',gameState:{away:{name:'Away',score:24},home:{name:'Home',score:16}},reportedAttendance:92351,scheduleDiffers:false,article:null};
+  const report=buildNflPublicReport(checked);
+  assert.match(report,/Selected-game direct publisher check/);
+  assert.match(report,/Reported attendance:\*\* 92351/);
+  assert.match(report,/publisher observations, not verified venue operations or threat findings/);
+});
