@@ -55,3 +55,27 @@ test('shared correction history survives an unchanged hourly build with its orig
   assert.equal(retainSharedRegionalRevisions(next,{...previousFeed,builtAt:'2026-09-20T00:00:00Z'},now+3600000)[0].revisions.length,0);
   assert.equal(retainSharedRegionalRevisions(next,{...previousFeed,sharedRegionalRecords:[{...corrected[0],sourceId:'different'}]},now+3600000)[0].revisions.length,0);
 });
+
+test('one NIFC incident point links two games without implying separate fires or game impact',()=>{
+  const fire={id:600932,name:'Example incident',lat:33.93,lon:-118.34,updatedAt:'2026-10-10T13:00:00Z',discoveredAt:'2026-10-10T12:00:00Z',acres:10,containedPercent:20,distanceKm:2.7,sourceUrl:'https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0/600932'};
+  const fireState=(eventId,events,asOf='2026-10-10T15:00:00Z')=>({eventId,picture:{wildfireContext:{state:'current_snapshot',asOf,events}}});
+  const current=[fireState('nfl:1',[fire]),fireState('nfl:2',[fire]),fireState('nfl:3',[])];
+  const groups=buildSharedRegionalRecords(reports,current,now);
+  assert.equal(groups.length,1);
+  assert.equal(groups[0].sourceType,'NIFC wildfire incident point');
+  assert.deepEqual(groups[0].linkedEvents.map(item=>item.eventId),['nfl:1','nfl:2']);
+  assert.ok(groups[0].linkedEvents.every(item=>item.windowRelation==='not_time_matched'&&item.possibleImpact==='not_assessed'));
+  assert.equal(groups[0].excludedSample.reason,'outside_150_km_candidate_point_rule');
+  assert.deepEqual(buildSharedRegionalRecords(reports,[current[0],fireState('nfl:2',[fire],'2026-10-09T00:00:00Z')],now),[]);
+  assert.deepEqual(buildSharedRegionalRecords(reports,[current[0],fireState('nfl:2',[{...fire,sourceUrl:'https://example.com/fire'}])],now),[]);
+  const old={...fire,acres:5,updatedAt:'2026-10-10T12:30:00Z'};
+  const prior=['nfl:1','nfl:2'].map(eventId=>({...fireState(eventId,[old],'2026-10-10T13:30:00Z'),schema:'event-atlas.published-report-state.v8'}));
+  const corrected=buildSharedRegionalRecords(reports,current,now,prior);
+  assert.deepEqual(corrected[0].revisions.map(item=>item.changedFields),[['acres'],['acres']]);
+  assert.equal(corrected[0].revisions[0].previous.acres,5);
+  assert.equal(corrected[0].revisions[0].current.acres,10);
+  const previousFeed={schema:'event-atlas.published-change-feed.v1',status:'unreviewed_public_source_changes',builtAt:new Date(now).toISOString(),sharedRegionalRecords:corrected};
+  const retained=retainSharedRegionalRevisions(buildSharedRegionalRecords(reports,current,now+3600000),previousFeed,now+3600000);
+  assert.equal(retained[0].revisions.length,2);
+  assert.ok(retained[0].revisions.every(item=>item.provenance==='retained_prior_published_feed'));
+});
