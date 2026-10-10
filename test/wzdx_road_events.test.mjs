@@ -28,3 +28,24 @@ test('fresh WZDx feed supplies bounded spatial context without kickoff-time matc
   assert.equal(records[0].distanceKm,0);
   assert.throws(()=>parseWzdxNearVenue({...feed,feed_info:{update_date:'2026-10-07T20:00:00Z'}},venue,now,Date.parse('2027-01-10T00:00:00Z'),options),/older than 24 hours/);
 });
+
+test('DriveNC repeated source features become one traceable road activity',()=>{
+  const geometry={type:'LineString',coordinates:[[-74.02,40],[-73.98,40]]};
+  const make=(id,start,end,description='Ramp closure. Id: 6817')=>feature(id,geometry,{core_details:{event_type:'work-zone',road_names:['I-1'],description,update_date:'2026-10-09T20:00:00Z'},start_date:start,end_date:end});
+  const feed={type:'FeatureCollection',feed_info:{update_date:'2026-10-09T20:55:00Z'},features:[
+    make('hash-a','2026-10-10T00:00:00Z','2026-10-11T00:00:00Z'),
+    make('hash-b','2026-10-10T00:00:00Z','2026-10-11T00:00:00Z'),
+    make('hash-c','2026-10-17T00:00:00Z','2026-10-18T00:00:00Z'),
+    make('separate','2026-10-10T00:00:00Z','2026-10-11T00:00:00Z','Other closure. Id: 6818')
+  ]};
+  const records=parseWzdxNearVenue(feed,venue,now,Date.parse('2027-01-10T00:00:00Z'),{...options,sourceUrl:'https://drivenc.gov/api/wzdx'});
+  assert.equal(records.length,2);
+  const grouped=records.find(record=>record.detail.includes('6817'));
+  assert.match(grouped.id,/^wzdx-drivenc-6817-/);
+  assert.equal(grouped.sourceFeatureCount,3);
+  assert.equal(grouped.sourceWindowCount,2);
+  assert.equal(grouped.startAt,null);
+  assert.equal(grouped.endAt,null);
+  assert.equal(parseWzdxNearVenue({...feed,features:[...feed.features].reverse()},venue,now,Date.parse('2027-01-10T00:00:00Z'),{...options,sourceUrl:'https://drivenc.gov/api/wzdx'}).find(record=>record.detail.includes('6817')).id,grouped.id);
+  assert.equal(parseWzdxNearVenue(feed,venue,now,Date.parse('2027-01-10T00:00:00Z'),options).length,4);
+});
