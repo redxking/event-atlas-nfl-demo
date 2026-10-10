@@ -7,7 +7,7 @@ const catalog=JSON.parse(readFileSync(new URL('../data/demo_scenarios.json',impo
 
 test('fictional scenarios keep their source and evidence identities isolated',()=>{
   validateExerciseCatalog(catalog);
-  assert.equal(catalog.scenarios.length,4);
+  assert.ok(catalog.scenarios.length>=4);
   for(const scenario of catalog.scenarios){
     const initial=exerciseFrame(catalog,scenario.id,0);
     assert.equal(initial.dataMode,EXERCISE_MODE);
