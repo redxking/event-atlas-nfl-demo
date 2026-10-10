@@ -5,6 +5,7 @@ import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
 import {MN_CAMERA_URL,parseMinnesotaCameras,requireSourceAge} from '../lib/minnesota_iris.mjs';
 import {MASSDOT_CCTV_LAYER,massdotCameraQuery,parseMassdotCameraInventory} from '../lib/massdot_camera_inventory.mjs';
 import {TXDOT_CCTV_LAYER,txdotCameraQuery,parseTxdotCameraInventory} from '../lib/txdot_camera_inventory.mjs';
+import {MODOT_CAMERA_LAYER,modotCameraQuery,parseModotCameraInventory} from '../lib/modot_camera_inventory.mjs';
 import {NJTA_CAMERA_PAGE,parseNjtaCameraInventory} from '../lib/njta_camera_inventory.mjs';
 import {TDOT_CONFIG_URL,TDOT_CAMERA_API,tdotCameraRequestConfig,parseTdotCameraInventory} from '../lib/tdot_camera_inventory.mjs';
 
@@ -12,7 +13,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX|NJ|TN|LA), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX|NJ|TN|MO|LA), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
@@ -191,6 +192,12 @@ try{
   cameras.push(...records);
   sources.push({id:'txdot-dfw-camera-assets',url:TXDOT_CCTV_LAYER,status:'ok',records:records.length,sourceUpdatedAt,imageryAccess:'not_connected'});
 }catch(error){sources.push({id:'txdot-dfw-camera-assets',url:TXDOT_CCTV_LAYER,status:'failed',error:String(error)})}
+try{
+  const parsed=parseModotCameraInventory(await get(modotCameraQuery()));
+  if(parsed.length<50)throw Error('Insufficient valid MoDOT Kansas City camera records');
+  cameras.push(...parsed);
+  sources.push({id:'modot-kansas-city-cameras',url:MODOT_CAMERA_LAYER,status:'ok',records:parsed.length,upstreamFreshness:'unknown',imageryAccess:'publisher map only; direct stream not available to this build'});
+}catch(error){sources.push({id:'modot-kansas-city-cameras',url:MODOT_CAMERA_LAYER,status:'failed',error:String(error)})}
 if(sources.filter(source=>source.status!=='directory_only').every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
 const byVenue=selectCameraCoverage(venues,cameras,sources);
 const caltransStreams=Object.values(byVenue).flat().filter(item=>item.agency==='Caltrans'&&item.videoUrl);
