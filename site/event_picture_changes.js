@@ -47,5 +47,10 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(!previous||previous.detail!==item.detail)changes.push({kind:previous?'city_notice_changed':'new_city_notice',observedAt,title:`Philadelphia city notice: ${item.title}`,detail:'A city website-wide notice was added or its displayed text changed between two checked snapshots. Verify its current content and event relevance; this is not a stadium incident, impact, or threat finding.',sourceUrl:item.url||newCity.sourceUrl||null});
     }
   }
+  const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
+  if(oldRail?.state==='event-specific advisory listed'&&newRail?.state==='event-specific advisory listed'&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
+    const oldUrls=new Set(oldRail.advisories.map(item=>item.url));
+    for(const item of newRail.advisories.slice(0,4))if(!oldUrls.has(item.url))changes.push({kind:'new_event_rail_advisory',observedAt,title:item.title,detail:'NJ TRANSIT added an advisory naming this MetLife game. Verify the publisher details; the listing does not establish disruption, train operation, venue impact, or a threat.',sourceUrl:item.url});
+  }
   return changes.slice(0,12);
 }

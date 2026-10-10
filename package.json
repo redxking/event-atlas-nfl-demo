@@ -22,6 +22,7 @@
     "sync:denver-police": "node scripts/sync_denver_public_safety.mjs",
     "sync:philly-alerts": "node scripts/sync_philly_city_alerts.mjs",
     "sync:philly-permits": "node scripts/sync_philly_lane_permits.mjs",
+    "sync:njtransit-rail": "node scripts/sync_njtransit_event_rail.mjs",
     "sync:ntas": "python3 scripts/sync_dhs_ntas.py",
     "sync:septa": "node scripts/sync_septa_b_alerts.mjs",
     "sync:seams": "node scripts/sync_faa_seams.mjs",

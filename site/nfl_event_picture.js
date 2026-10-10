@@ -4,6 +4,7 @@ import {tfrAtKickoff} from './tfr_notam.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 import {selectNflGameArticle} from './nfl_game_article.js';
 import {selectSeptaForGame} from './septa_b_alerts.js';
+import {selectNjTransitRailForGame} from './njtransit_event_rail.js';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
@@ -16,7 +17,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,phillyAlerts,phillyPermits,ntas,news,gameArticles,directGame}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,spc,wpcRain,roadDirect,conditions,forecast,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,njTransitRail,phillyAlerts,phillyPermits,ntas,news,gameArticles,directGame}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -48,6 +49,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const transitPredictionsFresh=venueId==='3738'&&['retrieved','partial'].includes(transitPredictions?.state)&&Number.isFinite(transitPredictions.checkedAt)&&transitPredictions.checkedAt<=now+60000&&now-transitPredictions.checkedAt<=10*60000&&Array.isArray(transitPredictions.entries)&&Number.isSafeInteger(transitPredictions.totalReturned);
   const transitPredictionsContext=transitPredictionsFresh?{state:transitPredictions.state,checkedAt:new Date(transitPredictions.checkedAt).toISOString(),sourceUrl:transitPredictions.sourceUrl,stopId:transitPredictions.stopId,routeId:transitPredictions.routeId,totalReturned:transitPredictions.totalReturned,invalidCount:transitPredictions.invalidCount,omittedEntryCount:transitPredictions.omittedEntryCount,entries:transitPredictions.entries.map(item=>({tripId:item.tripId,headsign:item.headsign,arrivalAt:item.arrivalAt,departureAt:item.departureAt,status:item.status,sourceUrl:item.sourceUrl})),interpretation:transitPredictions.interpretation}:null;
   const septaContext=selectSeptaForGame(game,septa,now);
+  const njTransitRailContext=selectNjTransitRailForGame(game,njTransitRail,now);
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
   const newsContext=selectNflNews(game,news,now);
   const gameArticleContext=selectNflGameArticle(game,gameArticles,now);
@@ -83,7 +85,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('MBTA Foxboro station alerts',venueId!=='3738'?'outside source area':transit?.state==='failed'?'source failed':!transitFresh?'not current':transit.state==='partial'?'partial source data':'station alerts checked',transitFresh?new Date(transit.checkedAt).toISOString():null,'Filtered to Foxboro station; event-window overlap is a transit review cue, not verified event service impact or a threat.',venueId==='3738'?'https://api-v3.mbta.com/alerts?filter%5Bstop%5D=place-FS-0049':null),
     row('MBTA Foxboro station schedule',venueId!=='3738'?'outside source area':transitSchedule?.state==='failed'?'source failed':!transitScheduleFresh?'not current':transitSchedule.state==='partial'?'partial source data':'station schedule checked',transitScheduleFresh?new Date(transitSchedule.checkedAt).toISOString():null,'Published station service plan for the game date. No train position, capacity or guaranteed event access is inferred.',venueId==='3738'?transitSchedule?.sourceUrl||'https://api-v3.mbta.com/schedules':null),
     row('MBTA Foxboro current predictions',venueId!=='3738'?'outside source area':transitPredictions?.state==='failed'?'source failed':!transitPredictionsFresh?'not current':transitPredictions.state==='partial'?'partial source data':'current predictions checked',transitPredictionsFresh?new Date(transitPredictions.checkedAt).toISOString():null,'Station predictions are estimates for current service. No result does not establish cancelled future service or train position.',venueId==='3738'?transitPredictions?.sourceUrl||'https://api-v3.mbta.com/predictions':null),
-    row('SEPTA B Line service alerts',venueId!=='3806'?'outside source area':septaContext.state,septaContext?.sourceAt||null,'Route-wide notices may affect travel to NRG Station; only stop-specific selectors identify the station. Neither establishes stadium impact.',septaContext?.sourceUrl||null)
+    row('SEPTA B Line service alerts',venueId!=='3806'?'outside source area':septaContext.state,septaContext?.sourceAt||null,'Route-wide notices may affect travel to NRG Station; only stop-specific selectors identify the station. Neither establishes stadium impact.',septaContext?.sourceUrl||null),
+    row('NJ TRANSIT event rail advisories',venueId!=='3839'?'outside source area':njTransitRailContext.state,njTransitRailContext?.sourceAt||null,'Exact MetLife game advisory is publisher service planning, not a disruption, verified train operation, or threat.',njTransitRailContext?.sourceUrl||null)
   ];
   const cues=[];
   if(weather?.state==='screened')for(const entry of weather.alerts.filter(item=>item.candidate)){
@@ -119,6 +122,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(venueId==='3806'&&!['current snapshot','partial'].includes(septaContext.state))gaps.push('SEPTA B Line service alert snapshot is unavailable or older than two hours; travel service status cannot be inferred.');
   if(venueId==='3806'&&septaContext.state==='partial')gaps.push('SEPTA B Line alert snapshot is partial; event-time screening is incomplete.');
   if(venueId==='3806'&&septaContext.state==='current snapshot'&&!septaContext.screenable)gaps.push('SEPTA B Line alerts cannot be screened against a confirmed future kickoff.');
+  if(venueId==='3839'&&njTransitRailContext.state==='stale or unavailable')gaps.push('NJ TRANSIT event rail-advisory snapshot is unavailable or stale; game rail-service planning cannot be inferred.');
   if(venueId==='3806'&&!phillyAlertsFresh)gaps.push('Philadelphia website-wide emergency notices are unavailable or older than two hours; other city alert channels are not covered.');
   if(venueId==='3806'&&!phillyPermitsFresh)gaps.push('Philadelphia lane-permit snapshot is unavailable or older than 12 hours; permitted work near the venue cannot be screened for the listed game date.');
   if(venueId==='3806'&&citywideAlertsContext?.state==='partial')gaps.push('Some Philadelphia citywide notice entries had unsupported fields; notice details may be incomplete.');
@@ -137,5 +141,5 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(directGameContext&&directGameContext.state!=='checked')gaps.push('The selected-game direct ESPN check is unavailable, stale, or has an identity mismatch; use the dated published snapshot and verify the game source.');
   if(directGameContext?.state==='checked'&&directGameContext.scheduleDiffers)gaps.push('The direct ESPN game-summary date differs from the published schedule; verify kickoff with NFL or host club and repeat event-window screening.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,forecastContext:kickoffForecast,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,forecastContext:kickoffForecast,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }
