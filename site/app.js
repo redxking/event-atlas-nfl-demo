@@ -36,7 +36,7 @@ import {cmpdOpenTrafficFeed,parseCmpdOpenTrafficXml,summarizeCmpdOpenTraffic} fr
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_alerts.js';
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
-import {publicRoadVideoAgency} from './camera_video.js?v=20261010-5';
+import {publicRoadVideoAgency,advancingMedia} from './camera_video.js?v=camera-progress-1';
 import {fl511EmbedUrl,fl511EmbedToolUrl} from './fl511_embed.js?v=20261010-2';
 import {failedSourcesForVenue} from './venue_source_scope.js?v=20261010-1';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
