@@ -33,6 +33,17 @@ test('Denver delayed crime aggregate appears as context without generating a thr
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
 });
 
+test('Glendale ZIP calls remain historical context rather than a stadium threat cue',()=>{
+  const arizonaGame={...game,venue:{id:'3970',lat:33.5275,lon:-112.2625}};
+  const police={state:'retrieved',checkedAt:now,context:{nearby:321,zip:'85305',start:'2026-10-01',end:'2026-10-08',sourceLatestAt:now-35*3600000,sourceLoadedAt:now-24*3600000,sourceLagHours:35}};
+  const picture=buildNflEventPicture(arizonaGame,{schedule:inputs.schedule,police},now);
+  assert.equal(picture.policeContext.nearby,321);
+  assert.equal(picture.policeContext.zip,'85305');
+  assert.equal(picture.sources.find(item=>item.name==='Local police activity').state,'delayed historical count checked');
+  assert.equal(picture.cues.some(item=>item.sourceUrl?.includes('Police_Calls_for_Service')),false);
+  assert.ok(picture.gaps.some(item=>item.includes('ZIP-wide historical')));
+});
+
 test('Philadelphia citywide notices are cited as city context without event impact or threat cue',()=>{
   const phillyGame={...game,venue:{id:'3806',lat:39.90089,lon:-75.16776}};
   const context={state:'retrieved',checkedAt:now,totalReturned:1,invalidCount:0,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1',alerts:[{title:'City notice',detail:'Citywide information',url:'https://www.phila.gov/notice'}]};

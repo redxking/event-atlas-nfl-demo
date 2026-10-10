@@ -18,6 +18,7 @@
     "sync:spc": "node scripts/sync_spc_outlooks.mjs",
     "sync:wpc-rain": "node scripts/sync_wpc_rain_outlooks.mjs",
     "sync:police": "node scripts/sync_indianapolis_public_safety.mjs",
+    "sync:glendale-police": "node scripts/sync_glendale_public_calls.mjs",
     "sync:charlotte-police": "node scripts/sync_charlotte_public_safety.mjs",
     "sync:arlington-police": "node scripts/sync_arlington_public_safety.mjs",
     "sync:denver-police": "node scripts/sync_denver_public_safety.mjs",
