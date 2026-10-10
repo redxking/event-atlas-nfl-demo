@@ -96,6 +96,22 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       if(priorHash!==item.sourceTextSha256)changes.push({kind:priorHash?'club_announcement_revised':'club_announcement_added',observedAt,title:`Packers ${item.category.replaceAll('_',' ')}: ${item.id.replaceAll('_',' ')}`,detail:`The official game article ${priorHash?'changed text underlying':'added'} this bounded announcement between two checks. Verify the club article before use. It remains a published plan, not confirmed person attendance, aircraft activity, venue impact, or a threat finding.`,sourceUrl:item.sourceUrl});
     }
   }
+  for(const spec of [
+    {key:'patriotsPreviewContext',eventId:'nfl:401872986',url:'https://www.patriots.com/news/game-preview-patriots-vs-raiders-nfl-week-5',states:['current_published_announcements','partial_published_announcements'],max:3,label:'Patriots'},
+    {key:'jetsGuideContext',eventId:'nfl:401872983',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',states:['current_published_plan','partial_published_plan'],max:5,label:'Jets'}
+  ]){
+    const prior=before[spec.key],next=after[spec.key];
+    if(eventWindowChanged||after.eventId!==spec.eventId||!spec.states.includes(prior?.state)||!spec.states.includes(next?.state)||prior.sourceUrl!==spec.url||next.sourceUrl!==spec.url||!Number.isFinite(Date.parse(prior.asOf))||Date.parse(next.asOf)<=Date.parse(prior.asOf)||!Array.isArray(prior.claims)||!Array.isArray(next.claims)||prior.claims.length>spec.max||next.claims.length>spec.max)continue;
+    const valid=item=>item?.sourceUrl===spec.url&&/^\w{3,30}$/.test(item.id||'')&&/^\w{3,30}$/.test(item.category||'')&&/^[a-f0-9]{64}$/.test(item.sourceTextSha256||'');
+    if(!prior.claims.every(valid)||!next.claims.every(valid))continue;
+    const oldById=new Map(prior.claims.map(item=>[item.id,item]));
+    const newById=new Map(next.claims.map(item=>[item.id,item]));
+    for(const item of next.claims){
+      const old=oldById.get(item.id);
+      if(!old||old.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:old?'club_passage_revised':'club_passage_matched',observedAt,title:`${spec.label} ${item.category.replaceAll('_',' ')}: ${item.id.replaceAll('_',' ')}`,detail:`The ${spec.label} page ${old?'changed the text underlying':'now matches'} this bounded claim between checks. Review the publisher page. This is a published plan or recommendation, not verified attendance, actual operations, impact, or a threat.`,sourceUrl:spec.url});
+    }
+    for(const item of prior.claims)if(!newById.has(item.id))changes.push({kind:'club_passage_unmatched',observedAt,title:`${spec.label} passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:`The bounded extractor no longer matches this ${spec.label} page passage. It may have changed or disappeared; this does not prove the plan was cancelled or an activity ended. Review the current publisher page.`,sourceUrl:spec.url});
+  }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
   if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));

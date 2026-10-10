@@ -1,4 +1,4 @@
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-17';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-18';
 import {selectNflNews} from './nfl_news_context.js';
 
 const schema='event-atlas.published-report-state.v5';
@@ -7,7 +7,7 @@ const validPrior=(prior,game,now)=>prior?.schema===schema&&prior.eventId===game.
 
 export function buildPublishedReportState(bundle,game,newsSnapshot,prior=null,now=Date.now()){
   const news=selectNflNews(game,newsSnapshot,now);
-  const picture={eventId:game.id,sources:bundle.picture.sources.slice(0,50),cues:bundle.picture.cues.slice(0,50),forecastContext:bundle.picture.forecastContext,gameArticle:bundle.picture.gameArticle,directGame:bundle.picture.directGame,citywideAlertsContext:bundle.picture.citywideAlertsContext,greenBayAlertContext:bundle.picture.greenBayAlertContext,lambeauPlanContext:bundle.picture.lambeauPlanContext,packersReleaseContext:bundle.picture.packersReleaseContext,njTransitRailContext:bundle.picture.njTransitRailContext,nj511Context:bundle.picture.nj511Context,naturalEventsContext:bundle.picture.naturalEventsContext,usgsContext:bundle.picture.usgsContext,wildfireContext:bundle.picture.wildfireContext,airQualityContext:bundle.picture.airQualityContext,smokeContext:bundle.picture.smokeContext,environmentalCorrelation:bundle.picture.environmentalCorrelation};
+  const picture={eventId:game.id,sources:bundle.picture.sources.slice(0,50),cues:bundle.picture.cues.slice(0,50),forecastContext:bundle.picture.forecastContext,gameArticle:bundle.picture.gameArticle,directGame:bundle.picture.directGame,citywideAlertsContext:bundle.picture.citywideAlertsContext,greenBayAlertContext:bundle.picture.greenBayAlertContext,lambeauPlanContext:bundle.picture.lambeauPlanContext,packersReleaseContext:bundle.picture.packersReleaseContext,patriotsPreviewContext:bundle.picture.patriotsPreviewContext,jetsGuideContext:bundle.picture.jetsGuideContext,njTransitRailContext:bundle.picture.njTransitRailContext,nj511Context:bundle.picture.nj511Context,naturalEventsContext:bundle.picture.naturalEventsContext,usgsContext:bundle.picture.usgsContext,wildfireContext:bundle.picture.wildfireContext,airQualityContext:bundle.picture.airQualityContext,smokeContext:bundle.picture.smokeContext,environmentalCorrelation:bundle.picture.environmentalCorrelation};
   const comparable=validPrior(prior,game,now);
   const changes=comparable?diffEventPicture(prior.picture,picture,prior.news,news,prior.game,game,new Date(now).toISOString()):[];
   const history=comparable?[...changes,...prior.changes].slice(0,30):[];

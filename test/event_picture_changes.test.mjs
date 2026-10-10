@@ -27,6 +27,26 @@ test('official game-announcement passage revisions require two newer checked sna
   assert.equal(diffEventPicture({...before,packersReleaseContext:{...before.packersReleaseContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(change=>change.kind==='club_announcement_revised'),false);
 });
 
+test('Jets and Patriots passage revisions surface without claiming a cancelled event',()=>{
+  const cases=[
+    {eventId:'nfl:401872983',key:'jetsGuideContext',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',state:'current_published_plan',id:'entry'},
+    {eventId:'nfl:401872986',key:'patriotsPreviewContext',url:'https://www.patriots.com/news/game-preview-patriots-vs-raiders-nfl-week-5',state:'current_published_announcements',id:'vinatieri_halftime'}
+  ];
+  for(const spec of cases){
+    const claim={id:spec.id,category:'announced_person',sourceUrl:spec.url,sourceTextSha256:'a'.repeat(64)};
+    const base={eventId:spec.eventId,sources:[],cues:[]};
+    const before={...base,[spec.key]:{state:spec.state,asOf:'2026-10-10T05:00:00Z',sourceUrl:spec.url,claims:[claim]}};
+    const after={...base,[spec.key]:{state:spec.state,asOf:'2026-10-10T06:00:00Z',sourceUrl:spec.url,claims:[{...claim,sourceTextSha256:'b'.repeat(64)}]}};
+    const changed=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='club_passage_revised');
+    assert.equal(changed?.sourceUrl,spec.url);
+    assert.match(changed.detail,/not verified attendance/);
+    const partial={...after,[spec.key]:{...after[spec.key],state:spec.eventId==='nfl:401872983'?'partial_published_plan':'partial_published_announcements',claims:[]}};
+    const missing=diffEventPicture(before,partial,null,null,game,game).find(item=>item.kind==='club_passage_unmatched');
+    assert.match(missing?.detail||'',/does not prove the plan was cancelled/);
+    assert.equal(diffEventPicture({...before,[spec.key]:{...before[spec.key],state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='club_passage_revised'),false);
+  }
+});
+
 test('NASA regional point changes require two current snapshots and preserve provenance',()=>{
   const point={id:'EONET_42',title:'Wildfire example',distanceKm:68,sourceAt:'2026-10-10T01:00:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/EONET_42/geojson'};
   const before={...picture('checked'),naturalEventsContext:{state:'current_snapshot',events:[]}};

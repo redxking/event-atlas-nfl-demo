@@ -31,7 +31,7 @@ import {selectNj511ForGame,nj511EventsPage} from './nj511_events.js';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-2';
 import {shouldAdoptPublishedSnapshot} from './published_snapshot_refresh.js';
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-17';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-18';
 import {fetchSelectedGame} from './espn_game_summary.js?v=20261010-2';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);
