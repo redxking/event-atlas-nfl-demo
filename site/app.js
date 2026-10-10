@@ -398,6 +398,11 @@ function renderCameras(game){
   const images=[...target.querySelectorAll('.camera-still')];
   for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle):not(.fl511-map-toggle)'))button.onclick=()=>playCameraVideo(button,game);
   for(const button of target.querySelectorAll('.camera-frame-toggle'))button.onclick=()=>toggleCameraFrame(button);
+  const primaryVideo=items.find(item=>item.videoPlaylistStatus==='playlist_reachable_at_sync'&&publicRoadVideoAgency(item));
+  if(primaryVideo&&document.visibilityState==='visible'){
+    const button=[...target.querySelectorAll('.camera-video-toggle[data-camera-id]')].find(candidate=>candidate.dataset.cameraId===primaryVideo.id);
+    if(button)playCameraVideo(button,game);
+  }
   for(const img of images)img.addEventListener('error',()=>{img.closest('.camera-image').querySelector('small').textContent='Agency image unavailable. Use the agency viewer.';img.hidden=true});
   if(images.length)cameraRefreshTimer=setInterval(()=>{
     if(selected!==game.id){clearInterval(cameraRefreshTimer);cameraRefreshTimer=null;return}
