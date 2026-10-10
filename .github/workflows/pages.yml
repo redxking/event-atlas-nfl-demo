@@ -98,6 +98,7 @@ jobs:
       - run: npm run sync:seams
       - run: npm run sync:tfr
       - run: npm run build:reports
+      - run: node scripts/verify_published_reports.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
