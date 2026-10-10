@@ -1,0 +1,76 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
+import {buildNflPublicReport} from '../site/nfl_public_report.js';
+import {renderPublicReportHtml} from './render_public_report_html.mjs';
+
+const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
+const read=async name=>{try{return JSON.parse(await fs.readFile(path.join(site,name),'utf8'))}catch{return null}};
+const required=await read('nfl.json');
+const now=Date.now();
+if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFinite(Date.parse(required.builtAt))||now-Date.parse(required.builtAt)>12*3600000)throw Error('Fresh NFL schedule snapshot required for published reports');
+const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',ntas:'ntas.json',septa:'septa_b_alerts.json'};
+const inputs={schedule:required};
+for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
+const games=required.games.filter(game=>String(game.status).startsWith('scheduled')&&!game.timeTbd&&Number.isFinite(Date.parse(game.kickoff))&&Date.parse(game.kickoff)>=now-6*3600000&&Date.parse(game.kickoff)<=now+7*86400000);
+if(games.length>35)throw Error('Unexpectedly many scheduled NFL games in the next seven days');
+const headers={Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public report (https://github.com/redxking/event-atlas-nfl-demo)'};
+const nwsHost=/^https:\/\/api\.weather\.gov\/gridpoints\/[A-Z]{3,4}\/\d+,\d+\/forecast\/hourly$/;
+const fetchJson=async url=>{
+  const response=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});
+  if(!response.ok)throw Error(`HTTP ${response.status}`);
+  return response.json();
+};
+let quakes=null,quakesError=null;
+try{
+  quakes=await fetchJson('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson');
+  if(quakes?.type!=='FeatureCollection'||!Array.isArray(quakes.features)||quakes.features.length>10000)throw Error('Invalid USGS collection');
+}catch(error){quakes=null;quakesError=`USGS ${String(error.message).slice(0,100)}`}
+const venueChecks=new Map();
+async function checkVenue(venue){
+  const result={at:Date.now(),alerts:null,alertsError:null,quakes,quakesError};
+  if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon)){result.alertsError='Venue point unavailable';return result}
+  try{
+    const url=`https://api.weather.gov/alerts/active?point=${venue.lat},${venue.lon}`;
+    const alerts=await fetchJson(url);
+    if(alerts?.type!=='FeatureCollection'||!Array.isArray(alerts.features)||alerts.features.length>100)throw Error('Invalid NWS alert collection');
+    result.alerts=alerts;
+  }catch(error){result.alertsError=`NWS ${String(error.message).slice(0,100)}`}
+  result.at=Date.now();
+  return result;
+}
+async function forecastFor(game){
+  const venue=game.venue,kickoff=Date.parse(game.kickoff);
+  if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon))return null;
+  try{
+    const point=await fetchJson(`https://api.weather.gov/points/${venue.lat},${venue.lon}`);
+    const url=point?.properties?.forecastHourly;
+    if(!nwsHost.test(url||''))throw Error('Unexpected NWS forecast URL');
+    const hourly=await fetchJson(url),periods=hourly?.properties?.periods;
+    if(!Array.isArray(periods)||periods.length>300)throw Error('Invalid NWS hourly forecast');
+    const period=periods.find(item=>Date.parse(item.startTime)<=kickoff&&kickoff<Date.parse(item.endTime));
+    if(!period)throw Error('Listed kickoff outside returned hourly periods');
+    return {state:'ok',checkedAt:Date.now(),kickoff:game.kickoff,sourceUrl:url,period};
+  }catch{return {state:'failed',kickoff:game.kickoff}}
+}
+const outDir=path.join(site,'reports');
+await fs.mkdir(outDir,{recursive:true});
+const entries=[];
+for(const game of games){
+  if(!/^nfl:\d+$/.test(game.id))throw Error('Unexpected NFL game ID');
+  const id=game.id.replace(':','-');
+  if(!venueChecks.has(game.venue.id))venueChecks.set(game.venue.id,await checkVenue(game.venue));
+  const conditions=venueChecks.get(game.venue.id),forecast=await forecastFor(game);
+  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast});
+  const body=buildNflPublicReport(bundle);
+  const frontmatter=`---\ntitle: ${JSON.stringify(`NFL public-source review: ${game.title}`)}\nauthor: Angelis Pseftis\ncreator: Angelis Pseftis\nstatus: Automated public-source compilation; unreviewed\ngenerated_at: ${bundle.generatedAt}\n---\n\n`;
+  const filename=`${id}.md`;
+  await fs.writeFile(path.join(outDir,filename),frontmatter+body,'utf8');
+  const htmlName=`${id}.html`;
+  await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename}),'utf8');
+  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state});
+}
+const index={status:'ok',builtAt:new Date().toISOString(),basis:'Automated hourly public-source compilations for listed NFL games within seven days. Each report is a point-in-time unreviewed document; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
+await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
+console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);

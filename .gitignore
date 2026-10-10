@@ -10,3 +10,4 @@ data/voting_history/
 .env
 .env.*
 *.log
+site/reports/
