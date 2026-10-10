@@ -153,6 +153,17 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of oldActive.entries)if(!next.has(item.id))changes.push({kind:'city_index_item_unlisted',observedAt,title:`NOLA Ready index no longer lists: ${item.title}`,detail:'The newer city index no longer lists this item. This does not prove the event or incident ended; verify its page and the issuing authority.',sourceUrl:item.url});
   }
+  const oldUpdates=before.nolaReadyUpdatesContext,newUpdates=after.nolaReadyUpdatesContext;
+  const updatesUrl='https://ready.nola.gov/incident/?rss=NOLA-Ready-Updates';
+  const validUpdate=item=>typeof item?.title==='string'&&item.title.length>=3&&item.title.length<=180&&Number.isFinite(Date.parse(item.publishedAt))&&/^https:\/\/ready\.nola\.gov\/incident\/[^/?#]+\/[^/?#]+\/$/.test(item.url||'');
+  if(!eventWindowChanged&&currentGame?.venue?.id==='3493'&&oldUpdates?.state==='current_updates'&&newUpdates?.state==='current_updates'&&oldUpdates.sourceUrl===updatesUrl&&newUpdates.sourceUrl===updatesUrl&&Number.isFinite(Date.parse(oldUpdates.asOf))&&Date.parse(newUpdates.asOf)>Date.parse(oldUpdates.asOf)&&Array.isArray(oldUpdates.entries)&&Array.isArray(newUpdates.entries)&&oldUpdates.entries.length<=20&&newUpdates.entries.length<=20&&oldUpdates.entries.every(validUpdate)&&newUpdates.entries.every(validUpdate)){
+    const prior=new Map(oldUpdates.entries.map(item=>[item.url,item]));
+    for(const item of newUpdates.entries){
+      const old=prior.get(item.url);
+      if(!old)changes.push({kind:'city_update_published',observedAt,title:`NOLA Ready update: ${item.title}`,detail:`City RSS lists this update as published ${item.publishedAt}. Read its page to verify what changed, its location and event relevance; a headline is not a stadium incident or threat finding.`,sourceUrl:item.url});
+      else if(old.title!==item.title||old.publishedAt!==item.publishedAt)changes.push({kind:'city_update_revised',observedAt,title:`NOLA Ready update revised: ${item.title}`,detail:'City RSS title or publication time changed. Verify the publisher page and current scope; this does not establish an incident or threat.',sourceUrl:item.url});
+    }
+  }
   const priorGeorgia=before.georgiaTrafficContext,nextGeorgia=after.georgiaTrafficContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorGeorgia?.state==='current_retrieval_time_basis_unverified'&&nextGeorgia?.state==='current_retrieval_time_basis_unverified'&&priorGeorgia.sourcePageUrl==='https://incidentreport.dot.ga.gov/'&&nextGeorgia.sourcePageUrl===priorGeorgia.sourcePageUrl&&Number.isFinite(Date.parse(priorGeorgia.asOf))&&Date.parse(nextGeorgia.asOf)>Date.parse(priorGeorgia.asOf)&&Array.isArray(priorGeorgia.records)&&Array.isArray(nextGeorgia.records)&&priorGeorgia.records.length<=10&&nextGeorgia.records.length<=10){
     const oldById=new Map(priorGeorgia.records.map(item=>[item.id,item]));
