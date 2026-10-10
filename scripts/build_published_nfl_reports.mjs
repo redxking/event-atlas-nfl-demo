@@ -12,6 +12,7 @@ import {fetchSelectedGame} from '../site/espn_game_summary.js';
 import {fetchNwsStationObservation} from '../site/nws_observation.js';
 import {calfireCountyContext} from '../site/calfire_active.js';
 import {selectChargersTheme} from '../site/chargers_themes.js';
+import {selectMetroSofiPlan} from '../site/metro_sofi_plan.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
@@ -23,6 +24,7 @@ const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
 inputs.chargersThemes=await read('chargers_themes.json');
+inputs.metroSofiPlan=await read('metro_sofi_plan.json');
 const games=required.games.filter(game=>publishedNflReportMode(game,now));
 if(games.length>300)throw Error('Unexpectedly many NFL games in the season report set');
 const headers={Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public report (https://github.com/redxking/event-atlas-nfl-demo)'};
@@ -121,6 +123,7 @@ for(const game of games){
   const bundle=buildNflEvidenceBundle(game,{...inputs,monitoringMode,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
   bundle.calfireRegional=monitoringMode==='near_term_monitoring'?calfireCountyContext(inputs.calfire,game.venue.id,Date.parse(bundle.generatedAt)):null;
   bundle.chargersTheme=selectChargersTheme(game,inputs.chargersThemes,Date.parse(bundle.generatedAt));
+  bundle.metroSofiPlan=selectMetroSofiPlan(game,inputs.metroSofiPlan,Date.parse(bundle.generatedAt));
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){
