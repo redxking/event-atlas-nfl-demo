@@ -1,9 +1,9 @@
-import {mapColors,eventKey,renderMapKey} from './map_key.js';
-import {attachDemoTracking} from './demo_tracking.js?v=map-key-1';
+import {mapColors,eventKey,renderMapKey} from './map_key.js?v=palette-2';
+import {attachDemoTracking} from './demo_tracking.js?v=palette-2';
 import {humanText} from './attention_summary.js';
 import {locatedConcerns} from './concern_location.js';
 import {findingDecision} from './finding_decision.js';
-import {attachMovementTracking} from './movement_map.js?v=map-key-1';
+import {attachMovementTracking} from './movement_map.js?v=palette-2';
 let map,groundLayer,airLayer,venueLayer,controls,eventId,resizeObserver,concernLayer,concernGameId,concerns=[],keyOptions={};
 const textNode=text=>{const node=document.createElement('div');node.textContent=text;return node;};
 const validRing=ring=>Array.isArray(ring)&&ring.length>=4&&ring.every(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);

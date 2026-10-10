@@ -1,4 +1,4 @@
-import {mapColors,trackingIcon} from './map_key.js';
+import {mapColors,trackingIcon} from './map_key.js?v=palette-2';
 import {positionRelation,aircraftInformationAlert} from './movement_tracking.js';
 export function demoTrackingFrame(game,step,now=Date.now()){
  const {lat,lon}=game.venue;

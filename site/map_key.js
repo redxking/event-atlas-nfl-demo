@@ -1,4 +1,4 @@
-export const mapColors={venue:'#2563eb',ground:'#047857',airspace:'#7c3aed',oldAirspace:'#64748b',concern:'#b45309',aircraft:'#0369a1',vessel:'#0f766e',demo:'#a21caf',urgent:'#b91c1c',neutral:'#64748b'};
+export const mapColors={venue:'#285ea8',ground:'#33765d',airspace:'#72569a',oldAirspace:'#596779',concern:'#a96312',aircraft:'#285ea8',vessel:'#237b83',demo:'#965782',urgent:'#b43e38',neutral:'#596779'};
 export function overviewKey(){return [
  {shape:'count',color:mapColors.neutral,label:'No current concern flag / screening pending',detail:'Gray does not mean cleared or safe.'},
  {shape:'count',color:mapColors.concern,label:'Potential source concern',detail:'At least one event has a finding awaiting assessment.'},

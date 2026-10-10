@@ -1,4 +1,4 @@
-import {overviewKey,renderMapKey} from './map_key.js';
+import {overviewKey,renderMapKey} from './map_key.js?v=palette-2';
 import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=evidence-timeline-2';
 import {setGeographicTrail,showWorkspaceView} from './workspace_views.js?v=multi-events-1';
 // FEMA state groupings: https://www.fema.gov/about/organization/regions

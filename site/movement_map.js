@@ -1,4 +1,4 @@
-import {mapColors,trackingIcon} from './map_key.js';
+import {mapColors,trackingIcon} from './map_key.js?v=palette-2';
 import {positionRelation,movementTransition,aircraftInformationAlert} from './movement_tracking.js';
 let active;
 export function stopMovementTracking(){active?.stop();}
