@@ -6,6 +6,7 @@ import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
 import {buildNflPublicReport} from '../site/nfl_public_report.js';
 import {buildLocalAiPacket} from '../lib/local_ai_brief.mjs';
 import {diffEventPicture} from '../site/event_picture_changes.js';
+import {buildNflCaseContext} from '../lib/build_nfl_case_context.mjs';
 
 const schedule=JSON.parse(readFileSync(new URL('../site/nfl.json',import.meta.url)));
 const snapshot=JSON.parse(readFileSync(new URL('../site/rams_bills_gameday.json',import.meta.url)));
@@ -27,6 +28,9 @@ test('Rams exact-game plans reach cited report and AI evidence without implying 
   const packet=buildLocalAiPacket({event:{sourceId:'nfl'},sourceComparison:{status:'unchanged_since_intake'},nflContext:{status:'snapshot_available_unreviewed',scheduleSnapshotAt:schedule.builtAt,evidence:bundle}},{now});
   assert.equal(packet.evidence.find(item=>item.id==='T4')?.sourceUrl,snapshot.sourceUrl);
   assert.equal(packet.evidence.find(item=>item.id==='O2')?.sourceUrl,snapshot.sourceUrl);
+  const currentEvent={id:game.id,sourceId:'nfl',title:game.title,startsAtLocal:game.kickoff,status:game.status,sourceUrl:game.sourceUrl,gameState:game.gameState};
+  const local=buildNflCaseContext({id:game.id,sourceId:'nfl'},currentEvent,{schedule,ramsBillsGameday:snapshot},now);
+  assert.equal(local.evidence.picture.ramsBillsGuideContext.state,'current_published_plan');
 });
 
 test('exact-game identity, freshness, source and publisher revisions are bounded',()=>{

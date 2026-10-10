@@ -16,6 +16,11 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
   if(!before||before.eventId!==after?.eventId)return [];
   const changes=[],oldRows=rows(before),newRows=rows(after);
   const eventWindowChanged=previousGame?.kickoff!==currentGame?.kickoff||previousGame?.status!==currentGame?.status||previousGame?.timeTbd!==currentGame?.timeTbd;
+  const oldSofi=before.sofiVenueEventContext,newSofi=after.sofiVenueEventContext;
+  if(!eventWindowChanged&&oldSofi?.state==='current_venue_event_page'&&newSofi?.state==='current_venue_event_page'&&oldSofi.sourceUrl===newSofi.sourceUrl&&Number.isFinite(Date.parse(oldSofi.asOf))&&Date.parse(newSofi.asOf)>Date.parse(oldSofi.asOf)&&oldSofi.sourceTextSha256!==newSofi.sourceTextSha256){
+    const changed=['eventStartsLocal','parkingLotsOpenLocal','doorsOpenLocal','detailKickoffLocal'].filter(key=>oldSofi[key]!==newSofi[key]);
+    if(changed.length)changes.push({kind:'venue_event_page_revised',observedAt,title:'SoFi exact-game venue timing changed',detail:`The official venue page changed: ${changed.join(', ')}. Reconcile with the club and stadium before using these published times. This is not an observed opening, crowd condition, incident, or threat.`,sourceUrl:newSofi.sourceUrl});
+  }
   if(eventWindowChanged)changes.push({kind:'schedule_changed',observedAt,title:'Published game time or status changed',detail:'Review the new schedule and repeat event-window screening. The change is not an incident finding.',sourceUrl:currentGame?.sourceUrl||null});
   if(!eventWindowChanged&&previousGame?.gameState&&currentGame?.gameState&&Number.isFinite(Date.parse(previousGame.sourceRetrievedAt))&&Date.parse(currentGame.sourceRetrievedAt)>Date.parse(previousGame.sourceRetrievedAt)&&JSON.stringify(previousGame.gameState)!==JSON.stringify(currentGame.gameState))changes.push({kind:'game_state_changed',observedAt,title:'Publisher game score or period changed',detail:'The publisher scoreboard differs from the prior retrieved snapshot. Confirm the latest game state with the source; this does not establish crowd movement, venue impact, or a threat.',sourceUrl:currentGame.sourceUrl||null});
   for(const [name,next] of newRows){
