@@ -116,6 +116,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of prior.claims)if(!newById.has(item.id))changes.push({kind:spec.label==='MARTA'?'operator_schedule_unmatched':'club_passage_unmatched',observedAt,title:`${spec.label} passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:`The bounded extractor no longer matches this ${spec.label} page passage. It may have changed or disappeared; this does not prove the plan was cancelled or an activity ended. Review the current publisher page.`,sourceUrl:spec.url});
   }
+  const priorMarta=before.martaAlertContext,nextMarta=after.martaAlertContext;
+  if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorMarta?.state==='current_preview'&&nextMarta?.state==='current_preview'&&priorMarta.alertPageUrl==='https://itsmarta.com/ride/alerts'&&nextMarta.alertPageUrl===priorMarta.alertPageUrl&&Number.isFinite(Date.parse(priorMarta.asOf))&&Date.parse(nextMarta.asOf)>Date.parse(priorMarta.asOf)&&Array.isArray(priorMarta.alerts)&&Array.isArray(nextMarta.alerts)&&priorMarta.alerts.length<=5&&nextMarta.alerts.length<=5){
+    const oldById=new Map(priorMarta.alerts.map(item=>[item.id,item]));
+    for(const item of nextMarta.alerts){
+      if(!/^[a-f0-9]{16}$/.test(item?.id||'')||!/^[a-f0-9]{64}$/.test(item.sourceTextSha256||'')||item.sourceUrl!==priorMarta.alertPageUrl)continue;
+      const old=oldById.get(item.id);
+      if(!old||old.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:'operator_alert_preview_changed',observedAt,title:'MARTA Train Alerts preview changed',detail:'An operator homepage notice appeared or its bounded text changed between checks. Verify its current status, time, route and event relevance with MARTA. The preview is incomplete and does not establish stadium impact or a threat.',sourceUrl:item.sourceUrl});
+    }
+  }
   const priorSounder=before.soundTransitContext,nextSounder=after.soundTransitContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872992'&&priorSounder?.state==='current_published_service_plan'&&nextSounder?.state==='current_published_service_plan'&&priorSounder.sourceUrl==='https://www.soundtransit.org/get-to-know-us/news-events/calendar/seahawks-vs-san-francisco-2026-10-11'&&nextSounder.sourceUrl===priorSounder.sourceUrl&&Number.isFinite(Date.parse(priorSounder.asOf))&&Date.parse(nextSounder.asOf)>Date.parse(priorSounder.asOf)&&/^[a-f0-9]{64}$/.test(priorSounder.sourceTextSha256||'')&&/^[a-f0-9]{64}$/.test(nextSounder.sourceTextSha256||'')&&priorSounder.sourceTextSha256!==nextSounder.sourceTextSha256)changes.push({kind:'operator_timetable_revised',observedAt,title:'Sound Transit Seahawks event timetable text changed',detail:'The operator page timetable or return-service text differs between two source checks. Confirm the current published plan and actual service with Sound Transit; a text change does not prove cancellation, a train run, crowd impact, or a threat.',sourceUrl:nextSounder.sourceUrl});
   const priorSounderAlerts=before.sounderAlertsContext,nextSounderAlerts=after.sounderAlertsContext;

@@ -45,6 +45,7 @@ jobs:
       - run: npm run sync:titans-guide
       - run: npm run sync:falcons-guide
       - run: npm run sync:marta-rail
+      - run: npm run sync:marta-alert-preview
       - run: npm run sync:sound-transit-seahawks
       - run: npm run sync:sound-transit-alerts
       - run: npm run sync:seattle-fire
