@@ -15,7 +15,7 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('report_refresh.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
-  assert.ok(html.includes('report_live_usgs.js?v=20261010-1'));
+  assert.ok(html.includes('report_live_usgs.js?v=20261010-2'));
   assert.ok(html.includes('report_live_game.js?v=20261010-1'));
   assert.ok(html.includes('report_live_tennessee_road.js?v=20261010-1'));
   assert.ok(html.includes('report_live_public_safety.js?v=20261010-2'));
