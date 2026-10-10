@@ -5,6 +5,17 @@ const line=(label,value)=>`- **${label}:** ${clean(value)||'not supplied'}`;
 const section=(title,rows,empty)=>[`## ${title}`,rows.length?rows.join('\n'):empty,''].join('\n');
 const sourceState=(picture,name)=>picture.sources?.find(item=>item.name===name)?.state||'source state unavailable';
 const screenedCount=(count,state,accepted)=>accepted.includes(state)?`${count??0} in completed source screen`:`unavailable (${state})`;
+function transitCount(picture){
+  const operatorStates=[
+    ['MBTA Foxboro station alerts',['station alerts checked']],
+    ['SEPTA B Line service alerts',['current snapshot']],
+    ['Sound Transit Sounder service alerts',['current_snapshot']]
+  ].map(([name,accepted])=>({name,state:sourceState(picture,name),accepted})).filter(item=>item.state!=='source state unavailable'&&item.state!=='outside source area');
+  if(!operatorStates.length)return 'no connected event-area transit alert screen';
+  const unavailable=operatorStates.filter(item=>!item.accepted.includes(item.state));
+  if(unavailable.length)return `unavailable (${unavailable.map(item=>`${item.name}: ${item.state}`).join('; ')})`;
+  return `${picture.cueCounts?.transit??0} in completed operator screen`;
+}
 
 export function buildNflPublicReport(bundle){
   if(bundle?.schema!=='event-atlas.public-evidence-bundle.v1'||!bundle.event||!bundle.venue||!bundle.picture)throw Error('Current NFL public evidence bundle required');
@@ -31,7 +42,7 @@ export function buildNflPublicReport(bundle){
     line('WPC rainfall forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':screenedCount(picture.cueCounts?.rainfall,picture.excessiveRainOutlook?.state||'source state unavailable',['published outlook at kickoff','no point match in current Day 1–3 outlook'])),
     line('Roadway time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':screenedCount(picture.cueCounts?.road,sourceState(picture,'Road conditions'),['time screened'])),
     ...(event.id==='nfl:401872987'?[line('Saints pregame and DOTD published-window overlaps',picture.saintsAccessComparison?.state==='unavailable'?'unavailable':picture.cueCounts?.accessPlan??0)]:[]),
-    line('Transit alert time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.transit??0),
+    line('Transit alert time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':transitCount(picture)),
     bundle.reportMonitoringMode==='season_planning'?'Event-window checks have not started. Current source records are planning context and do not establish conditions at kickoff.':'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
     ''
   ];

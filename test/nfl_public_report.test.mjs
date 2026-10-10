@@ -24,6 +24,7 @@ test('review summary does not turn failed or unscreenable sources into zero find
   assert.match(report,/SPC forecast review candidates:\*\* unavailable \(stale or unavailable\)/);
   assert.match(report,/WPC rainfall forecast review candidates:\*\* unavailable \(outside published Day 1–3 window\)/);
   assert.match(report,/Roadway time overlaps:\*\* unavailable \(stale\)/);
+  assert.match(report,/Transit alert time overlaps:\*\* no connected event-area transit alert screen/);
   const screened=structuredClone(failed);
   screened.picture.sources.find(item=>item.name==='NWS point alerts').state='checked';
   screened.picture.sources[0].state='time screened';
@@ -32,6 +33,10 @@ test('review summary does not turn failed or unscreenable sources into zero find
   const completed=buildNflPublicReport(screened);
   assert.match(completed,/NWS alert review candidates:\*\* 0 in completed source screen/);
   assert.match(completed,/Roadway time overlaps:\*\* 1 in completed source screen/);
+  screened.picture.sources.push({name:'MBTA Foxboro station alerts',state:'source failed'});
+  assert.match(buildNflPublicReport(screened),/Transit alert time overlaps:\*\* unavailable \(MBTA Foxboro station alerts: source failed\)/);
+  screened.picture.sources.at(-1).state='station alerts checked';
+  assert.match(buildNflPublicReport(screened),/Transit alert time overlaps:\*\* 0 in completed operator screen/);
 });
 
 test('Packers exact-game report attributes announced people and flyover without claiming attendance',()=>{
