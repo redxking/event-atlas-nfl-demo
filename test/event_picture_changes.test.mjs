@@ -167,7 +167,11 @@ test('NIFC change feed distinguishes a new bounded point from a material source 
   const stamp={...point,updatedAt:'2026-10-10T02:00:00Z'};
   assert.equal(diffEventPicture(after,{...after,wildfireContext:{...after.wildfireContext,asOf:'2026-10-10T03:10:00Z',events:[stamp]}},null,null,game,game).some(item=>item.kind==='wildfire_point_revised'),false);
   const revised={...stamp,acres:20};
-  assert.equal(diffEventPicture(after,{...after,wildfireContext:{...after.wildfireContext,asOf:'2026-10-10T03:10:00Z',events:[revised]}},null,null,game,game).find(item=>item.kind==='wildfire_point_revised')?.sourceUrl,point.sourceUrl);
+  const correction=diffEventPicture(after,{...after,wildfireContext:{...after.wildfireContext,asOf:'2026-10-10T03:10:00Z',events:[revised]}},null,null,game,game).find(item=>item.kind==='wildfire_point_revised');
+  assert.equal(correction?.sourceUrl,point.sourceUrl);
+  assert.match(correction.detail,/reported acres 10 → 20/);
+  assert.match(correction.detail,/Previous source update 2026-10-10T01:00:00Z; current source update 2026-10-10T02:00:00Z/);
+  assert.doesNotMatch(correction.detail,/reported containment/);
 });
 
 test('EPA PM2.5 change feed uses dated same-station values and a review threshold',()=>{

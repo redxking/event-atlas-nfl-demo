@@ -36,8 +36,12 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const priorById=new Map(oldFire.events.map(item=>[item.id,item]));
     for(const item of newFire.events.slice(0,5)){
       if(!Number.isInteger(item?.id)||item.sourceUrl!==`https://services3.arcgis.com/T4QMspbfLg3qTGWY/arcgis/rest/services/WFIGS_Incident_Locations_Current/FeatureServer/0/${item.id}`||!Number.isFinite(item.distanceKm)||item.distanceKm<0||item.distanceKm>150)continue;
-      const prior=priorById.get(item.id),updated=prior&&Date.parse(item.updatedAt)>Date.parse(prior.updatedAt)&&(item.acres!==prior.acres||item.containedPercent!==prior.containedPercent||item.lat!==prior.lat||item.lon!==prior.lon);
-      if(!prior||updated)changes.push({kind:prior?'wildfire_point_revised':'new_wildfire_point',observedAt,title:`NIFC wildfire point: ${item.name}`.slice(0,300),detail:`${prior?'Changed source fields for':'Newly displayed in the bounded sample:'} NIFC wildfire point ${item.distanceKm} km from the candidate venue point; source updated ${item.updatedAt}. Confirm the current incident with the responsible fire authority. This point is not a perimeter, smoke measurement, venue impact, or threat finding.`,sourceUrl:item.sourceUrl});
+      const prior=priorById.get(item.id),changed=prior&&Date.parse(item.updatedAt)>Date.parse(prior.updatedAt)?[
+        item.acres!==prior.acres?`reported acres ${prior.acres??'unreported'} → ${item.acres??'unreported'}`:null,
+        item.containedPercent!==prior.containedPercent?`reported containment ${prior.containedPercent??'unreported'}% → ${item.containedPercent??'unreported'}%`:null,
+        item.lat!==prior.lat||item.lon!==prior.lon?`point (${prior.lat}, ${prior.lon}) → (${item.lat}, ${item.lon})`:null
+      ].filter(Boolean):[];
+      if(!prior||changed.length)changes.push({kind:prior?'wildfire_point_revised':'new_wildfire_point',observedAt,title:`NIFC wildfire point: ${item.name}`.slice(0,300),detail:`${prior?`Published fields changed: ${changed.join('; ')}. Previous source update ${prior.updatedAt}; current source update ${item.updatedAt}.`:'Newly displayed in the bounded sample:'} NIFC wildfire point ${item.distanceKm} km from the candidate venue point; source updated ${item.updatedAt}. Confirm the current incident with the responsible fire authority. This point is not a perimeter, smoke measurement, venue impact, or threat finding.`,sourceUrl:item.sourceUrl});
     }
   }
   const oldAir=before.airQualityContext,newAir=after.airQualityContext;
