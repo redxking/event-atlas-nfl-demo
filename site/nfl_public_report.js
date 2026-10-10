@@ -29,6 +29,10 @@ export function buildNflPublicReport(bundle){
     'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
     ''
   ];
+  if(bundle.publishedChanges){
+    const changes=bundle.publishedChanges;
+    rows.push('## Changes observed across published runs',line('Comparison',changes.comparison),line('New entries in this build',changes.newChangeCount),...((changes.items||[]).length?(changes.items||[]).slice(0,30).map(item=>`- **${clean(item.title)}:** ${clean(item.kind.replaceAll('_',' '))}; observed ${iso(item.observedAt)}. ${clean(item.detail)} ${source(item.sourceUrl,'Publisher source')}`):['No comparable change entry is recorded. A missing entry does not establish that sources or conditions are unchanged.']),'This is a bounded history of displayed source samples, not a complete publisher history. An item that disappears is not treated as resolved. Changes are unreviewed and do not establish a threat.','');
+  }
   const forecast=observations.kickoffForecast;
   if(forecast?.state==='current forecast')rows.push('## Kickoff forecast',line('NWS hourly forecast',`${forecast.period?.shortForecast||'description unavailable'} · ${forecast.period?.temperature??'temperature unavailable'}°${forecast.period?.temperatureUnit||''} · wind ${forecast.period?.windSpeed||'unavailable'} ${forecast.period?.windDirection||''} · precipitation ${forecast.period?.precipitationPercent??'unavailable'}%`),line('Checked',iso(forecast.checkedAt)),`- **Source:** ${source(forecast.sourceUrl,'NWS hourly forecast')}`,'Forecast, not an observed condition.','');
   const outlook=observations.convectiveOutlook;

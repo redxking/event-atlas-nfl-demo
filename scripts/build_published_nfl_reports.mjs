@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
 import {buildNflPublicReport} from '../site/nfl_public_report.js';
+import {buildPublishedReportState} from '../site/published_report_changes.js';
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from '../site/mbta_foxboro_alerts.js';
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from '../site/mbta_foxboro_schedules.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
@@ -77,6 +78,17 @@ async function forecastFor(game){
 }
 const outDir=path.join(site,'reports');
 await fs.mkdir(outDir,{recursive:true});
+async function previousReportState(id){
+  const name=`${id}.state.json`;
+  try{return JSON.parse(await fs.readFile(path.join(outDir,name),'utf8'))}catch{}
+  try{
+    const url=`https://redxking.github.io/event-atlas-nfl-demo/reports/${name}?check=${now}`;
+    const response=await fetch(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000),cache:'no-store'});
+    if(!response.ok)return null;
+    const raw=await response.text();
+    return raw.length<=150000?JSON.parse(raw):null;
+  }catch{return null}
+}
 const entries=[];
 for(const game of games){
   if(!/^nfl:\d+$/.test(game.id))throw Error('Unexpected NFL game ID');
@@ -85,13 +97,16 @@ for(const game of games){
   const conditions=venueChecks.get(game.venue.id),forecast=await forecastFor(game);
   const mbta=await publishedMbta(game);
   const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast,police:publishedPolice(game),...mbta});
+  const changeState=buildPublishedReportState(bundle,game,inputs.news,await previousReportState(id),Date.parse(bundle.generatedAt));
+  bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,items:changeState.changes};
   const body=buildNflPublicReport(bundle);
   const frontmatter=`---\ntitle: ${JSON.stringify(`NFL public-source review: ${game.title}`)}\nauthor: Angelis Pseftis\ncreator: Angelis Pseftis\nstatus: Automated public-source compilation; unreviewed\ngenerated_at: ${bundle.generatedAt}\n---\n\n`;
   const filename=`${id}.md`;
   await fs.writeFile(path.join(outDir,filename),frontmatter+body,'utf8');
   const htmlName=`${id}.html`;
   await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename}),'utf8');
-  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state,mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area'});
+  await fs.writeFile(path.join(outDir,`${id}.state.json`),JSON.stringify(changeState)+'\n','utf8');
+  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state,mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState.newChangeCount});
 }
 const index={status:'ok',builtAt:new Date().toISOString(),basis:'Automated hourly public-source compilations for listed NFL games within seven days. Each report is a point-in-time unreviewed document; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
