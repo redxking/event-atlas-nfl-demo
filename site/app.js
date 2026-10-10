@@ -5,9 +5,9 @@ import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-80';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-73';
-import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-48';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-81';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-74';
+import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-49';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
@@ -20,6 +20,7 @@ import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_al
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
 import {publicRoadVideoAgency} from './camera_video.js?v=20261010-5';
+import {fl511EmbedUrl,fl511EmbedToolUrl} from './fl511_embed.js?v=20261010-1';
 import {failedSourcesForVenue} from './venue_source_scope.js?v=20261010-1';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {fetchNwsStationObservation} from './nws_observation.js?v=20261010-1';
@@ -344,13 +345,20 @@ async function playCameraVideo(button,game){
     }
   }catch{if(cameraPlayer?.video===video)status.textContent=`Stream unavailable. Use the ${agency} camera viewer link.`}
 }
+function appendFloridaPublisherMap(target,game){
+  const url=fl511EmbedUrl(game);
+  if(!url)return;
+  target.insertAdjacentHTML('beforeend',`<div class="camera-row"><strong>Florida 511 official roadway map</strong><p>Open the publisher’s map centered on the unreviewed Hard Rock Stadium point, with public traffic-camera, closure, and incident layers selected. Camera views are roadway views; availability, capture time, direction, and visibility of the stadium are unverified. Event Atlas does not copy or analyze Florida 511 imagery or incident data.</p><button type="button" class="camera-video-toggle fl511-map-toggle">Open official map</button><div class="publisher-road-map" hidden><iframe title="Florida 511 official roadway map near Hard Rock Stadium" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen" allowfullscreen></iframe></div><small>${link(fl511EmbedToolUrl,'Florida 511 publisher embed tool')} · ${link('https://fl511.com/','Open Florida 511 directly')}</small></div>`);
+  const button=target.querySelector('.fl511-map-toggle'),container=target.querySelector('.publisher-road-map'),frame=container?.querySelector('iframe');
+  button.onclick=()=>{if(container.hidden){container.hidden=false;frame.src=url;button.textContent='Close official map'}else{frame.removeAttribute('src');container.hidden=true;button.textContent='Open official map'}};
+}
 function renderCameras(game){
   const target=$('cameras');
   if(!target)return;
   stopCameraVideo();
   stopCameraFrame();
   if(cameraRefreshTimer){clearInterval(cameraRefreshTimer);cameraRefreshTimer=null}
-  if(!cameraSnapshot){target.innerHTML='<p>Camera metadata snapshot unavailable.</p>';return}
+  if(!cameraSnapshot){target.innerHTML='<p>Camera metadata snapshot unavailable.</p>';appendFloridaPublisherMap(target,game);return}
   const sources=cameraSnapshot.sources||[];
   const covered=Object.hasOwn(cameraSnapshot.byVenue||{},game.venue.id);
   const items=covered?cameraSnapshot.byVenue[game.venue.id]:[];
@@ -361,8 +369,9 @@ function renderCameras(game){
     `<p>${covered?'Nearest agency-listed cameras within 15 km of the venue candidate point. Distance does not establish a stadium view, live image, or access to venue security cameras.':'No connected agency roadway-camera inventory for this venue.'}${game.venue.id==='3493'&&!covered?' <a href="https://511la.org/cctv" target="_blank" rel="noopener noreferrer">Open the official 511LA camera directory ↗</a>; this snapshot does not attribute a camera to the Superdome.':''}${game.venue.id==='3738'&&covered?' Massachusetts records come from a public MassDOT staging asset layer with unknown upstream freshness. Live imagery requires separate TrafficLand access; the Mass511 link is a general camera directory.':''}${stale?' This snapshot is more than 12 hours old.':''}</p>`+
     (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span>${cameraStill(item,stale)}${item.videoPlaylistStatus==='playlist_unavailable_at_sync'?'<small>Agency lists a stream, but its playlist was unavailable in the latest build; check the agency viewer.</small>':''}${!stale&&publicRoadVideoAgency(item)?`<button type="button" class="camera-video-toggle" data-agency="${esc(item.agency)}" data-camera-id="${esc(item.id)}" data-in-service="${item.inService===true}" data-video-url="${esc(item.videoUrl)}">Play public roadway video</button><div class="camera-video" hidden><video controls muted playsinline preload="none" aria-label="${esc(item.agency)} roadway camera near ${esc(item.name)}"></video><small class="camera-video-status">Agency stream not yet started. Camera direction and stadium view are unverified.</small></div>`:''}${!stale&&item.agency==='Maryland CHART'&&item.operationalStatus==='OK'&&marylandViewer(item.viewerUrl)?`<button type="button" class="camera-video-toggle camera-frame-toggle" data-frame-url="${esc(item.viewerUrl)}">Show official CHART video</button><div class="camera-video" hidden><iframe title="Maryland CHART roadway camera near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; fullscreen" allowfullscreen></iframe><small>Official CHART public viewer. Source status is from its last cache update; playback, latency, field of view and stadium visibility are unverified. No video is stored by Event Atlas.</small></div>`:''}<span>${link(item.viewerUrl,item.viewerKind==='unverified_still'?'Agency image URL (freshness unverified)':item.viewerKind==='directory_only'?'Agency camera directory':'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
     (failed.length?`<p>Unavailable source: ${esc(failed.map(source=>source.id).join(', '))}. The displayed coverage may be incomplete.</p>`:'');
+  appendFloridaPublisherMap(target,game);
   const images=[...target.querySelectorAll('.camera-still')];
-  for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle)'))button.onclick=()=>playCameraVideo(button,game);
+  for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle):not(.fl511-map-toggle)'))button.onclick=()=>playCameraVideo(button,game);
   for(const button of target.querySelectorAll('.camera-frame-toggle'))button.onclick=()=>toggleCameraFrame(button);
   for(const img of images)img.addEventListener('error',()=>{img.closest('.camera-image').querySelector('small').textContent='Agency image unavailable. Use the agency viewer.';img.hidden=true});
   if(images.length)cameraRefreshTimer=setInterval(()=>{
