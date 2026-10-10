@@ -15,7 +15,8 @@ test('MnDOT public camera parser retains only published bounded metadata',()=>{
   const rows=parseMinnesotaCameras(fixture);
   assert.equal(rows.length,499);
   assert.equal(rows[0].viewerUrl,'https://511mn.org/cameras');
-  assert.equal(rows[0].videoUrl,undefined);
+  assert.equal(rows[0].videoUrl,'https://video.dot.state.mn.us/public/C1.stream/playlist.m3u8');
+  assert.equal(rows.find(item=>item.id==='mndot-C2'),undefined);
   assert.equal(rows[0].views,undefined);
   assert.throws(()=>parseMinnesotaCameras([]));
 });

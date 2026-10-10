@@ -31,14 +31,19 @@ test('Georgia DOT metadata covers the Atlanta venue only when the agency source 
   assert.equal(selectCameraCoverage([venue],cameras,[{id:'gdot-atlanta-cameras',status:'ok'}]).atlanta.length,1);
 });
 
-test('WisDOT public video links stay on the agency HLS host and are tied to Green Bay roadway cameras',()=>{
+test('public video links stay on their agency HLS hosts and camera IDs',()=>{
   const snapshot=JSON.parse(fs.readFileSync(new URL('../site/cameras.json',import.meta.url)));
   const items=snapshot.byVenue?.['3798']||[];
   assert.ok(items.some(item=>item.videoUrl),'expected a public WisDOT HLS link in the saved snapshot');
   for(const item of Object.values(snapshot.byVenue).flat().filter(item=>item.videoUrl)){
-    assert.equal(item.agency,'WisDOT 511');
-    assert.equal(item.operationalStatus,'Enabled');
-    assert.match(item.videoUrl,/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/);
-    assert.match(item.viewerUrl,/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/);
+    if(item.agency==='WisDOT 511'){
+      assert.equal(item.operationalStatus,'Enabled');
+      assert.match(item.videoUrl,/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/);
+      assert.match(item.viewerUrl,/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/);
+    }else{
+      assert.equal(item.agency,'MnDOT IRIS');
+      assert.match(item.id,/^mndot-C\d{1,6}$/);
+      assert.equal(item.videoUrl,`https://video.dot.state.mn.us/public/${item.id.slice(6)}.stream/playlist.m3u8`);
+    }
   }
 });

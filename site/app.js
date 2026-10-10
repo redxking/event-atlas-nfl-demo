@@ -14,6 +14,7 @@ import {cmpdOpenTrafficFeed,parseCmpdOpenTrafficXml,summarizeCmpdOpenTraffic} fr
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_alerts.js';
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
+import {publicRoadVideoAgency} from './camera_video.js';
 import {selectSeptaForGame,septaAlertsPage} from './septa_b_alerts.js';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {selectNflNews} from './nfl_news_context.js';
@@ -198,7 +199,6 @@ function cameraStill(item,stale){
   const note=wsdot?'WSDOT says this roadway image updates approximately every 5 minutes. The image may lag or be unavailable; inspect its overlaid time. Page checks every 2 minutes while selected.':'Agency current-image endpoint · may show an unavailable placeholder · check any overlaid timestamp · page checks every 2 minutes while selected';
   return `<div class="camera-image"><img class="camera-still" src="${esc(item.stillUrl)}?t=${Date.now()}" data-src="${esc(item.stillUrl)}" alt="Agency roadway camera image near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer"><small>${esc(note)}</small></div>`;
 }
-const wisdotVideo=url=>/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/.test(url||'');
 const marylandViewer=url=>/^https:\/\/chart\.maryland\.gov\/Video\/GetVideo\/[a-f0-9]{32}$/i.test(url||'');
 function stopCameraFrame(){
   if(!cameraFrame)return;
@@ -233,12 +233,13 @@ function loadHls(){
 }
 async function playCameraVideo(button,game){
   const url=button.dataset.videoUrl,container=button.nextElementSibling,video=container?.querySelector('video'),status=container?.querySelector('.camera-video-status');
-  if(!wisdotVideo(url)||!video||!status)return;
+  const agency=publicRoadVideoAgency({agency:button.dataset.agency,id:button.dataset.cameraId,videoUrl:url});
+  if(!agency||!video||!status)return;
   if(cameraPlayer?.video===video){stopCameraVideo();container.hidden=true;button.textContent='Play public roadway video';return}
-  stopCameraVideo();stopCameraFrame();container.hidden=false;button.textContent='Stop public roadway video';status.textContent='Connecting to WisDOT public roadway stream…';
+  stopCameraVideo();stopCameraFrame();container.hidden=false;button.textContent='Stop public roadway video';status.textContent=`Connecting to ${agency} public roadway stream…`;
   cameraPlayer={video,hls:null};
   video.onplaying=()=>{if(cameraPlayer?.video===video)status.textContent='Playing agency roadway stream. Capture latency and field of view are not independently verified.'};
-  video.onerror=()=>{if(cameraPlayer?.video===video)status.textContent='Stream unavailable. Use the WisDOT camera viewer link.'};
+  video.onerror=()=>{if(cameraPlayer?.video===video)status.textContent=`Stream unavailable. Use the ${agency} camera viewer link.`};
   try{
     if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=url;await video.play()}
     else{
@@ -248,10 +249,10 @@ async function playCameraVideo(button,game){
       const hls=new Hls({enableWorker:true,maxBufferLength:20});cameraPlayer.hls=hls;
       hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));
       hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{status.textContent='Press play to start the public roadway stream.'}));
-      hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal&&cameraPlayer?.video===video)status.textContent='Stream unavailable. Use the WisDOT camera viewer link.'});
+      hls.on(Hls.Events.ERROR,(_event,data)=>{if(data.fatal&&cameraPlayer?.video===video)status.textContent=`Stream unavailable. Use the ${agency} camera viewer link.`});
       hls.attachMedia(video);
     }
-  }catch{if(cameraPlayer?.video===video)status.textContent='Stream unavailable. Use the WisDOT camera viewer link.'}
+  }catch{if(cameraPlayer?.video===video)status.textContent=`Stream unavailable. Use the ${agency} camera viewer link.`}
 }
 function renderCameras(game){
   const target=$('cameras');
@@ -268,7 +269,7 @@ function renderCameras(game){
   const stale=!Number.isFinite(builtAt)||Date.now()-builtAt>12*3600000;
   target.innerHTML=`<p class="feed-state">PUBLIC ROADWAY CAMERAS · SNAPSHOT ${esc(fmt(cameraSnapshot.builtAt))}</p>`+
     `<p>${covered?'Nearest agency-listed cameras within 15 km of the venue candidate point. Distance does not establish a stadium view, live image, or access to venue security cameras.':'No connected agency roadway-camera inventory for this venue.'}${game.venue.id==='3738'&&covered?' Massachusetts records come from a public MassDOT staging asset layer with unknown upstream freshness. Live imagery requires separate TrafficLand access; the Mass511 link is a general camera directory.':''}${stale?' This snapshot is more than 12 hours old.':''}</p>`+
-    (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span>${cameraStill(item,stale)}${!stale&&item.agency==='WisDOT 511'&&wisdotVideo(item.videoUrl)?`<button type="button" class="camera-video-toggle" data-video-url="${esc(item.videoUrl)}">Play public roadway video</button><div class="camera-video" hidden><video controls muted playsinline preload="none" aria-label="WisDOT roadway camera near ${esc(item.name)}"></video><small class="camera-video-status">Agency stream not yet started. Camera direction and stadium view are unverified.</small></div>`:''}${!stale&&item.agency==='Maryland CHART'&&item.operationalStatus==='OK'&&marylandViewer(item.viewerUrl)?`<button type="button" class="camera-video-toggle camera-frame-toggle" data-frame-url="${esc(item.viewerUrl)}">Show official CHART video</button><div class="camera-video" hidden><iframe title="Maryland CHART roadway camera near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; fullscreen" allowfullscreen></iframe><small>Official CHART public viewer. Source status is from its last cache update; playback, latency, field of view and stadium visibility are unverified. No video is stored by Event Atlas.</small></div>`:''}<span>${link(item.viewerUrl,item.viewerKind==='unverified_still'?'Agency image URL (freshness unverified)':item.viewerKind==='directory_only'?'Agency camera directory':'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
+    (items.length?items.map(item=>`<div class="camera-row"><strong>${esc(item.name)}</strong><span>${esc(item.agency)} · ${esc(item.distanceKm)} km · ${item.operationalStatus?'source status '+esc(item.operationalStatus):item.inService===null?'service status not supplied':item.inService?'listed in service':'listed out of service'}${item.statusAsOf?' · source cache '+esc(fmt(item.statusAsOf)):''}${item.metadataDate?' · metadata dated '+esc(item.metadataDate):''}</span>${cameraStill(item,stale)}${!stale&&publicRoadVideoAgency(item)?`<button type="button" class="camera-video-toggle" data-agency="${esc(item.agency)}" data-camera-id="${esc(item.id)}" data-video-url="${esc(item.videoUrl)}">Play public roadway video</button><div class="camera-video" hidden><video controls muted playsinline preload="none" aria-label="${esc(item.agency)} roadway camera near ${esc(item.name)}"></video><small class="camera-video-status">Agency stream not yet started. Camera direction and stadium view are unverified.</small></div>`:''}${!stale&&item.agency==='Maryland CHART'&&item.operationalStatus==='OK'&&marylandViewer(item.viewerUrl)?`<button type="button" class="camera-video-toggle camera-frame-toggle" data-frame-url="${esc(item.viewerUrl)}">Show official CHART video</button><div class="camera-video" hidden><iframe title="Maryland CHART roadway camera near ${esc(item.name)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation" allow="autoplay; fullscreen" allowfullscreen></iframe><small>Official CHART public viewer. Source status is from its last cache update; playback, latency, field of view and stadium visibility are unverified. No video is stored by Event Atlas.</small></div>`:''}<span>${link(item.viewerUrl,item.viewerKind==='unverified_still'?'Agency image URL (freshness unverified)':item.viewerKind==='directory_only'?'Agency camera directory':'Agency camera viewer')} · ${link(item.sourceUrl,'Metadata source')}</span></div>`).join(''):covered?'<p>No nearby camera metadata in this agency snapshot.</p>':'')+
     (failed.length?`<p>Unavailable source: ${esc(failed.map(source=>source.id).join(', '))}. The displayed coverage may be incomplete.</p>`:'');
   const images=[...target.querySelectorAll('.camera-still')];
   for(const button of target.querySelectorAll('.camera-video-toggle:not(.camera-frame-toggle)'))button.onclick=()=>playCameraVideo(button,game);
