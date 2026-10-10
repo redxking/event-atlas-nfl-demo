@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {includePublishedNflReport} from '../lib/nfl_game_lifecycle.mjs';
 import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
 import {buildNflPublicReport} from '../site/nfl_public_report.js';
 import {buildPublishedReportState} from '../site/published_report_changes.js';
@@ -16,7 +17,7 @@ if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFi
 const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',ntas:'ntas.json',septa:'septa_b_alerts.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json'};
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
-const games=required.games.filter(game=>String(game.status).startsWith('scheduled')&&!game.timeTbd&&Number.isFinite(Date.parse(game.kickoff))&&Date.parse(game.kickoff)>=now-6*3600000&&Date.parse(game.kickoff)<=now+7*86400000);
+const games=required.games.filter(game=>includePublishedNflReport(game,now));
 if(games.length>35)throw Error('Unexpectedly many scheduled NFL games in the next seven days');
 const headers={Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public report (https://github.com/redxking/event-atlas-nfl-demo)'};
 const nwsHost=/^https:\/\/api\.weather\.gov\/gridpoints\/[A-Z]{3,4}\/\d+,\d+\/forecast\/hourly$/;
@@ -108,6 +109,6 @@ for(const game of games){
   await fs.writeFile(path.join(outDir,`${id}.state.json`),JSON.stringify(changeState)+'\n','utf8');
   entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state,mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState.newChangeCount});
 }
-const index={status:'ok',builtAt:new Date().toISOString(),basis:'Automated hourly public-source compilations for listed NFL games within seven days. Each report is a point-in-time unreviewed document; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
+const index={status:'ok',builtAt:new Date().toISOString(),basis:'Automated hourly public-source compilations for scheduled NFL games within seven days, active games, and source-completed games within 24 hours of listed kickoff. Each report is a point-in-time unreviewed document; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
 console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);

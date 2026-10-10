@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import {saveReconciledEventSnapshot} from '../lib/event_snapshot.mjs';
 import {pointInsideRing} from '../site/ground_relevance.js';
+import {nflSourceStatus} from '../lib/nfl_game_lifecycle.mjs';
 const venues=JSON.parse(await fs.readFile('data/venues.json','utf8')).venues;
 const nflVenueCandidates=JSON.parse(await fs.readFile('data/nfl_venue_candidates.json','utf8'));
 const groundFootprints=JSON.parse(await fs.readFile('site/ground_footprints.json','utf8'));
@@ -46,7 +47,7 @@ try{
       const home=competitors.find(c=>c.homeAway==='home')?.team?.displayName,away=competitors.find(c=>c.homeAway==='away')?.team?.displayName;
       if(!home||!away)throw Error(`NFL game ${game.id} missing teams`);
       const address=[venue.address?.city,venue.address?.state,venue.address?.country].filter(Boolean).join(', ');
-      add({id:`nfl:${game.id}`,title:`${away} at ${home}`,startsAtLocal:game.date,timeZone:'UTC',sourceId:'nfl',sourceUrl:game.links?.find(l=>l.rel?.includes('summary'))?.href||`https://www.espn.com/nfl/game/_/gameId/${game.id}`,sourceDataset:url,sourceVenueId:String(venue.id),placeName:venue.fullName,placeAddress:address,category:`NFL regular season · week ${week}`,description:`ESPN scoreboard status: ${game.status?.type?.description||'not supplied'}; neutral site: ${competition.neutralSite?'yes':'no'}`,participants:[{type:'team',name:away,role:'away'},{type:'team',name:home,role:'home'}],status:game.status?.type?.completed?'completed in source':'scheduled in source; unreviewed',timeTbd:/TBD/i.test(game.status?.type?.shortDetail||'')});
+      add({id:`nfl:${game.id}`,title:`${away} at ${home}`,startsAtLocal:game.date,timeZone:'UTC',sourceId:'nfl',sourceUrl:game.links?.find(l=>l.rel?.includes('summary'))?.href||`https://www.espn.com/nfl/game/_/gameId/${game.id}`,sourceDataset:url,sourceVenueId:String(venue.id),placeName:venue.fullName,placeAddress:address,category:`NFL regular season · week ${week}`,description:`ESPN scoreboard status: ${game.status?.type?.description||'not supplied'}; neutral site: ${competition.neutralSite?'yes':'no'}`,participants:[{type:'team',name:away,role:'away'},{type:'team',name:home,role:'home'}],status:nflSourceStatus(game.status?.type),timeTbd:/TBD/i.test(game.status?.type?.shortDetail||'')});
     }
   }
   if(ids.size!==272)throw Error(`NFL season returned ${ids.size} games, expected 272`);

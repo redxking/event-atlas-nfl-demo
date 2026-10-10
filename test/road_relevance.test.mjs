@@ -20,6 +20,15 @@ test('kickoff window puts a farther overlapping closure before closer unrelated 
   assert.equal(result.records.find(record=>record.id==='untimed').overlaps,false);
 });
 
+test('an active game keeps current road records time screened after kickoff',()=>{
+  const liveNow=Date.parse('2026-10-11T21:00:00Z');
+  const liveSnapshot={...snapshot,builtAt:'2026-10-11T20:55:00Z',coverageFrom:'2026-10-11T20:55:00Z',coverageThrough:'2026-10-18T20:55:00Z'};
+  const result=selectRoadContext({...game,status:'in progress in source'},liveSnapshot,liveNow);
+  assert.equal(result.timingState,'matched');
+  assert.equal(result.overlapCount,1);
+  assert.equal(result.records[0].id,'far-overlap');
+});
+
 test('TBD, stale, past, and out-of-window games do not get temporal matches',()=>{
   const cases=[
     [{...game,timeTbd:true},snapshot,'kickoff_tbd'],
