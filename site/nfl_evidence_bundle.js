@@ -1,6 +1,7 @@
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-97';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
+import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';
 
 const pick=(value,fields)=>Object.fromEntries(fields.filter(key=>value?.[key]!==undefined).map(key=>[key,value[key]]));
 
@@ -14,7 +15,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
   const alerts=inputs.conditions?.alerts?.features;
   const ntasCurrent=inputs.ntas?.status==='ok'&&Array.isArray(inputs.ntas.active)&&Number.isFinite(Date.parse(inputs.ntas.retrievedAt))&&now-Date.parse(inputs.ntas.retrievedAt)>=-60000&&now-Date.parse(inputs.ntas.retrievedAt)<=12*3600000;
   const news=selectNflNews(game,inputs.news,now);
-  return {
+  const bundle={
     schema:'event-atlas.public-evidence-bundle.v1',
     status:'unreviewed_public_source_export',
     generatedAt:new Date(now).toISOString(),
@@ -103,4 +104,6 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     },
     protectedPeople:{state:'not_collected_in_public_demo',reason:'Named-person material requires a documented protective nexus, controlled access, source review, and supervisor approval.'}
   };
+  bundle.relationshipLedger=buildNflRelationshipLedger(game,picture,{news,roads:bundle.publicObservations.roads});
+  return bundle;
 }
