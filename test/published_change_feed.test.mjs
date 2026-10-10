@@ -33,6 +33,9 @@ test('shared regional records are retained when no source-change item was observ
   assert.equal(feed.items.length,0);
   assert.equal(feed.sharedRegionalRecords.length,1);
   assert.equal(feed.sharedRegionalRecords[0].linkedEvents.length,2);
+  const previous=states.map(item=>({...item,picture:{usgsContext:{...item.picture.usgsContext,asOf:'2026-10-10T02:00:00Z',events:[{...quake,magnitude:2.8,updatedAt:'2026-10-10T02:00:00Z'}]}}}));
+  const revised=buildPublishedChangeFeed(reports,states,now,previous);
+  assert.equal(revised.sharedRegionalRecords[0].revisions.length,2);
 });
 
 test('unmatched states and missing source links do not enter the subscription',()=>{

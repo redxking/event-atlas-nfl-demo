@@ -145,7 +145,15 @@ test('USGS nearby earthquake changes require two successful newer checks',()=>{
   assert.equal(diffEventPicture({...before,usgsContext:{state:'unavailable',asOf:null,events:[]}},after,null,null,game,game).some(item=>item.kind==='new_usgs_earthquake'),false);
   assert.equal(diffEventPicture(before,{...after,usgsContext:{...after.usgsContext,asOf:before.usgsContext.asOf}},null,null,game,game).some(item=>item.kind==='new_usgs_earthquake'),false);
   const revised={...after,usgsContext:{...after.usgsContext,asOf:'2026-10-10T01:30:00Z',events:[{...quake,magnitude:3.2,updatedAt:'2026-10-10T01:25:00Z'}]}};
-  assert.equal(diffEventPicture(after,revised,null,null,game,game).find(item=>item.kind==='usgs_earthquake_revised')?.sourceUrl,quake.sourceUrl);
+  const correction=diffEventPicture(after,revised,null,null,game,game).find(item=>item.kind==='usgs_earthquake_revised');
+  assert.equal(correction?.sourceUrl,quake.sourceUrl);
+  assert.match(correction.detail,/magnitude 3 → 3.2/);
+  assert.match(correction.detail,/USGS updated 2026-10-10T01:05:00Z → 2026-10-10T01:25:00Z/);
+  assert.equal(diffEventPicture(after,{...revised,usgsContext:{...revised.usgsContext,events:[{...quake,updatedAt:'2026-10-10T01:25:00Z'}]}},null,null,game,game).some(item=>item.kind==='usgs_earthquake_revised'),false);
+  const noise=Array.from({length:14},(_,index)=>source(`Other source ${index}`,'checked'));
+  const crowdedBefore={...after,sources:[...after.sources,...noise]};
+  const crowdedAfter={...revised,sources:[...revised.sources,...noise.map(item=>({...item,state:'unavailable'}))]};
+  assert.equal(diffEventPicture(crowdedBefore,crowdedAfter,null,null,game,game).find(item=>item.kind==='usgs_earthquake_revised')?.sourceUrl,quake.sourceUrl);
 });
 
 test('NIFC change feed distinguishes a new bounded point from a material source revision',()=>{

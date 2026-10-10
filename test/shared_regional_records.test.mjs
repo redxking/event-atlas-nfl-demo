@@ -27,3 +27,15 @@ test('stale, mismatched and single-event publisher records do not become shared 
   assert.deepEqual(buildSharedRegionalRecords(reports,[state('nfl:1',[record]),state('nfl:2',[{...record,sourceUrl:'https://example.com/other'}])],now),[]);
   assert.deepEqual(buildSharedRegionalRecords(reports,[state('nfl:1',[record]),state('nfl:2',[{...record,point:[-118.5,33.8]}])],now),[]);
 });
+
+test('one publisher correction records separate before and after values for both linked games',()=>{
+  const old={...record,magnitude:3,title:'M 3.0 - near Signal Hill, CA',updatedAt:'2026-10-10T12:00:00Z'};
+  const current=[state('nfl:1',[record]),state('nfl:2',[record]),state('nfl:3',[])];
+  const prior=['nfl:1','nfl:2'].map(eventId=>({...state(eventId,[old],'2026-10-10T13:00:00Z'),schema:'event-atlas.published-report-state.v8'}));
+  const group=buildSharedRegionalRecords(reports,current,now,prior)[0];
+  assert.deepEqual(group.revisions.map(item=>item.eventId),['nfl:1','nfl:2']);
+  assert.ok(group.revisions.every(item=>item.changedFields.includes('magnitude')&&item.previous.magnitude===3&&item.current.magnitude===3.16&&item.status==='unreviewed_publisher_revision'));
+  assert.equal(group.revisions[0].previous.sourceUpdatedAt,old.updatedAt);
+  assert.equal(group.revisions[0].current.sourceUpdatedAt,record.updatedAt);
+  assert.equal(buildSharedRegionalRecords(reports,current,now,prior.map(item=>({...item,picture:{usgsContext:{...item.picture.usgsContext,state:'stale_or_unavailable'}}})))[0].revisions.length,0);
+});

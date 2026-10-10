@@ -284,9 +284,17 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const priorById=new Map(oldUsgs.events.map(item=>[item.sourceId,item]));
     for(const item of newUsgs.events.slice(0,3)){
       if(!item?.sourceId||!/^https:\/\/earthquake\.usgs\.gov\/earthquakes\/eventpage\/[A-Za-z0-9_-]+$/.test(item.sourceUrl||''))continue;
-      const prior=priorById.get(item.sourceId),changed=prior&&(prior.magnitude!==item.magnitude||prior.updatedAt!==item.updatedAt);
-      if(!prior||changed)changes.push({kind:prior?'usgs_earthquake_revised':'new_usgs_earthquake',observedAt,title:`USGS: ${item.title}`.slice(0,300),detail:`${prior?'Revised':'Newly displayed'} in the bounded magnitude 2.5+ weekly USGS sample: magnitude ${item.magnitude??'unavailable'}; ${item.distanceKm} km from the candidate venue point; occurred ${item.occurredAt}. Verify the current USGS record and local effects; proximity does not establish stadium impact or a threat.`,sourceUrl:item.sourceUrl});
+      const prior=priorById.get(item.sourceId);
+      if(!prior){changes.push({kind:'new_usgs_earthquake',observedAt,title:`USGS: ${item.title}`.slice(0,300),detail:`Newly displayed in the bounded magnitude 2.5+ weekly USGS sample: magnitude ${item.magnitude??'unavailable'}; ${item.distanceKm} km from the candidate venue point; occurred ${item.occurredAt}. Verify the current USGS record and local effects; proximity does not establish stadium impact or a threat.`,sourceUrl:item.sourceUrl});continue}
+      if(prior.sourceUrl!==item.sourceUrl||!Number.isFinite(Date.parse(prior.updatedAt))||!Number.isFinite(Date.parse(item.updatedAt))||Date.parse(item.updatedAt)<=Date.parse(prior.updatedAt))continue;
+      const changed=[];
+      if(prior.magnitude!==item.magnitude)changed.push(`magnitude ${prior.magnitude??'unavailable'} → ${item.magnitude??'unavailable'}`);
+      if(prior.title!==item.title)changed.push(`title ${String(prior.title||'unavailable').slice(0,120)} → ${String(item.title||'unavailable').slice(0,120)}`);
+      if(prior.occurredAt!==item.occurredAt)changed.push(`occurrence time ${prior.occurredAt||'unavailable'} → ${item.occurredAt||'unavailable'}`);
+      if(JSON.stringify(prior.point)!==JSON.stringify(item.point))changed.push(`source point changed; candidate venue distance ${prior.distanceKm??'unavailable'} → ${item.distanceKm??'unavailable'} km`);
+      if(changed.length)changes.push({kind:'usgs_earthquake_revised',observedAt,title:`USGS: ${item.title}`.slice(0,300),detail:`Tracked source fields changed between successful checks: ${changed.join('; ')}. USGS updated ${prior.updatedAt} → ${item.updatedAt}; system observed this change ${observedAt}. Verify the publisher record and local effects. This does not establish shaking, stadium impact, or a threat.`,sourceUrl:item.sourceUrl});
     }
   }
-  return changes.slice(0,12);
+  const corrected=changes.filter(item=>item.kind==='usgs_earthquake_revised').slice(0,3);
+  return [...corrected,...changes.filter(item=>item.kind!=='usgs_earthquake_revised').slice(0,12-corrected.length)];
 }

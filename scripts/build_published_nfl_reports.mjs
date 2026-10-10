@@ -95,7 +95,7 @@ async function previousReportState(id){
     return raw.length<=150000?JSON.parse(raw):null;
   }catch{return null}
 }
-const entries=[],changeStates=[];
+const entries=[],changeStates=[],previousStates=[];
 for(const game of games){
   if(!/^nfl:\d+$/.test(game.id))throw Error('Unexpected NFL game ID');
   const id=game.id.replace(':','-');
@@ -109,7 +109,9 @@ for(const game of games){
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){
-    changeState=buildPublishedReportState(bundle,game,inputs.news,await previousReportState(id),Date.parse(bundle.generatedAt));
+    const previous=await previousReportState(id);
+    changeState=buildPublishedReportState(bundle,game,inputs.news,previous,Date.parse(bundle.generatedAt));
+    if(previous&&changeState.comparison==='previous published run')previousStates.push(previous);
     changeStates.push(changeState);
     bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,items:changeState.changes};
   }
@@ -124,7 +126,7 @@ for(const game of games){
 }
 const index={status:'ok',builtAt:new Date().toISOString(),basis:'Hourly public-source compilations for every upcoming U.S. NFL game. Games within seven days, active games, and source-completed games within 24 hours of listed kickoff receive point alert, nearby station observation, event-hour forecast, and exact-game publisher checks. More distant games are planning snapshots without those live event checks. Each report is unreviewed; direct browser checks may be newer. A station reading is not a stadium measurement or a kickoff forecast. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
-const changeFeed=buildPublishedChangeFeed(entries,changeStates,Date.now());
+const changeFeed=buildPublishedChangeFeed(entries,changeStates,Date.now(),previousStates);
 await fs.writeFile(path.join(outDir,'changes.json'),JSON.stringify(changeFeed)+'\n','utf8');
 await fs.writeFile(path.join(outDir,'changes.xml'),renderPublishedChangeAtom(changeFeed),'utf8');
 console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);
