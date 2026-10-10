@@ -87,6 +87,7 @@ jobs:
       - run: npm run sync:calfire
       - run: npm run sync:chargers-themes
       - run: npm run sync:metro-sofi
+      - run: npm run sync:rams-bills
       - run: npm run sync:airnow
       - run: npm run sync:hms-smoke
       - run: npm run sync:septa
