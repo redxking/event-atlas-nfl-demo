@@ -8,7 +8,7 @@
     "label": "October 10 through October 23, 2026 (America/New_York)",
     "frozenAt": "2026-10-10T14:45:12.821Z"
   },
-  "updatedAt": "2026-10-10T18:04:20.742Z",
+  "updatedAt": "2026-10-10T18:14:39.931Z",
   "completion": "incomplete",
   "evidence": {
     "engine": {
@@ -91,6 +91,46 @@
         "Only one game directly tested in browser for this increment",
         "Mobile acceptance not completed"
       ]
+    },
+    "model": {
+      "command": "node scripts/build_window_model_snapshots.mjs",
+      "result": "29 actual local model runs completed; 0 failures; all input hashes and current packet bindings verified",
+      "artifact": "site/window_model_snapshots.json",
+      "boundary": "qwen3.5:9b ranks fictional verification candidates. Recorded inference; no browser invocation or generated threat assessment. No field validation."
+    },
+    "localSuite": {
+      "command": "node --test test/window*.test.mjs",
+      "result": "209 passed; 0 failed",
+      "boundary": "Includes mocked model failure tests; actual execution evidence is recorded separately"
+    },
+    "browserWindow": {
+      "games": 29,
+      "passed": 29,
+      "checks": [
+        "Selected each scoped game",
+        "Injected all 35 records",
+        "Verified synthetic camera Play enabled"
+      ],
+      "limitations": [
+        "Does not prove playback on every game",
+        "Does not replace all-game model, export, review or deployed acceptance"
+      ]
+    },
+    "historyBrowser": {
+      "eventId": "nfl:401872981",
+      "download": "nfl-401872981-SYNTHETIC-history.json",
+      "verified": "3 snapshots; initial state, matching recorded model run, and later relationship context retained"
+    },
+    "responsive": {
+      "contentWidth": 391,
+      "contentHeight": 847,
+      "documentWidth": 383,
+      "checks": [
+        "Populated game no horizontal page overflow",
+        "Keyboard radius edit to 1500 m",
+        "Clock advancement hid mismatched model run"
+      ],
+      "boundary": "Local browser; representative game, not all-game mobile acceptance"
     }
   },
   "games": [
@@ -289,11 +329,13 @@
         "maps_and_editable_areas": "local_browser_keyboard_edit_verified",
         "camera_presentation": "local_browser_synthetic_playback_and_failure_verified",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "international_schedule_and_simulation"
       }
     },
     {
@@ -491,11 +533,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -693,11 +737,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -895,11 +941,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -1097,11 +1145,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -1299,11 +1349,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -1501,11 +1553,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -1703,11 +1757,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -1905,11 +1961,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -2107,11 +2165,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -2309,11 +2369,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -2511,11 +2573,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -2713,11 +2777,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -2915,11 +2981,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -3117,11 +3185,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -3319,11 +3389,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "international_schedule_and_simulation"
       }
     },
     {
@@ -3521,11 +3593,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -3723,11 +3797,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -3925,11 +4001,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -4127,11 +4205,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -4329,11 +4409,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -4531,11 +4613,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -4733,11 +4817,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -4935,11 +5021,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -5137,11 +5225,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -5339,11 +5429,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -5541,11 +5633,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -5743,11 +5837,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     },
     {
@@ -5945,11 +6041,13 @@
         "maps_and_editable_areas": "local_engine_test_pass; browser_pending",
         "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
-        "cross_event_relationships": "pending",
+        "cross_event_relationships": "local_engine_test_pass; browser_repeated_claims_verified",
         "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
-        "actual_model_execution": "pending",
+        "actual_model_execution": "actual_local_recorded_ranking_verified; online_inference_not_connected",
         "desktop_mobile_keyboard": "pending",
-        "deployed_end_to_end": "pending"
+        "deployed_end_to_end": "pending",
+        "brief_history": "implemented; representative_browser_export_verified",
+        "public_source_context": "local_bundle_validation_pass"
       }
     }
   ],
