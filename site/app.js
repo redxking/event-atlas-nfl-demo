@@ -4,7 +4,6 @@ import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
-import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-98';
@@ -260,17 +259,33 @@ function renderCoverage(){
     (result.cameraFailed.length||result.roadFailed.length?`<p>Failed sources: ${esc([...result.cameraFailed,...result.roadFailed].join(', '))}.</p>`:'');
   renderVenueMap(result.rows);
 }
+let overviewMap,overviewMarkers;
 function renderVenueMap(rows){
-  const target=$('venue-map');
-  if(!target||!snapshot)return;
-  const markers=venueMarkers(rows,snapshot.games);
-  const labels={connected:'connected snapshot',directory_only:'publisher directory only',not_connected:'no connector',source_failed:'configured source failed',stale:'stale snapshot',unavailable:'unavailable'};
-  target.innerHTML=`<div class="map-scroll"><div class="map-stage">${markers.map(marker=>`<button type="button" class="map-marker ${marker.state}${snapshot.games.find(game=>game.id===selected)?.venue.id===marker.id?' selected':''}" style="left:${marker.x/10}%;top:${marker.y/5.7}%" data-venue-id="${esc(marker.id)}" data-game-id="${esc(marker.gameId)}" title="${esc(marker.name)}" aria-label="${esc(marker.name)}: camera ${esc(labels[marker.camera])}, road ${esc(labels[marker.road])}. Open ${esc(marker.gameTitle||'venue')}"></button>`).join('')}</div></div>`;
-  target.querySelectorAll('.map-marker').forEach(button=>button.addEventListener('click',()=>{
-    if(!button.dataset.gameId)return;
-    selectGame(button.dataset.gameId);
-    $('detail').scrollIntoView({block:'start',behavior:'smooth'});
-  }));
+  const target=$('venue-map');if(!target||!snapshot)return;
+  if(!window.L){$('overview-map-status').textContent='Map unavailable. Select a game from the list below.';return;}
+  const L=window.L;
+  if(!overviewMap){
+    target.replaceChildren();overviewMap=L.map(target,{scrollWheelZoom:false}).setView([38,-97],4);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(overviewMap).on('tileerror',()=>{$('overview-map-status').textContent='Street tiles unavailable. Event markers and the game list remain available.';});
+    overviewMarkers=L.layerGroup().addTo(overviewMap);
+    new ResizeObserver(()=>overviewMap.invalidateSize()).observe(target);
+  }
+  overviewMarkers.clearLayers();
+  const venues=new Map();
+  for(const game of snapshot.games){const venue=game.venue;if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon))continue;if(!venues.has(venue.id))venues.set(venue.id,[]);venues.get(venue.id).push(game);}
+  for(const games of venues.values()){
+    games.sort((a,b)=>Date.parse(a.kickoff)-Date.parse(b.kickoff));
+    const venue=games[0].venue,upcoming=games.filter(game=>Date.parse(game.kickoff)>=Date.now());
+    const popup=document.createElement('div');popup.className='event-map-popup';
+    const heading=document.createElement('h3');heading.textContent=venue.name;popup.append(heading);
+    const label=document.createElement('p');label.textContent=upcoming.length?'Upcoming games':'Past games';popup.append(label);
+    for(const game of (upcoming.length?upcoming:games.slice().reverse())){
+      const button=document.createElement('button');button.type='button';button.textContent=game.title+' — '+gameTime(game);
+      button.addEventListener('click',()=>{selectGame(game.id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});});popup.append(button);
+    }
+    const tooltip=document.createElement('span');tooltip.textContent=venue.name+' · '+upcoming.length+' upcoming games';
+    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:340,maxHeight:280}).addTo(overviewMarkers);
+  }
 }
 function renderGround(game){
   renderEventGeographicMap(game,groundSnapshot,seamsSnapshot);
