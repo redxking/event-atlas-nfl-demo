@@ -23,6 +23,12 @@ test('local AI packet includes only source-linked ESPN RSS headlines, never case
   assert.ok(!JSON.stringify(packet).includes('PRIVATE PERSON'));
 });
 
+test('local AI packet accepts only publisher-linked CBS fallback headlines',()=>{
+  const cbs={publisher:'CBS Sports',matchBasis:'one_team_mentioned',title:'Bears news',description:'',url:'https://www.cbssports.com/nfl/news/example',publishedAt:'2026-10-09T16:00:00Z'};
+  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',articles:[cbs]}}}}};
+  assert.equal(buildLocalAiPacket(withNews).evidence.find(item=>item.id==='N1')?.sourceUrl,cbs.url);
+});
+
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
   const draft={selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Is the road condition relevant to event access?',evidenceIds:['C1']}]};

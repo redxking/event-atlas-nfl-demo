@@ -28,6 +28,14 @@ class NflNewsTests(unittest.TestCase):
         self.assertEqual(NEWS.match_article(GAME, article, NOW), "one_team_mentioned")
         self.assertIsNone(NEWS.match_article({**GAME, "kickoff": "2026-12-01T17:00Z"}, article, NOW))
 
+    def test_cbs_fallback_keeps_headline_link_and_omits_description(self):
+        source = NEWS.SOURCES[1]
+        cbs = feed().replace(b"www.espn.com/nfl/story/_/id/", b"www.cbssports.com/nfl/news/")
+        result = NEWS.parse_feed(cbs, [GAME], NOW, source)
+        self.assertEqual(result["publisher"], "CBS Sports")
+        self.assertEqual(result["byGame"]["nfl:1"][0]["description"], "")
+        self.assertTrue(result["byGame"]["nfl:1"][0]["url"].startswith("https://www.cbssports.com/nfl/"))
+
     def test_rejects_dtd_and_stale_feed(self):
         with self.assertRaisesRegex(ValueError, "DTD"):
             NEWS.parse_feed(b"<!DOCTYPE rss>" + feed(), [GAME], NOW)

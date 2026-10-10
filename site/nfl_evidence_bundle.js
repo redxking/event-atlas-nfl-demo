@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-21';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261009-22';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js';
 
