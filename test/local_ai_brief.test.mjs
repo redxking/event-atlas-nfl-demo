@@ -10,11 +10,14 @@ test('local AI packet can rank the exact-game NDOT permit plan without claiming 
   const ids=['2026080985','2026081000','2026081007','2026081013','2026081031','2026081033','2026081036'];
   const streets=['WOODLAND ST','S 1ST ST','RUSSELL ST','TITANS WAY','VICTORY AVE','S 1ST ST','CRUTCHER ST'];
   const plan={state:'current_published_plan',asOf:'2026-10-10T12:00:00Z',sourceUrl:url,entries:ids.map((permitNumber,i)=>({permitNumber,street:streets[i],sourceUrl:url}))};
-  const evidence={...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872984'},venue:{id:'3810',name:'Nissan Stadium'},picture:{...brief.nflContext.evidence.picture,nashvilleTitansClosureContext:plan}};
+  const wego={state:'current_operator_notice',asOf:'2026-10-10T12:00:00Z',sourceUrl:'https://www.wegotransit.com/ride/alerts/',startAt:'2026-10-11T15:00:00Z',endAt:'2026-10-11T21:00:00Z',routeNumbers:['14','23','41','56']};
+  const evidence={...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872984'},venue:{id:'3810',name:'Nissan Stadium'},picture:{...brief.nflContext.evidence.picture,nashvilleTitansClosureContext:plan,wegoTitansAlertContext:wego,nashvilleAccessComparison:{state:'source_overlap_review'}}};
   const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
   const item=packet.evidence.find(row=>row.id==='K11');
   assert.equal(item?.sourceUrl,url);
   assert.match(item.text,/does not verify activation/);
+  assert.equal(packet.evidence.find(row=>row.id==='K12')?.sourceUrl,wego.sourceUrl);
+  assert.match(packet.evidence.find(row=>row.id==='K12')?.text,/causal relationship/);
   assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence:{...evidence,picture:{...evidence.picture,nashvilleTitansClosureContext:{...plan,state:'stale_or_unavailable'}}}}},{now:at}).evidence.some(row=>row.id==='K11'),false);
 });
 

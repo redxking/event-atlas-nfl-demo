@@ -30,6 +30,16 @@ test('revised exact-game NDOT permit is a planning change, never an observed clo
   assert.match(change.detail,/not an observed closure or threat/);
 });
 
+test('WeGo stadium notice revisions require a newer operator check',()=>{
+  const notice={state:'current_operator_notice',asOf:'2026-10-10T05:00:00Z',sourceUrl:'https://www.wegotransit.com/ride/alerts/',sourceTextSha256:'a'.repeat(64)};
+  const before={...picture('checked'),wegoTitansAlertContext:notice};
+  const after={...picture('checked'),wegoTitansAlertContext:{...notice,asOf:'2026-10-10T06:00:00Z',sourceTextSha256:'b'.repeat(64)}};
+  const titans={...game,id:'nfl:401872984'};
+  const change=diffEventPicture(before,after,null,null,titans,titans).find(item=>item.kind==='operator_service_notice_revised');
+  assert.equal(change?.sourceUrl,notice.sourceUrl);
+  assert.equal(diffEventPicture({...before,wegoTitansAlertContext:{...notice,state:'stale_or_unavailable'}},after,null,null,titans,titans).some(item=>item.kind==='operator_service_notice_revised'),false);
+});
+
 test('new source cue is linked only across comparable current checks',()=>{
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,game);
   assert.equal(changes.length,1);

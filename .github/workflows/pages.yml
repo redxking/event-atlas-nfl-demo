@@ -56,6 +56,7 @@ jobs:
       - run: npm run sync:nola-ready-updates
       - run: npm run sync:nashville-oem-news
       - run: npm run sync:nashville-titans-closures
+      - run: npm run sync:wego-titans-alert
       - run: npm run sync:nola-ready-regional
       - run: npm run sync:norta-alerts
       - run: npm run sync:nola-calls
