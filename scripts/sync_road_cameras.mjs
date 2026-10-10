@@ -5,15 +5,23 @@ import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
 import {MN_CAMERA_URL,parseMinnesotaCameras,requireSourceAge} from '../lib/minnesota_iris.mjs';
 import {MASSDOT_CCTV_LAYER,massdotCameraQuery,parseMassdotCameraInventory} from '../lib/massdot_camera_inventory.mjs';
 import {TXDOT_CCTV_LAYER,txdotCameraQuery,parseTxdotCameraInventory} from '../lib/txdot_camera_inventory.mjs';
+import {NJTA_CAMERA_PAGE,parseNjtaCameraInventory} from '../lib/njta_camera_inventory.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
 const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
 const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).values()]
-  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX), USA$/.test(venue.address));
+  .filter(venue=>Number.isFinite(venue.lat)&&Number.isFinite(venue.lon)&&/\b(CA|WA|MD|IL|WI|PA|GA|MN|MA|TX|NJ), USA$/.test(venue.address));
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
+try{
+  const response=await fetch(NJTA_CAMERA_PAGE,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata',Accept:'text/html'},signal:AbortSignal.timeout(25000)});
+  if(!response.ok)throw Error(`HTTP ${response.status}`);
+  const records=parseNjtaCameraInventory(await response.text());
+  cameras.push(...records);
+  sources.push({id:'njta-public-road-cameras',url:NJTA_CAMERA_PAGE,status:'ok',records:records.length,imageryAccess:'public HLS listed; playback per camera not guaranteed'});
+}catch(error){sources.push({id:'njta-public-road-cameras',url:NJTA_CAMERA_PAGE,status:'failed',error:String(error)})}
 for(const district of [4,7]){
   const suffix=String(district).padStart(2,'0');
   const url=`https://cwwp2.dot.ca.gov/data/d${district}/cctv/cctvStatusD${suffix}.json`;

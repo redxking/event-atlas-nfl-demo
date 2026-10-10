@@ -40,10 +40,15 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
       assert.equal(item.operationalStatus,'Enabled');
       assert.match(item.videoUrl,/^https:\/\/cctv\d+\.dot\.wi\.gov\/rtplive\/CCTV-\d{2}-\d{4}\/playlist\.m3u8$/);
       assert.match(item.viewerUrl,/^https:\/\/511wi\.gov\/map\/Cctv\/\d+$/);
-    }else{
+    }else if(item.agency==='MnDOT IRIS'){
       assert.equal(item.agency,'MnDOT IRIS');
       assert.match(item.id,/^mndot-C\d{1,6}$/);
       assert.equal(item.videoUrl,`https://video.dot.state.mn.us/public/${item.id.slice(6)}.stream/playlist.m3u8`);
+    }else{
+      assert.equal(item.agency,'NJTA');
+      assert.match(item.id,/^njta-\d{1,6}$/);
+      assert.match(item.videoUrl,/^https:\/\/wink\.njta\.com\/\d{1,4}\/public\/hls\/[A-Za-z0-9-]+_nj\.m3u8$/);
+      assert.equal(item.viewerUrl,'https://www.njta.gov/travel-resources/camera-list/');
     }
   }
 });

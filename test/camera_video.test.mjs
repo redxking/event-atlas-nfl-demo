@@ -9,4 +9,7 @@ test('only source-matched agency HLS URLs can be played',()=>{
   assert.equal(publicRoadVideoAgency({...mn,videoUrl:'https://video.dot.state.mn.us/public/C627.stream/../../private.m3u8'}),null);
   assert.equal(publicRoadVideoAgency({...mn,agency:'Other'}),null);
   assert.equal(publicRoadVideoAgency({agency:'WisDOT 511',videoUrl:'https://cctv1.dot.wi.gov/rtplive/CCTV-01-0001/playlist.m3u8'}),'WisDOT');
+  const nj={id:'njta-57',agency:'NJTA',videoUrl:'https://wink.njta.com/204/public/hls/WF05-24B0-46EE-1F2E-1932_nj.m3u8'};
+  assert.equal(publicRoadVideoAgency(nj),'NJTA');
+  assert.equal(publicRoadVideoAgency({...nj,videoUrl:'https://wink.njta.com/204/private/hls/WF05-24B0-46EE-1F2E-1932_nj.m3u8'}),null);
 });
