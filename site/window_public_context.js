@@ -1,3 +1,4 @@
+import {displayStatus} from './window_presenter.js';
 const https=url=>{try{return new URL(url).protocol==='https:'}catch{return false}};
 export function validateWindowPublicBundle(bundle,game){
  if(bundle?.schema!=='event-atlas.public-evidence-bundle.v1'||bundle.status!=='unreviewed_public_source_export'||bundle.event?.id!==game.id||String(bundle.venue?.id)!==String(game.venue.id)||Date.parse(bundle.event.kickoff)!==Date.parse(game.kickoff)||!Array.isArray(bundle.picture?.sources)||!Number.isFinite(Date.parse(bundle.generatedAt)))throw Error('Published report identity or schedule does not match this game');
@@ -21,7 +22,7 @@ export function createWindowPublicContext(target){
  for(const person of bundle.announcements){const article=document.createElement('article'),name=document.createElement('strong'),role=document.createElement('p'),source=document.createElement('a'),stamp=document.createElement('small');name.textContent=person.name;role.textContent=person.role;source.textContent='Publisher announcement';source.href=person.sourceUrl;source.target='_blank';source.rel='noopener noreferrer';stamp.textContent=`Source checked ${person.sourceCheckedAt} · attendance unverified`;article.append(name,role,source,stamp);target.append(article)}
  if(bundle.rejectedAnnouncements)line(`${bundle.rejectedAnnouncements} announcement records did not meet event, venue or provenance validation and are not displayed.`);
  const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent=`Inspect ${bundle.sources.length} source states`;details.append(summary);
- for(const s of bundle.sources){const article=document.createElement('article'),title=document.createElement('strong'),p=document.createElement('p');title.textContent=`${s.name} · ${s.state}`;p.textContent=`${s.asOf||'Observation time unknown'} · ${s.detail}`;article.append(title,p);if(s.sourceUrl){const a=document.createElement('a');a.href=s.sourceUrl;a.textContent='Publisher source';a.target='_blank';a.rel='noopener noreferrer';article.append(a)}details.append(article)}target.append(details);
+ for(const s of bundle.sources){const article=document.createElement('article'),title=document.createElement('strong'),p=document.createElement('p');title.textContent=`${s.name} · ${displayStatus(s.state)}`;p.textContent=`${s.asOf||'Observation time unknown'} · ${s.detail}`;article.append(title,p);if(s.sourceUrl){const a=document.createElement('a');a.href=s.sourceUrl;a.textContent='Publisher source';a.target='_blank';a.rel='noopener noreferrer';article.append(a)}details.append(article)}target.append(details);
  }catch(error){if(request===sequence)line(`Public-source context unavailable: ${error.message}. This is not an all-clear.`)}
  }};
 }

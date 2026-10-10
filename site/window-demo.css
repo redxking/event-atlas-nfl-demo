@@ -6,3 +6,7 @@
 *,*::before,*::after{box-sizing:border-box}header,main,section{min-width:0}body{overflow-wrap:anywhere}select{min-width:0}#area-form label{min-width:0;flex:1 1 180px}#area-form input{width:100%;max-width:100%}button{white-space:normal}#exercise-map{overflow-wrap:normal}.scroll{max-width:100%}
 
 .workspace-nav{padding:12px 0;border-bottom:1px solid #39465c;margin-bottom:20px;gap:8px 18px}.workspace-nav a{padding:4px 0;text-decoration-thickness:1px}section{scroll-margin-top:18px}#analysis-simulation details{padding:12px 0;border-top:1px solid #39465c}summary{cursor:pointer}
+
+#presenter{border:2px solid #99d7ff;background:#10243a}#tour-notes{max-width:80ch}#tour-notes h4{margin-bottom:4px;color:#ffd377}#tour-notes h4+p{margin-top:4px}#tour-progress{font-weight:700;color:#99d7ff}
+
+.readable-report{font:inherit;line-height:1.65;background:#0b1420;padding:20px;border-radius:8px}#briefing-report{border-color:#99d7ff}

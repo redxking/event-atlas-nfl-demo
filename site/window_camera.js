@@ -1,3 +1,4 @@
+import {displayStatus} from './window_presenter.js';
 export function cameraPresentation(brief){
  const source=brief.sources.find(s=>s.id==='feed-camera');
  const frame=brief.observations.find(r=>r.sourceId==='feed-camera'&&r.payload?.kind==='camera_frame');
@@ -27,5 +28,5 @@ export function createSyntheticCamera(target){
   draw();stream=canvas.captureStream(10);video.srcObject=stream;video.style.display='block';timer=setInterval(draw,100);button.textContent='Stop synthetic camera';
   try{await video.play();status.textContent='Synthetic training video playing. No real camera is connected.'}catch{stop();status.textContent='Synthetic playback was not started by this browser. Try Play again.'}
  };
- return {update(brief){const next=cameraPresentation(brief);if(model?.eventId!==next.eventId||!next.playable)stop();model=next;venue.textContent=`Exercise context: ${next.venue} · ${next.eventId}`;button.disabled=!next.playable;link.hidden=!next.evidenceId;if(next.evidenceId)link.href=`#${next.evidenceId}`;status.textContent=`SYNTHETIC · ${next.state} · ${next.receivedAt?'frame observation '+next.receivedAt:'awaiting camera feed record'}${next.playable?'':'. Playback unavailable; no current frame is represented.'}`},destroy:stop};
+ return {update(brief){const next=cameraPresentation(brief);if(model?.eventId!==next.eventId||!next.playable)stop();model=next;venue.textContent=`Exercise context: ${next.venue} · ${next.eventId}`;button.disabled=!next.playable;link.hidden=!next.evidenceId;if(next.evidenceId)link.href=`#${next.evidenceId}`;status.textContent=`SYNTHETIC · ${displayStatus(next.state)} · ${next.receivedAt?'frame observation '+next.receivedAt:'awaiting camera feed record'}${next.playable?'':'. Playback unavailable; no current frame is represented.'}`},destroy:stop};
 }
