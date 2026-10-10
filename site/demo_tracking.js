@@ -1,3 +1,4 @@
+import {mapColors,trackingIcon} from './map_key.js';
 import {positionRelation,aircraftInformationAlert} from './movement_tracking.js';
 export function demoTrackingFrame(game,step,now=Date.now()){
  const {lat,lon}=game.venue;
@@ -23,9 +24,9 @@ export function attachDemoTracking(map,controls,game){
  let timer,step=-1;const pause=()=>{clearInterval(timer);timer=null;play.textContent='Play tracking story';};active={map,stop(){pause();layer.clearLayers();map.removeLayer(layer);}};
  const draw=()=>{layer.clearLayers();content.replaceChildren();const frame=demoTrackingFrame(game,step);layer.addTo(map);
   content.append(node('h5',frame.headline),node('p',frame.assessment));
-  if(frame.phase!==4)L.polygon(frame.ring.map(([x,y])=>[y,x]),{color:'#b04bac',dashArray:'5 6',fillOpacity:.04}).bindPopup(node('p','Fictional observation area — not an FAA restriction or approved perimeter')).addTo(layer);
+  if(frame.phase!==4)L.polygon(frame.ring.map(([x,y])=>[y,x]),{color:mapColors.demo,dashArray:'5 6',fillOpacity:.04}).bindPopup(node('p','Fictional observation area — not an FAA restriction or approved perimeter')).addTo(layer);
   for(const track of frame.tracks){const details=[track.label,track.kind==='aircraft'?'Callsign: '+(track.callsign||'Unavailable'):'Vessel identity: Demo Vessel 1',track.kind==='aircraft'?'Altitude: '+(track.altitudeM==null?'Unavailable':Math.round(track.altitudeM*3.28084)+' ft'):'AIS example; no real transmission', 'Speed: '+track.speedKnots+' knots','Heading: '+track.heading+'°','Fictional position; no live feed'].join(' · ');
-   const marker=L.circleMarker([track.lat,track.lon],{className:'demo-track-marker',color:'#b04bac',radius:8,fillOpacity:.85}).bindPopup(node('p',details)).bindTooltip(track.label).addTo(layer);
+   const marker=L.marker([track.lat,track.lon],{icon:trackingIcon(L,track.kind,mapColors.demo,true)}).bindPopup(node('p',details)).bindTooltip(track.label).addTo(layer);
    const row=node('article');row.className='movement-track-card';row.append(node('p',details));const locate=node('button','Locate '+track.label);locate.type='button';locate.onclick=()=>{map.setView([track.lat,track.lon],14);marker.openPopup();};row.append(locate);content.append(row);
   }
   if(frame.alert){const alert=node('article');alert.className='movement-information-alert';alert.setAttribute('role','alert');alert.append(node('strong','Demo information alert · '+frame.alert.title),node('p',frame.alert.detail),node('p',frame.alert.action));content.append(alert);}

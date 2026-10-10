@@ -6,13 +6,13 @@ import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=event-notif
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitoring-2';
 import {getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
-import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=tracking-demo-1';
+import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=map-key-1';
 import {stopMovementTracking} from './movement_map.js?v=multi-events-1';
 import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=grouped-decisions-1';
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
-import {createGeographicExplorer} from './geographic_explorer.js?v=grouped-decisions-1';
-import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=tracking-demo-1';
+import {createGeographicExplorer} from './geographic_explorer.js?v=map-key-1';
+import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-key-1';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=assessments-2';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
