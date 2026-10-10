@@ -129,6 +129,18 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of oldCityEvent.claims)if(!newClaims.has(item.id))changes.push({kind:'city_event_notice_unmatched',observedAt,title:`NOLA Ready festival passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:'The bounded extractor no longer matches this city passage. Verify the city page; this does not establish that an event or closure ended.',sourceUrl:cityUrl});
   }
+  const oldRegional=before.nolaReadyRegionalContext,newRegional=after.nolaReadyRegionalContext;
+  const regionalUrl='https://ready.nola.gov/incident/the-city-of-new-orleans-has-granted-permits-to-fes/national-fried-chicken-festival-2026/';
+  const validRegional=item=>['sunday_window','lakefront_location','traffic_advisory'].includes(item?.id)&&item.sourceUrl===regionalUrl&&/^[a-f0-9]{64}$/.test(item.sourceTextSha256||'');
+  if(!eventWindowChanged&&after.eventId==='nfl:401872987'&&['current_regional_notice','partial_regional_notice'].includes(oldRegional?.state)&&['current_regional_notice','partial_regional_notice'].includes(newRegional?.state)&&oldRegional.sourceUrl===regionalUrl&&newRegional.sourceUrl===regionalUrl&&Number.isFinite(Date.parse(oldRegional.asOf))&&Date.parse(newRegional.asOf)>Date.parse(oldRegional.asOf)&&Array.isArray(oldRegional.claims)&&Array.isArray(newRegional.claims)&&oldRegional.claims.length<=3&&newRegional.claims.length<=3&&oldRegional.claims.every(validRegional)&&newRegional.claims.every(validRegional)){
+    const prior=new Map(oldRegional.claims.map(item=>[item.id,item]));
+    const next=new Map(newRegional.claims.map(item=>[item.id,item]));
+    for(const item of newRegional.claims){
+      const old=prior.get(item.id);
+      if(!old||old.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:old?'city_regional_notice_revised':'city_regional_notice_matched',observedAt,title:`NOLA Ready Lakefront festival ${item.id.replaceAll('_',' ')}`,detail:'The official city page changed or added a bounded regional event passage. Verify current hours and location with the city; this does not establish a Superdome travel or security effect.',sourceUrl:regionalUrl});
+    }
+    for(const item of oldRegional.claims)if(!next.has(item.id))changes.push({kind:'city_regional_notice_unmatched',observedAt,title:`NOLA Ready Lakefront passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:'The bounded extractor no longer matches this city passage. Verify the city page; this does not establish that the festival or its traffic plan ended.',sourceUrl:regionalUrl});
+  }
   const oldActive=before.nolaReadyActiveContext,newActive=after.nolaReadyActiveContext;
   const activeUrl='https://ready.nola.gov/incident/';
   const validActive=item=>/^[a-z0-9_-]{3,120}$/.test(item?.id||'')&&typeof item.title==='string'&&item.title.length>=3&&item.title.length<=180&&item.url===`${activeUrl}${item.id}/`;
