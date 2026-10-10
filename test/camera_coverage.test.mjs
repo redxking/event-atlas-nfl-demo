@@ -44,6 +44,11 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
       assert.equal(item.agency,'MnDOT IRIS');
       assert.match(item.id,/^mndot-C\d{1,6}$/);
       assert.equal(item.videoUrl,`https://video.dot.state.mn.us/public/${item.id.slice(6)}.stream/playlist.m3u8`);
+    }else if(item.agency==='Caltrans'){
+      assert.equal(item.inService,true);
+      assert.match(item.id,/^caltrans-([47])-\d{1,6}$/);
+      const district=item.id.split('-')[1];
+      assert.match(item.videoUrl,new RegExp(`^https://wzmedia\\.dot\\.ca\\.gov/D${district}/[A-Za-z0-9_-]+\\.stream/playlist\\.m3u8$`));
     }else{
       assert.equal(item.agency,'NJTA');
       assert.match(item.id,/^njta-\d{1,6}$/);

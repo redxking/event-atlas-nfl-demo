@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import {publicRoadVideoAgency} from '../site/camera_video.js';
 
 test('only source-matched agency HLS URLs can be played',()=>{
+  const ca={id:'caltrans-7-1183',agency:'Caltrans',inService:true,videoUrl:'https://wzmedia.dot.ca.gov/D7/CCTV-848.stream/playlist.m3u8'};
+  assert.equal(publicRoadVideoAgency(ca),'Caltrans');
+  assert.equal(publicRoadVideoAgency({...ca,id:'caltrans-4-1183'}),null);
+  assert.equal(publicRoadVideoAgency({...ca,inService:false}),null);
+  assert.equal(publicRoadVideoAgency({...ca,videoUrl:'https://wzmedia.dot.ca.gov/D7/../private.stream/playlist.m3u8'}),null);
   const mn={id:'mndot-C627',agency:'MnDOT IRIS',videoUrl:'https://video.dot.state.mn.us/public/C627.stream/playlist.m3u8'};
   assert.equal(publicRoadVideoAgency(mn),'MnDOT');
   assert.equal(publicRoadVideoAgency({...mn,id:'mndot-C628'}),null);

@@ -35,7 +35,9 @@ for(const district of [4,7]){
       const recordDate=item.recordTimestamp?.recordDate;
       const stillUrl=item.imageData?.static?.currentImageURL;
       const allowedStill=typeof stillUrl==='string'&&new RegExp(`^https://cwwp2\\.dot\\.ca\\.gov/data/d${district}/cctv/image/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+\\.jpg$`).test(stillUrl);
-      cameras.push({id:`caltrans-${district}-${item.index}`,agency:'Caltrans',name:item.location?.locationName||'Road camera',lat,lon,route:item.location?.route||null,inService:item.inService==='true',metadataDate:/^\d{4}-\d\d-\d\d$/.test(recordDate||'')?recordDate:null,sourceUrl:url,viewerUrl:'https://quickmap.dot.ca.gov/',...(allowedStill?{stillUrl}:{} )});
+      const videoUrl=item.imageData?.streamingVideoURL;
+      const allowedVideo=item.inService==='true'&&typeof videoUrl==='string'&&new RegExp(`^https://wzmedia\\.dot\\.ca\\.gov/D${district}/[A-Za-z0-9_-]+\\.stream/playlist\\.m3u8$`).test(videoUrl);
+      cameras.push({id:`caltrans-${district}-${item.index}`,agency:'Caltrans',name:item.location?.locationName||'Road camera',lat,lon,route:item.location?.route||null,inService:item.inService==='true',metadataDate:/^\d{4}-\d\d-\d\d$/.test(recordDate||'')?recordDate:null,sourceUrl:url,viewerUrl:'https://quickmap.dot.ca.gov/',...(allowedStill?{stillUrl}:{} ),...(allowedVideo?{videoUrl}:{})});
       count++;
     }
     sources.push({id:`caltrans-d${district}`,url,status:'ok',records:count});
