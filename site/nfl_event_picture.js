@@ -14,6 +14,7 @@ import {selectEonetForGame} from './eonet_nfl.js?v=20261010-1';
 import {selectNifcForGame} from './nifc_wildfire.js?v=20261010-1';
 import {selectAirnowForGame} from './airnow_pm25.js?v=20261010-1';
 import {selectHmsSmokeForGame} from './hms_smoke.js?v=20261010-1';
+import {correlateEnvironmentalSources} from './environmental_correlation.js?v=20261010-1';
 import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';
 
 const HOUR=3600000;
@@ -49,6 +50,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const wildfireContext=selectNifcForGame(game,nifc,now,queueMode);
   const airQualityContext=selectAirnowForGame(game,airnow,now,queueMode);
   const smokeContext=selectHmsSmokeForGame(game,hmsSmoke,now,queueMode);
+  const environmentalCorrelation=correlateEnvironmentalSources(smokeContext,airQualityContext,wildfireContext);
   const usgsContext=selectUsgsForGame(game,conditions,now,queueMode);
   const policeConnected=['3687','3673','3933','3812','3628','3937'].includes(venueId);
   const policeFresh=police?.state==='retrieved'&&Number.isFinite(police.checkedAt)&&police.checkedAt<=now+60000&&now-police.checkedAt<=(['3812','3628','3937'].includes(venueId)?12*HOUR:15*60000);
@@ -172,5 +174,5 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(queueMode==='near_term_monitoring'&&airQualityContext.state!=='current_station_observation')gaps.push('A current nearby EPA AirNow PM2.5 station reading is unavailable; no air-quality finding follows.');
   if(queueMode==='near_term_monitoring'&&smokeContext.state!=='recent_daily_analysis')gaps.push('Recent NOAA HMS daily smoke-polygon analysis is unavailable or stale; no negative finding follows.');
   const reviewQueue=buildNflReviewQueue(game,{cues,sources},queueMode,now);
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,naturalEventsContext,wildfireContext,airQualityContext,smokeContext,usgsContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,naturalEventsContext,wildfireContext,airQualityContext,smokeContext,environmentalCorrelation,usgsContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }

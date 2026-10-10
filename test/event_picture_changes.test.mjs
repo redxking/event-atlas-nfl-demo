@@ -82,6 +82,17 @@ test('NOAA smoke point matches require two newer daily analyses',()=>{
   assert.equal(diffEventPicture(after,{...after,smokeContext:{...after.smokeContext,asOf:'2026-10-10T03:00:00Z'}},null,null,game,game).some(item=>item.kind==='new_satellite_smoke_match'),false);
 });
 
+test('new smoke and nearby station time overlap is a source-linked review change',()=>{
+  const sourceUrl='https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/KML/2026/10/hms_smoke20261009.kml';
+  const air={state:'current_station_observation',asOf:'2026-10-10T01:00:00Z'};
+  const before={...picture('checked'),smokeContext:{state:'recent_daily_analysis',asOf:'2026-10-10T01:00:00Z'},airQualityContext:air,environmentalCorrelation:{state:'no_polygon_point_match'}};
+  const after={...before,smokeContext:{state:'recent_daily_analysis',asOf:'2026-10-10T02:00:00Z'},environmentalCorrelation:{state:'same_published_time_window',smokeSourceUrl:sourceUrl,stationObservedAt:'2026-10-09T18:00:00Z',stationDistanceKm:6}};
+  const change=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='smoke_pm25_time_overlap');
+  assert.equal(change?.sourceUrl,sourceUrl);
+  assert.match(change.detail,/not source attribution/);
+  assert.equal(diffEventPicture({...before,smokeContext:{...before.smokeContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='smoke_pm25_time_overlap'),false);
+});
+
 test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
   const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
   const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});
