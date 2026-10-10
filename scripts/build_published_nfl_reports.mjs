@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import {buildPublishedEvidenceArtifact} from '../lib/published_evidence_artifact.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {publishedNflReportMode} from '../lib/nfl_game_lifecycle.mjs';
@@ -132,14 +133,16 @@ for(const game of games){
     changeStates.push(changeState);
     bundle.publishedChanges={comparison:changeState.comparison,newChangeCount:changeState.newChangeCount,newItems:changeState.newItems,items:changeState.changes};
   }
-  const body=buildNflPublicReport(bundle);
+  const evidence=buildPublishedEvidenceArtifact(bundle);
+  await fs.writeFile(path.join(outDir,evidence.filename),evidence.bytes,'utf8');
+  const body=buildNflPublicReport(bundle)+evidence.section;
   const frontmatter=`---\ntitle: ${JSON.stringify(`NFL public-source review: ${game.title}`)}\nauthor: Angelis Pseftis\ncreator: Angelis Pseftis\nstatus: Automated public-source compilation; unreviewed\ngenerated_at: ${bundle.generatedAt}\n---\n\n`;
   const filename=`${id}.md`;
   await fs.writeFile(path.join(outDir,filename),frontmatter+body,'utf8');
   const htmlName=`${id}.html`;
   await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename,liveContext:{monitoringMode,gameId:game.id,home:game.teams.find(team=>team.role==='home')?.name,away:game.teams.find(team=>team.role==='away')?.name,venueId:game.venue.id,lat:game.venue.lat,lon:game.venue.lon,kickoff:game.kickoff,status:game.status}}),'utf8');
   if(changeState)await fs.writeFile(path.join(outDir,`${id}.state.json`),JSON.stringify(changeState)+'\n','utf8');
-  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,venueLat:game.venue.lat,venueLon:game.venue.lon,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,monitoringMode,nwsAlerts:conditions?conditions.alertsError?'unavailable':'checked':'not checked outside near-term window',nwsObservation:monitoringMode==='near_term_monitoring'?bundle.picture.observationContext?.state||'unavailable or stale':'not checked outside near-term window',nwsForecast:monitoringMode==='near_term_monitoring'?bundle.picture.forecastContext.state:'not checked outside near-term window',directGame:directGame?.state||'not checked outside near-term window',mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState?.newChangeCount??null});
+  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,venueLat:game.venue.lat,venueLon:game.venue.lon,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,evidencePath:`reports/${evidence.filename}`,evidenceSha256:evidence.sha256,evidenceBytes:evidence.byteLength,generatedAt:bundle.generatedAt,monitoringMode,nwsAlerts:conditions?conditions.alertsError?'unavailable':'checked':'not checked outside near-term window',nwsObservation:monitoringMode==='near_term_monitoring'?bundle.picture.observationContext?.state||'unavailable or stale':'not checked outside near-term window',nwsForecast:monitoringMode==='near_term_monitoring'?bundle.picture.forecastContext.state:'not checked outside near-term window',directGame:directGame?.state||'not checked outside near-term window',mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState?.newChangeCount??null});
 }
 const index={status:'ok',builtAt:new Date().toISOString(),basis:'Hourly public-source compilations for every upcoming U.S. NFL game. Games within seven days, active games, and source-completed games within 24 hours of listed kickoff receive point alert, nearby station observation, event-hour forecast, and exact-game publisher checks. More distant games are planning snapshots without those live event checks. Each report is unreviewed; direct browser checks may be newer. A station reading is not a stadium measurement or a kickoff forecast. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
