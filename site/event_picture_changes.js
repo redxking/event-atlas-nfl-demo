@@ -115,6 +115,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
   }
   const priorSounder=before.soundTransitContext,nextSounder=after.soundTransitContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872992'&&priorSounder?.state==='current_published_service_plan'&&nextSounder?.state==='current_published_service_plan'&&priorSounder.sourceUrl==='https://www.soundtransit.org/get-to-know-us/news-events/calendar/seahawks-vs-san-francisco-2026-10-11'&&nextSounder.sourceUrl===priorSounder.sourceUrl&&Number.isFinite(Date.parse(priorSounder.asOf))&&Date.parse(nextSounder.asOf)>Date.parse(priorSounder.asOf)&&/^[a-f0-9]{64}$/.test(priorSounder.sourceTextSha256||'')&&/^[a-f0-9]{64}$/.test(nextSounder.sourceTextSha256||'')&&priorSounder.sourceTextSha256!==nextSounder.sourceTextSha256)changes.push({kind:'operator_timetable_revised',observedAt,title:'Sound Transit Seahawks event timetable text changed',detail:'The operator page timetable or return-service text differs between two source checks. Confirm the current published plan and actual service with Sound Transit; a text change does not prove cancellation, a train run, crowd impact, or a threat.',sourceUrl:nextSounder.sourceUrl});
+  const priorSounderAlerts=before.sounderAlertsContext,nextSounderAlerts=after.sounderAlertsContext;
+  if(!eventWindowChanged&&after.eventId==='nfl:401872992'&&['current_snapshot','partial'].includes(priorSounderAlerts?.state)&&['current_snapshot','partial'].includes(nextSounderAlerts?.state)&&Number.isFinite(Date.parse(priorSounderAlerts.sourceAt))&&Date.parse(nextSounderAlerts.sourceAt)>Date.parse(priorSounderAlerts.sourceAt)&&Array.isArray(priorSounderAlerts.alerts)&&Array.isArray(nextSounderAlerts.alerts)){
+    const oldById=new Map(priorSounderAlerts.alerts.map(item=>[item.id,item]));
+    for(const item of nextSounderAlerts.alerts.slice(0,12)){
+      if(!/^[A-Za-z0-9_-]{1,80}$/.test(item?.id||'')||!/^https:\/\/www\.soundtransit\.org\//.test(item?.sourceUrl||''))continue;
+      const old=oldById.get(item.id);
+      if(!old||JSON.stringify([old.header,old.effect,old.activePeriods])!==JSON.stringify([item.header,item.effect,item.activePeriods]))changes.push({kind:old?'operator_notice_revised':'operator_notice_added',observedAt,title:`Sound Transit Sounder notice ${old?'revised':'added'}: ${item.id}`,detail:`The operator's route-selected ${item.effect||'service'} notice ${old?'changed':'appeared'} between feed checks. Confirm its current text, time and station scope with Sound Transit. An added or revised notice does not establish a train run, stadium impact, or security threat.`,sourceUrl:item.sourceUrl});
+    }
+  }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
   if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));
