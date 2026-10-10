@@ -19,6 +19,17 @@ test('Nashville OEM release additions require newer successful checks',()=>{
   assert.equal(diffEventPicture({...before,nashvilleOemNewsContext:{...base,state:'stale_or_unavailable'}},after,null,null,titans,titans).some(item=>item.kind==='city_release_published'),false);
 });
 
+test('revised exact-game NDOT permit is a planning change, never an observed closure',()=>{
+  const url='https://www.nashville.gov/sites/default/files/2026-10/ROWConstructionRoadClosures-Weekof_101026-101726.pdf?ct=1791578264';
+  const permit={permitNumber:'2026081013',street:'TITANS WAY',sourceUrl:url,sourceTextSha256:'a'.repeat(64)};
+  const before={...picture('checked'),nashvilleTitansClosureContext:{state:'current_published_plan',asOf:'2026-10-10T05:00:00Z',entries:[permit,...Array.from({length:6},(_,i)=>({...permit,permitNumber:`20260810${20+i}`}))]}};
+  const after={...picture('checked'),nashvilleTitansClosureContext:{state:'current_published_plan',asOf:'2026-10-10T06:00:00Z',entries:[{...permit,sourceTextSha256:'b'.repeat(64)},...before.nashvilleTitansClosureContext.entries.slice(1)]}};
+  const titans={...game,id:'nfl:401872984'};
+  const change=diffEventPicture(before,after,null,null,titans,titans).find(item=>item.kind==='planned_road_permit_revised');
+  assert.equal(change?.sourceUrl,url);
+  assert.match(change.detail,/not an observed closure or threat/);
+});
+
 test('new source cue is linked only across comparable current checks',()=>{
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,game);
   assert.equal(changes.length,1);

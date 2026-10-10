@@ -4,6 +4,20 @@ import {buildLocalAiPacket,generateLocalAiDraft,validateLocalAiDraft} from '../l
 
 const brief={event:{sourceId:'nfl'},sourceComparison:{status:'unchanged_since_intake'},nflContext:{status:'snapshot_available_unreviewed',scheduleSnapshotAt:'2026-10-09T12:00:00Z',evidence:{event:{id:'game-1',title:'Home at Away',kickoff:'2026-10-11T17:00:00Z',status:'scheduled',sourceUrl:'https://example.org/game'},venue:{name:'Example Stadium'},picture:{cues:[{type:'road condition',title:'Closure',basis:'Publisher window overlap',sourceUrl:'https://example.org/road'}],sources:[{name:'Road source',state:'checked',detail:'No route impact established',sourceUrl:'https://example.org/roads'}],gaps:['No verified stadium CCTV stream is connected.']}}},protectedPeople:[{displayName:'PRIVATE PERSON'}],reviewedAssessments:[{analysis:'PRIVATE ANALYSIS'}],case:{openingRationale:'PRIVATE RATIONALE'}};
 
+test('local AI packet can rank the exact-game NDOT permit plan without claiming field closure',()=>{
+  const at=Date.parse('2026-10-10T12:30:00Z');
+  const url='https://www.nashville.gov/sites/default/files/2026-10/ROWConstructionRoadClosures-Weekof_101026-101726.pdf?ct=1791578264';
+  const ids=['2026080985','2026081000','2026081007','2026081013','2026081031','2026081033','2026081036'];
+  const streets=['WOODLAND ST','S 1ST ST','RUSSELL ST','TITANS WAY','VICTORY AVE','S 1ST ST','CRUTCHER ST'];
+  const plan={state:'current_published_plan',asOf:'2026-10-10T12:00:00Z',sourceUrl:url,entries:ids.map((permitNumber,i)=>({permitNumber,street:streets[i],sourceUrl:url}))};
+  const evidence={...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872984'},venue:{id:'3810',name:'Nissan Stadium'},picture:{...brief.nflContext.evidence.picture,nashvilleTitansClosureContext:plan}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
+  const item=packet.evidence.find(row=>row.id==='K11');
+  assert.equal(item?.sourceUrl,url);
+  assert.match(item.text,/does not verify activation/);
+  assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence:{...evidence,picture:{...evidence.picture,nashvilleTitansClosureContext:{...plan,state:'stale_or_unavailable'}}}}},{now:at}).evidence.some(row=>row.id==='K11'),false);
+});
+
 test('local model packet is public only and refuses stale or changed sources',()=>{
   const packet=buildLocalAiPacket(brief),serialized=JSON.stringify(packet);
   assert.equal(packet.event.id,'game-1');

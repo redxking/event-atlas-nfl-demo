@@ -158,6 +158,14 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
   }
   const oldUpdates=before.nolaReadyUpdatesContext,newUpdates=after.nolaReadyUpdatesContext;
   const oldOem=before.nashvilleOemNewsContext,newOem=after.nashvilleOemNewsContext;
+  const oldNdop=before.nashvilleTitansClosureContext,newNdop=after.nashvilleTitansClosureContext;
+  if(!eventWindowChanged&&currentGame?.id==='nfl:401872984'&&oldNdop?.state==='current_published_plan'&&newNdop?.state==='current_published_plan'&&Number.isFinite(Date.parse(oldNdop.asOf))&&Date.parse(newNdop.asOf)>Date.parse(oldNdop.asOf)&&Array.isArray(oldNdop.entries)&&Array.isArray(newNdop.entries)&&oldNdop.entries.length===7&&newNdop.entries.length===7){
+    const prior=new Map(oldNdop.entries.map(item=>[item.permitNumber,item]));
+    for(const item of newNdop.entries){
+      const old=prior.get(item.permitNumber);
+      if(old&&old.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:'planned_road_permit_revised',observedAt,title:`NDOT game permit revised: ${item.permitNumber} ${item.street}`,detail:'The source passage for this published game-day street-closure permit changed. Verify the current PDF and field status with NDOT; this is a planned permit, not an observed closure or threat.',sourceUrl:item.sourceUrl});
+    }
+  }
   const validOem=item=>typeof item?.title==='string'&&item.title.length>=3&&item.title.length<=180&&Number.isFinite(Date.parse(item.publishedAt))&&/^https:\/\/www\.nashville\.gov\/departments\/emergency-management\/news\/[a-z0-9-]+$/.test(item.url||'');
   if(!eventWindowChanged&&currentGame?.venue?.id==='3810'&&oldOem?.state==='current_newsroom_check'&&newOem?.state==='current_newsroom_check'&&oldOem.sourceUrl==='https://www.nashville.gov/departments/emergency-management/news'&&newOem.sourceUrl===oldOem.sourceUrl&&Number.isFinite(Date.parse(oldOem.asOf))&&Date.parse(newOem.asOf)>Date.parse(oldOem.asOf)&&Array.isArray(oldOem.recent)&&Array.isArray(newOem.recent)&&oldOem.recent.length<=20&&newOem.recent.length<=20&&oldOem.recent.every(validOem)&&newOem.recent.every(validOem)){
     const prior=new Map(oldOem.recent.map(item=>[item.url,item]));

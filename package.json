@@ -63,7 +63,8 @@
     "sync:sound-transit-alerts": "node scripts/sync_sound_transit_alerts.mjs",
     "sync:seattle-fire": "node scripts/sync_seattle_fire_aggregate.mjs",
     "sync:nashville-police": "node scripts/sync_nashville_police_aggregate.mjs",
-    "sync:nashville-oem-news": "python3 scripts/sync_nashville_oem_news.py"
+    "sync:nashville-oem-news": "python3 scripts/sync_nashville_oem_news.py",
+    "sync:nashville-titans-closures": "python3 scripts/sync_nashville_titans_closures.py"
   },
   "dependencies": {
     "gtfs-realtime-bindings": "1.1.1"
