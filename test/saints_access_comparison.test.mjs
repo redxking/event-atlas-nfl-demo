@@ -10,9 +10,10 @@ import {buildLocalAiPacket} from '../lib/local_ai_brief.mjs';
 
 const schedule=JSON.parse(readFileSync(new URL('../site/nfl.json',import.meta.url)));
 const guide=JSON.parse(readFileSync(new URL('../site/saints_gameday.json',import.meta.url)));
-const roads=JSON.parse(readFileSync(new URL('../site/roads.json',import.meta.url)));
 const game=schedule.games.find(item=>item.id==='nfl:401872987');
 const now=Date.parse(guide.checkedAt)+1000;
+const roadLayer='https://maps.dotd.la.gov/gdw/rest/services/Road_Closures/511_Road_Closures/FeatureServer/0';
+const roads={builtAt:new Date(now-60_000).toISOString(),coverageFrom:'2026-10-10T00:00:00.000Z',coverageThrough:'2026-10-17T00:00:00.000Z',timedCoverageByVenue:{'3493':{from:'2026-10-10T00:00:00.000Z',through:'2026-10-17T00:00:00.000Z'}},sources:[{id:'ladotd-511-new-orleans',status:'ok',url:roadLayer}],byVenue:{'3493':[{id:'ladotd-511-97207',agency:'Louisiana DOTD 511',kind:'Agency-listed road event',name:'Published road window',detail:'Fixture road window for source comparison',distanceKm:2,startAt:'2026-10-11T12:30:00.000Z',endAt:'2026-10-11T18:00:00.000Z',sourceUrl:roadLayer}]}};
 
 test('club pregame period and DOTD published road window become a two-source verification lead',()=>{
   const club=selectSaintsGameday(game,guide,now),road=selectRoadContext(game,roads,now);
