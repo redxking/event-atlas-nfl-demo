@@ -20,3 +20,15 @@ test('public report flattens untrusted publisher text and omits unsafe links',()
   assert.ok(report.includes('Source link unavailable'));
   assert.throws(()=>buildNflPublicReport({schema:'wrong'}),/required/);
 });
+
+test('report keeps delayed police counts and station service plans distinct from live alerts',()=>{
+  const withSources=structuredClone(bundle);
+  withSources.picture.sources.push({name:'Local police activity',sourceUrl:'https://gis.indy.gov/server/rest/services/IMPD/IMPD_Public_Data/FeatureServer/0'});
+  withSources.publicObservations.policeAggregate={nearby:2877,start:'2026-10-01',end:'2026-10-08',sourceLagHours:29.2,radiusKm:5};
+  withSources.sourceSnapshots.police='2026-10-09T22:18:40Z';
+  withSources.publicObservations.stationSchedule={serviceDate:'2026-10-11',totalReturned:4,screenable:true,withinWindowCount:2,state:'retrieved',checkedAt:'2026-10-10T01:23:45Z',sourceUrl:'https://api-v3.mbta.com/schedules?filter%5Bstop%5D=place-FS-0049'};
+  const report=buildNflPublicReport(withSources);
+  for(const expected of ['2026-10-01 through 2026-10-08','29.2 hours','https://gis.indy.gov/server/rest/services/IMPD/IMPD_Public_Data/FeatureServer/0','Foxboro station service plan','Within illustrative event window','https://api-v3.mbta.com/schedules'])assert.ok(report.includes(expected),expected);
+  assert.ok(report.includes('not active police alerts'));
+  assert.ok(report.includes('not a train position'));
+});

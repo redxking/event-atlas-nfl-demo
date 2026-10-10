@@ -52,7 +52,10 @@ export function buildNflPublicReport(bundle){
   ],'No linked FAA airspace record or TFR spatial candidate in this snapshot. Confirm the current NOTAM directly.'));
   rows.push('Published airspace and TFR geometry do not detect drones or establish a ground security perimeter.','');
   const police=observations.policeAggregate;
-  if(police)rows.push('## Delayed public safety context',line('Nearby public records',police.nearby??'unavailable'),line('Source window count',police.windowCount??'unavailable'),line('Radius',police.radiusKm==null?'unavailable':`${police.radiusKm} km`),'These are delayed public records or counts, not active police alerts or stadium incidents.','');
+  if(police){
+    const policeSource=picture.sources?.find(item=>item.name==='Local police activity');
+    rows.push('## Delayed public safety context',line('Nearby public records',police.nearby??'unavailable'),line('Reporting window',police.start&&police.end?`${police.start} through ${police.end}`:'not supplied'),line('Publisher lag at check',police.sourceLagHours==null?'not supplied':`${police.sourceLagHours} hours`),line('Radius',police.radiusKm==null?'unavailable':`${police.radiusKm} km`),line('Checked',iso(sourceSnapshots.police)),`- **Source:** ${source(policeSource?.sourceUrl,'Jurisdictional public data')}`,'These are delayed area counts, not active police alerts, confirmed crimes, stadium incidents, a trend, or a threat finding.','');
+  }
   const openRoad=observations.openRoadwayAggregate;
   if(openRoad)rows.push('## Open roadway activity',line('Nearby publisher-listed entries',openRoad.nearby??'unavailable'),line('Checked',iso(openRoad.checkedAt)),`- **Source:** ${source(openRoad.sourceUrl,'Publisher feed')}`,'Approximate source points do not establish access or event impact.','');
   const transit=observations.stationAlerts,septa=observations.septaBLineAlerts;
@@ -61,6 +64,10 @@ export function buildNflPublicReport(bundle){
     ...(septa?.alerts||[]).slice(0,8).map(item=>`- **${clean(item.header)}:** ${clean(item.effect)}; event-window overlap ${item.eventWindowOverlap?'yes':'not established'}. ${source(item.sourceUrl,'SEPTA alert')}`)
   ],'No connected station or route alert record for this event, or the relevant snapshot is unavailable. Check source status above.'));
   rows.push('Transit alert overlap is a review cue, not verified game travel impact.','');
+  const stationSchedule=observations.stationSchedule;
+  if(stationSchedule){
+    rows.push('## Foxboro station service plan',line('Game service date',stationSchedule.serviceDate),line('Publisher schedule entries returned',stationSchedule.totalReturned),line('Within illustrative event window',stationSchedule.screenable?stationSchedule.withinWindowCount:'not screenable'),line('Feed state',stationSchedule.state),line('Checked',iso(stationSchedule.checkedAt)),`- **Source:** ${source(stationSchedule.sourceUrl,'MBTA Foxboro station schedule')}`,'A published schedule is a service plan, not a train position, guaranteed operation, ridership count, or verified stadium access impact.','');
+  }
   const advisory=observations.nationalAdvisory;
   rows.push(section('DHS national advisory context',(advisory?.active||[]).map(item=>`- **${clean(item.type)}:** ${clean(item.summary)}; ${iso(item.start)} to ${iso(item.end)}. ${source(item.url,'DHS advisory')}`),`${clean(advisory?.state||'unavailable')}; no venue-specific conclusion follows. ${source(advisory?.sourceUrl,'DHS feed')}`));
   rows.push(section('Coverage and verification gaps',(picture.gaps||[]).map(item=>`- ${clean(item)}`),'Coverage gaps unavailable.'));

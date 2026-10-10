@@ -3,6 +3,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
 import {buildNflPublicReport} from '../site/nfl_public_report.js';
+import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from '../site/mbta_foxboro_alerts.js';
+import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from '../site/mbta_foxboro_schedules.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
@@ -10,7 +12,7 @@ const read=async name=>{try{return JSON.parse(await fs.readFile(path.join(site,n
 const required=await read('nfl.json');
 const now=Date.now();
 if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFinite(Date.parse(required.builtAt))||now-Date.parse(required.builtAt)>12*3600000)throw Error('Fresh NFL schedule snapshot required for published reports');
-const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',ntas:'ntas.json',septa:'septa_b_alerts.json'};
+const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',ntas:'ntas.json',septa:'septa_b_alerts.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json'};
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
 const games=required.games.filter(game=>String(game.status).startsWith('scheduled')&&!game.timeTbd&&Number.isFinite(Date.parse(game.kickoff))&&Date.parse(game.kickoff)>=now-6*3600000&&Date.parse(game.kickoff)<=now+7*86400000);
@@ -28,6 +30,25 @@ try{
   if(quakes?.type!=='FeatureCollection'||!Array.isArray(quakes.features)||quakes.features.length>10000)throw Error('Invalid USGS collection');
 }catch(error){quakes=null;quakesError=`USGS ${String(error.message).slice(0,100)}`}
 const venueChecks=new Map();
+function publishedPolice(game){
+  const feed=game.venue.id==='3812'?inputs.indianapolisPolice:game.venue.id==='3628'?inputs.charlottePolice:null;
+  if(!feed)return null;
+  const checkedAt=Date.parse(feed.builtAt),context=feed.byVenue?.[game.venue.id];
+  if(feed.status!=='ok'||!context||!Number.isFinite(checkedAt)||checkedAt>now+60000||now-checkedAt>12*3600000)return {state:'failed'};
+  return {state:'retrieved',checkedAt,context,sourceId:feed.sourceId};
+}
+async function publishedMbta(game){
+  if(game.venue.id!=='3738')return {transit:null,transitSchedule:null};
+  const retrieve=async (url,summarize)=>{
+    try{return summarize(await fetchJson(url),game,Date.now())}
+    catch{return {state:'failed',checkedAt:Date.now()}}
+  };
+  const [transit,transitSchedule]=await Promise.all([
+    retrieve(mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts),
+    retrieve(mbtaFoxboroSchedulesUrl(game),summarizeMbtaFoxboroSchedules)
+  ]);
+  return {transit,transitSchedule};
+}
 async function checkVenue(venue){
   const result={at:Date.now(),alerts:null,alertsError:null,quakes,quakesError};
   if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon)){result.alertsError='Venue point unavailable';return result}
@@ -62,14 +83,15 @@ for(const game of games){
   const id=game.id.replace(':','-');
   if(!venueChecks.has(game.venue.id))venueChecks.set(game.venue.id,await checkVenue(game.venue));
   const conditions=venueChecks.get(game.venue.id),forecast=await forecastFor(game);
-  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast});
+  const mbta=await publishedMbta(game);
+  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast,police:publishedPolice(game),...mbta});
   const body=buildNflPublicReport(bundle);
   const frontmatter=`---\ntitle: ${JSON.stringify(`NFL public-source review: ${game.title}`)}\nauthor: Angelis Pseftis\ncreator: Angelis Pseftis\nstatus: Automated public-source compilation; unreviewed\ngenerated_at: ${bundle.generatedAt}\n---\n\n`;
   const filename=`${id}.md`;
   await fs.writeFile(path.join(outDir,filename),frontmatter+body,'utf8');
   const htmlName=`${id}.html`;
   await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename}),'utf8');
-  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state});
+  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,nwsAlerts:conditions.alertsError?'unavailable':'checked',nwsForecast:bundle.picture.forecastContext.state,mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area'});
 }
 const index={status:'ok',builtAt:new Date().toISOString(),basis:'Automated hourly public-source compilations for listed NFL games within seven days. Each report is a point-in-time unreviewed document; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
