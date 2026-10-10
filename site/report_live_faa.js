@@ -36,7 +36,7 @@ if(typeof document!=='undefined'){
     async function check(){
       if(pending||document.visibilityState!=='visible')return;
       target.replaceChildren();
-      if(main.dataset.monitoringMode!=='near_term_monitoring'){p('Direct FAA event-record checks start when this game enters the seven-day monitoring window.');return}
+      if(main.dataset.monitoringMode!=='near_term_monitoring'){p('Direct FAA event-record checks start when this game enters the fourteen-day monitoring window.');return}
       pending=true;
       try{
         const response=await fetch(new URL('seams.json',import.meta.url),{cache:'no-store',signal:AbortSignal.timeout(10000),headers:{Accept:'application/json'}});
