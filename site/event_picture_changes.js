@@ -101,6 +101,7 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     {key:'jetsGuideContext',eventId:'nfl:401872983',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',states:['current_published_plan','partial_published_plan'],max:5,label:'Jets'},
     {key:'seahawksGuideContext',eventId:'nfl:401872992',url:'https://www.seahawks.com/game-day/',states:['current_published_plan','partial_published_plan'],max:7,label:'Seahawks'},
     {key:'titansGuideContext',eventId:'nfl:401872984',url:'https://www.tennesseetitans.com/stadium/gameday/',states:['current_published_plan','partial_published_plan'],max:6,label:'Titans'},
+    {key:'commandersGuideContext',eventId:'nfl:401872988',url:'https://www.commanders.com/matchups/giants',states:['current_published_plan','partial_published_plan'],max:9,label:'Commanders'},
     {key:'falconsGuideContext',eventId:'nfl:401872993',url:'https://www.atlantafalcons.com/tickets/gameday',states:['current_published_plan','partial_published_plan'],max:9,label:'Falcons'},
     {key:'dolphinsCrucialCatchContext',eventId:'nfl:401872982',url:'https://www.miamidolphins.com/news/dolphins-cancer-challenge-celebrates-100-million-lifetime-raised-at-crucial-catch-game',states:['current_published_plan','partial_published_plan'],max:6,label:'Dolphins'},
     {key:'saintsGuideContext',eventId:'nfl:401872987',url:'https://www.neworleanssaints.com/news/saints-vs-vikings-2026-nfl-week-5-gameday-guide',states:['current_published_plan','partial_published_plan'],max:5,label:'Saints'},
