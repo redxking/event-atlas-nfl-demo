@@ -29,3 +29,12 @@ test('headline addition requires two current publisher snapshots',()=>{
   assert.equal(diffEventPicture(picture('checked'),picture('checked'),empty,current,game,game)[0].kind,'newly_displayed_headline');
   assert.equal(diffEventPicture(picture('checked'),picture('checked'),{state:'unavailable',articles:[]},current,game,game).length,0);
 });
+
+test('changed kickoff forecast is logged only across comparable current checks',()=>{
+  const base={state:'current forecast',sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{startTime:'2026-10-11T16:00:00Z',endTime:'2026-10-11T18:00:00Z',shortForecast:'Sunny',temperature:74,temperatureUnit:'F'}};
+  const before={...picture('checked'),forecastContext:base};
+  const after={...picture('checked'),forecastContext:{...base,period:{...base.period,temperature:70}}};
+  const changes=diffEventPicture(before,after,null,null,game,game);
+  assert.equal(changes.find(item=>item.kind==='forecast_changed')?.sourceUrl,base.sourceUrl);
+  assert.ok(!diffEventPicture(before,{...after,forecastContext:{...after.forecastContext,state:'unavailable or stale'}},null,null,game,game).some(item=>item.kind==='forecast_changed'));
+});

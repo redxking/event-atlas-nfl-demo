@@ -21,6 +21,15 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.ok(picture.gaps.some(gap=>gap.includes('active jurisdictional police alert')));
 });
 
+test('current kickoff forecast enters source status without becoming a threat cue',()=>{
+  const forecast={state:'ok',checkedAt:now,kickoff:game.kickoff,sourceUrl:'https://api.weather.gov/gridpoints/FWD/82,107/forecast/hourly',period:{startTime:'2026-10-11T19:00:00Z',endTime:'2026-10-11T21:00:00Z',shortForecast:'Partly Cloudy',temperature:78,temperatureUnit:'F',windSpeed:'10 mph',windDirection:'S',probabilityOfPrecipitation:{value:20}}};
+  const picture=buildNflEventPicture(game,{...inputs,forecast},now);
+  assert.equal(picture.forecastContext.state,'current forecast');
+  assert.equal(picture.sources.find(item=>item.name==='NWS kickoff forecast').sourceUrl,forecast.sourceUrl);
+  assert.equal(picture.cues.length,2);
+  assert.ok(!picture.gaps.some(item=>item.includes('hourly kickoff forecast')));
+});
+
 test('stale observations and unknown kickoff do not create time-aligned cues',()=>{
   const stale=buildNflEventPicture(game,{...inputs,roads:{...inputs.roads,builtAt:'2026-10-08T00:00:00Z'},conditions:{...inputs.conditions,at:now-3600000}},now);
   assert.equal(stale.cues.length,0);
