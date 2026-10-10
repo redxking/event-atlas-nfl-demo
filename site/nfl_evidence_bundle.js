@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-36';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-37';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 
@@ -45,6 +45,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       cameras:Array.isArray(cameras)?cameras.map(item=>pick(item,['id','agency','name','lat','lon','distanceKm','inService','operationalStatus','statusAsOf','metadataDate','sourceUrl','viewerUrl','stillUrl','videoUrl'])):null,
       policeAggregate:picture.policeContext,
       citywideNotices:picture.citywideAlertsContext,
+      lanePermitPlanning:picture.phillyPermitContext,
       openRoadwayAggregate:picture.openRoadwayContext,
       stationAlerts:picture.transitContext,
       stationSchedule:picture.transitScheduleContext,

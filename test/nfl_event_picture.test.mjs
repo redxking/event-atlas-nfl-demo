@@ -41,6 +41,16 @@ test('Philadelphia citywide notices are cited as city context without event impa
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
 });
 
+test('Philadelphia permitted work is game-date planning context and never an observed road cue',()=>{
+  const phillyGame={...game,venue:{id:'3806',lat:39.90089,lon:-75.16776}};
+  const permits={status:'ok',builtAt:new Date(now).toISOString(),sourceUrl:'https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/LaneClosure_Master/FeatureServer/0',byGame:{[game.id]:{gameDate:'2026-10-11',segmentCount:47,permitCount:19,nearest:[{permitNumber:'P-1',effective:'2026-10-01',expires:'2026-10-31',distanceKm:0.1}]}}};
+  const picture=buildNflEventPicture(phillyGame,{schedule:inputs.schedule,phillyPermits:permits},now);
+  assert.equal(picture.phillyPermitContext.permitCount,19);
+  assert.equal(picture.sources.find(item=>item.name==='Philadelphia lane permits').state,'game-date permit candidates listed');
+  assert.equal(picture.cues.some(item=>item.sourceUrl?.includes('LaneClosure_Master')),false);
+  assert.equal(picture.cueCounts.road,0);
+});
+
 test('current SPC categorical forecast enters brief as an unassessed planning cue',()=>{
   const spc={status:'ok',builtAt:'2026-10-09T17:50:00Z',byVenue:{3687:[{day:3,category:'Marginal',categoryRank:3,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z',issuedAt:'2026-10-09T17:30:00Z',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/MapServer/17'}]}};
   const picture=buildNflEventPicture(game,{...inputs,spc},now);

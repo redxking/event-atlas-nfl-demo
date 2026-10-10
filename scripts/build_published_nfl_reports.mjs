@@ -14,7 +14,7 @@ const read=async name=>{try{return JSON.parse(await fs.readFile(path.join(site,n
 const required=await read('nfl.json');
 const now=Date.now();
 if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFinite(Date.parse(required.builtAt))||now-Date.parse(required.builtAt)>12*3600000)throw Error('Fresh NFL schedule snapshot required for published reports');
-const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',gameArticles:'game_articles.json',ntas:'ntas.json',septa:'septa_b_alerts.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json',denverPolice:'denver_public_safety.json',phillyAlerts:'philly_city_alerts.json'};
+const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',news:'news.json',gameArticles:'game_articles.json',ntas:'ntas.json',septa:'septa_b_alerts.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json',denverPolice:'denver_public_safety.json',phillyAlerts:'philly_city_alerts.json',phillyPermits:'philly_lane_permits.json'};
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
 const games=required.games.filter(game=>includePublishedNflReport(game,now));
