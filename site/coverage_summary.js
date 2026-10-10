@@ -1,7 +1,7 @@
 const HOUR=3600000;
 const configuredSources={
   camera:{CA:['caltrans-d4','caltrans-d7'],WA:['wsdot-seattle'],MD:['md-chart-cameras','md-imap-cameras'],GA:['gdot-atlanta-cameras'],IL:['idot-gateway-chicago'],WI:['wisdot-511-green-bay'],PA:['penndot-camera-inventory'],MN:['mndot-iris-cameras'],TX:['txdot-dfw-camera-assets']},
-  road:{CA:['caltrans-lcs-d4','caltrans-lcs-d7'],WA:['wsdot-road-alerts'],MD:['md-chart-incidents','md-chart-closures'],IL:['idot-closure-incidents'],WI:['wisdot-511-events-green-bay'],LA:['ladotd-511-new-orleans'],TN:['tdot-smartway-nashville'],NJ:['njit-transcom-wzdx'],NC:['ncdot-drivenc-wzdx'],MO:['modot-wzdx'],MN:['mndot-iris-incidents']}
+  road:{CA:['caltrans-lcs-d4','caltrans-lcs-d7'],WA:['wsdot-road-alerts'],MD:['md-chart-incidents','md-chart-closures'],IL:['idot-closure-incidents'],WI:['wisdot-511-events-green-bay'],LA:['ladotd-511-new-orleans'],TN:['tdot-smartway-nashville'],NJ:['njit-transcom-wzdx'],NC:['ncdot-drivenc-wzdx'],MO:['modot-wzdx'],MN:['mndot-iris-incidents'],AZ:['aztech-wzdx']}
 };
 
 function feedState(venue,snapshot,kind,now){

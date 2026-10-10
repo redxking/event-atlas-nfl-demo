@@ -55,6 +55,13 @@ test('WZDx road source failure stays visible for its stadium',()=>{
   assert.equal(summarizeCoverage(stadium,null,road,now).rows[0].road,'source_failed');
 });
 
+test('Arizona work-zone coverage is connected only when its source snapshot succeeds',()=>{
+  const stadium=[{venue:{id:'3970',name:'State Farm Stadium',address:'Glendale, AZ, USA',lat:33.5276,lon:-112.2626}}];
+  const base={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'aztech-wzdx',status:'failed'}],byVenue:{}};
+  assert.equal(summarizeCoverage(stadium,null,base,now).rows[0].road,'source_failed');
+  assert.equal(summarizeCoverage(stadium,null,{...base,sources:[{id:'aztech-wzdx',status:'ok'}],byVenue:{3970:[]}},now).rows[0].road,'connected');
+});
+
 test('Dallas-area TxDOT inventory does not claim Houston coverage',()=>{
   const texas=[{venue:{id:'arlington',name:'AT&T Stadium',address:'Arlington, TX, USA',lat:32.74769,lon:-97.09288}},{venue:{id:'houston',name:'Reliant Stadium',address:'Houston, TX, USA',lat:29.6847,lon:-95.4108}}];
   const camera={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'txdot-dfw-camera-assets',status:'ok'}],byVenue:{arlington:[{}]}};
