@@ -268,7 +268,7 @@ function renderVenueMap(rows){
     target.replaceChildren();
     const usBounds=L.latLngBounds([[24,-125],[50,-66]]);
     overviewMap=L.map(target,{scrollWheelZoom:false,maxBounds:usBounds,maxBoundsViscosity:1,worldCopyJump:false}).fitBounds(usBounds,{padding:[8,8]});
-    const constrainOverview=()=>{overviewMap.invalidateSize();overviewMap.setMinZoom(overviewMap.getBoundsZoom(usBounds));overviewMap.panInsideBounds(usBounds,{animate:false});};
+    const constrainOverview=()=>{overviewMap.invalidateSize();overviewMap.setMinZoom(overviewMap.getBoundsZoom(usBounds,true));overviewMap.panInsideBounds(usBounds,{animate:false});};
     constrainOverview();
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(overviewMap).on('tileerror',()=>{$('overview-map-status').textContent='Street tiles unavailable. Event markers and the game list remain available.';});
     overviewMarkers=L.layerGroup().addTo(overviewMap);
