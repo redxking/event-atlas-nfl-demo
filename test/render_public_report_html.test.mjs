@@ -16,10 +16,12 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('report_live_nws.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
   assert.ok(html.includes('report_live_game.js?v=20261010-1'));
+  assert.ok(html.includes('report_live_tennessee_road.js?v=20261010-1'));
   assert.ok(html.includes('report_live_public_safety.js?v=20261010-1'));
   assert.ok(html.includes('data-venue-id="3810"'));
   assert.ok(html.includes('data-game-id="nfl:401872984" data-home="Tennessee Titans" data-away="Houston Texans"'));
   assert.ok(html.includes('id="direct-game"'));
+  assert.ok(html.includes('id="direct-tennessee-road"'));
   assert.ok(html.includes('id="direct-public-safety"'));
   assert.ok(html.includes('data-venue-lat="38.9" data-venue-lon="-76.8"'));
   assert.ok(html.includes('id="direct-nws"'));
