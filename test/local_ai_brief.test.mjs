@@ -123,7 +123,7 @@ test('local model result must cite supplied evidence IDs',()=>{
 test('local Ollama request fixes model and endpoint without private fields',async()=>{
   const packet=buildLocalAiPacket(brief);
   let called=false;
-  const result=await generateLocalAiDraft(packet,{fetchImpl:async(url,options)=>{called=true;assert.equal(url,'http://127.0.0.1:11434/api/chat');const request=JSON.parse(options.body);assert.equal(request.model,'qwen3.5:9b');assert.equal(request.stream,false);assert.equal(request.messages[1].content,JSON.stringify(packet));assert.ok(!options.body.includes('PRIVATE PERSON'));return {ok:true,json:async()=>({model:'qwen3.5:9b',done_reason:'stop',message:{content:'C1,S1,G1'}})}}});
+  const result=await generateLocalAiDraft(packet,{fetchImpl:async(url,options)=>{called=true;assert.equal(url,'http://127.0.0.1:11434/api/chat');const request=JSON.parse(options.body);assert.equal(request.model,'qwen3.5:9b');assert.equal(request.stream,false);assert.match(request.messages[0].content,/Valid IDs for this packet are exactly: C1,S1,G1/);assert.equal(request.messages[1].content,JSON.stringify(packet));assert.ok(!options.body.includes('PRIVATE PERSON'));return {ok:true,json:async()=>({model:'qwen3.5:9b',done_reason:'stop',message:{content:'C1,S1,G1'}})}}});
   assert.ok(called);
   assert.equal(result.status,'model_generated_unreviewed');
   assert.equal(result.schema,'event-atlas.local-ai-draft.v4');
