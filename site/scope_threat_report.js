@@ -1,5 +1,6 @@
 import {humanText} from './attention_summary.js';
 import {demoPeopleForEvent} from './demo_people.js';
+import {findingDecision} from './finding_decision.js';
 const clean=value=>humanText(String(value??'').replace(/_/g,' '));
 const time=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'})+' ET':'Not supplied';
 const safeUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}};
@@ -21,9 +22,9 @@ export function buildScopeThreatReport({title,level,games,summaries,start,end},n
  const gapGroups=new Map();for(const {game,source} of gaps){const key=source.name+'|'+source.state;if(!gapGroups.has(key))gapGroups.set(key,{source,games:new Set()});gapGroups.get(key).games.add(game.title);}
  const gapText=[...gapGroups.values()].map(({source,games})=>`${clean(source.name)}: ${clean(source.state)} for ${[...games].join('; ')}. ${clean(source.detail||'Current information is not available for assessment.')}`);
  const coordination=shared.length?shared.map(c=>`Shared reporting: ${clean(c.trigger)} links ${c.games.map(g=>g.title+' at '+g.venue.name).join('; ')}. This is one publisher record affecting multiple event checks, not independent corroboration.`):['No finding in the available records is shared across multiple selected events.'];
- const decisions=eventRollup.map(row=>`${row.game.venue.name} — ${row.decision||'Confirm the reported condition and its relevance with the responsible venue lead.'}`);
+ const decisions=findings.map(cue=>{const d=findingDecision(cue);return `${clean(cue.trigger)} — ${cue.games.map(game=>game.venue.name).filter((v,i,a)=>a.indexOf(v)===i).join(', ')}. Possible consequence: ${d.impact} Responsible role: ${d.owner}. Verification: ${clean(cue.action)||d.verify} Escalate when: ${d.escalate} Close when: ${d.close} ${d.review}`;});
 
- return {title:`${title} — Threat report`,level,generatedAt:now.toISOString(),author:'Angelis Pseftis',games,findings,eventRollup,sections:[
+ return {title:`${title} — Threat report`,level,generatedAt:now.toISOString(),author:'Angelis Pseftis',games,findings,eventRollup,decisions:findings.map(cue=>({finding:cue,...findingDecision(cue)})),sections:[
  {heading:'Executive assessment',paragraphs:[frame,overview,...(findings.length?[`The reported issues are concentrated at ${[...new Set(affectedGames.map(g=>g.venue.name))].join(', ')}. One reported condition is ${clean(findings[0].trigger)}: ${clean(findings[0].basis)}. ${urgent?'Review the official weather instructions first.':'The available findings support verification of operational impact, not designation of a confirmed security threat.'}`]:[])]},
  {heading:'Threat and hazard rollup',paragraphs:domainNarratives.length?[...domainNarratives,...coordination]:['No event-linked threat or hazard finding is supported by the screened records in this scope.']},
  {heading:'Decisions requiring attention',paragraphs:decisions.length?decisions:['No new operational change is supported by the available findings. The unresolved coverage gaps below limit this assessment.']},
@@ -35,7 +36,7 @@ const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.
 let dialog,body,currentContext;
 function renderReport(context){
  const report=buildScopeThreatReport(context);body.replaceChildren();body.append(el('h2',report.title),el('p','Updated '+time(report.generatedAt)));
- for(const section of report.sections){const block=el('section');block.append(el('h3',section.heading));for(const text of section.paragraphs)block.append(el('p',text));body.append(block);if(section.heading==='Threat and hazard rollup'){
+ for(const section of report.sections){const block=el('section');block.append(el('h3',section.heading));if(section.heading==='Decisions requiring attention'&&report.decisions.length){block.append(el('p','These are conditional planning judgments. Confirm the source condition and its relevance before changing event operations.'));for(const d of report.decisions){const card=el('article');card.className='report-finding';card.append(el('h4',clean(d.finding.trigger)));const fields=[['Affected events',d.finding.games.map(game=>game.title+' at '+game.venue.name).join('; ')],['Possible consequence',d.impact],['Responsible role',d.owner],['Verification needed',clean(d.finding.action)||d.verify],['Review timing',d.review],['Escalate when',d.escalate],['Close when',d.close]];for(const [label,value] of fields){const p=el('p');p.append(el('strong',label+': '),document.createTextNode(value));card.append(p);}block.append(card);}}else for(const text of section.paragraphs)block.append(el('p',text));body.append(block);if(section.heading==='Threat and hazard rollup'){
   if(report.eventRollup.length){const eventSection=el('section');eventSection.append(el('h3','Events requiring attention'));for(const row of report.eventRollup){const article=el('article');article.className='report-finding';article.append(el('h4',row.priority+' · '+row.game.venue.name),el('p',row.paragraph));eventSection.append(article);}body.append(eventSection);}
   const findings=el('section');findings.append(el('h3','Findings and supporting sources'));
   if(!report.findings.length)findings.append(el('p','No source concerns are available for this scope.'));
