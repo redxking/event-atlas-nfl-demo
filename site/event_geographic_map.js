@@ -1,5 +1,5 @@
 import {mapColors,eventKey,renderMapKey} from './map_key.js';
-import {attachDemoTracking} from './demo_tracking.js';
+import {attachDemoTracking} from './demo_tracking.js?v=map-key-1';
 import {humanText} from './attention_summary.js';
 import {locatedConcerns} from './concern_location.js';
 import {findingDecision} from './finding_decision.js';

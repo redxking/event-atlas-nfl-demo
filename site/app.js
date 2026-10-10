@@ -1,4 +1,4 @@
-import {stopDemoTracking} from './demo_tracking.js';
+import {stopDemoTracking} from './demo_tracking.js?v=map-key-1';
 import {renderEventNotifications} from './event_notifications.js';
 import {appendDemoOperationalFeeds,stopDemoReplay} from './demo_operational_feeds.js?v=feed-replay-1';
 import {installBriefingGuide} from './briefing_guide.js?v=tracking-demo-1';
@@ -12,7 +12,7 @@ import {createThreatReportButton,refreshThreatReport} from './scope_threat_repor
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
 import {createGeographicExplorer} from './geographic_explorer.js?v=map-key-1';
-import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-key-1';
+import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-key-2';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=assessments-2';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';

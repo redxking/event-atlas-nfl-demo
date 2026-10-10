@@ -2,7 +2,7 @@ import {monitorPublicEvent} from './public_event_monitor.js?v=event-monitoring-2
 import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=event-views-1';
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {createThreatReportButton} from './scope_threat_report.js?v=grouped-decisions-1';
-import {renderEventGeographicMap} from './event_geographic_map.js?v=map-key-1';
+import {renderEventGeographicMap} from './event_geographic_map.js?v=map-key-2';
 export {eventTypeLabel,exampleSummary} from './event_catalog.js?v=event-monitoring-1';
 import {eventTypeLabel} from './event_catalog.js?v=event-monitoring-1';
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
