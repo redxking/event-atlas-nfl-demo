@@ -61,8 +61,9 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     if(!first.scheduleDiffers&&next.scheduleDiffers)changes.push({kind:'direct_schedule_discrepancy',observedAt,title:'Direct ESPN game date differs from published schedule',detail:'Confirm the event time with the NFL or host club and repeat event-window screening; this is not an incident finding.',sourceUrl:next.sourceUrl});
   }
   if(previousNews?.state==='current_snapshot'&&currentNews?.state==='current_snapshot'){
-    const oldUrls=new Set(previousNews.articles.map(item=>item.url));
-    for(const item of currentNews.articles)if(!oldUrls.has(item.url))changes.push({kind:'newly_displayed_headline',observedAt,title:item.title,detail:`${item.publisher} RSS team mention, published ${item.publishedAt}. Verify that the article concerns this game; it does not establish attendance or a threat.`,sourceUrl:item.url});
+    const titleMatch=item=>['both_teams_in_title','matchup_phrase_in_title'].includes(item?.matchBasis);
+    const oldUrls=new Set(previousNews.articles.filter(titleMatch).map(item=>item.url));
+    for(const item of currentNews.articles.filter(titleMatch))if(!oldUrls.has(item.url))changes.push({kind:'newly_displayed_headline',observedAt,title:item.title,detail:`${item.publisher} headline names both teams, published ${item.publishedAt}. Verify that the article concerns this specific game; a title match does not establish attendance, venue impact, or a threat.`,sourceUrl:item.url});
   }
   const oldCity=before.citywideAlertsContext,newCity=after.citywideAlertsContext;
   if(oldCity?.state==='retrieved'&&newCity?.state==='retrieved'&&Array.isArray(oldCity.alerts)&&Array.isArray(newCity.alerts)&&oldCity.alerts.length<=20&&newCity.alerts.length<=20){

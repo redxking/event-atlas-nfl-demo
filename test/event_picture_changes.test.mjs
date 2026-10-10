@@ -173,11 +173,12 @@ test('score changes require two newer retrieved publisher states',()=>{
 });
 
 test('headline addition requires two current publisher snapshots',()=>{
-  const article={title:'Packers update',publisher:'CBS Sports',publishedAt:'2026-10-10T00:00:00Z',url:'https://www.cbssports.com/nfl/news/example'};
+  const article={title:'Bears at Packers preview',publisher:'CBS Sports',matchBasis:'both_teams_in_title',publishedAt:'2026-10-10T00:00:00Z',url:'https://www.cbssports.com/nfl/news/example'};
   const current={state:'current_snapshot',articles:[article]};
   const empty={state:'current_snapshot',articles:[]};
   assert.equal(diffEventPicture(picture('checked'),picture('checked'),empty,current,game,game)[0].kind,'newly_displayed_headline');
   assert.equal(diffEventPicture(picture('checked'),picture('checked'),{state:'unavailable',articles:[]},current,game,game).length,0);
+  assert.equal(diffEventPicture(picture('checked'),picture('checked'),empty,{...current,articles:[{...article,matchBasis:'one_team_mentioned'}]},game,game).length,0);
 });
 
 test('game-linked article revisions require two newer current snapshots',()=>{

@@ -6,6 +6,7 @@ const PUBLISHERS={
 };
 const bases=new Set(['one_team_mentioned','both_teams_mentioned','both_teams_in_title','matchup_phrase_in_title']);
 const rank={one_team_mentioned:1,both_teams_mentioned:2,both_teams_in_title:3,matchup_phrase_in_title:4};
+const matchupTitleBases=new Set(['both_teams_in_title','matchup_phrase_in_title']);
 
 function selectSource(game,source,now){
   const config=PUBLISHERS[source?.publisher],retrieved=Date.parse(source?.retrievedAt),built=Date.parse(source?.sourceBuiltAt);
@@ -25,6 +26,8 @@ export function selectNflNews(game,news,now=Date.now()){
   const current=sources.filter(item=>item.state==='current_snapshot');
   const seen=new Set();
   const articles=current.flatMap(item=>item.articles.slice(0,4)).sort((a,b)=>rank[b.matchBasis]-rank[a.matchBasis]||Date.parse(b.publishedAt)-Date.parse(a.publishedAt)).filter(item=>{if(seen.has(item.url))return false;seen.add(item.url);return true}).slice(0,8);
+  const matchupCandidates=articles.filter(item=>matchupTitleBases.has(item.matchBasis));
+  const teamDiscovery=articles.filter(item=>!matchupTitleBases.has(item.matchBasis));
   const asOf=current.length?new Date(Math.max(...current.map(item=>Date.parse(item.asOf)))).toISOString():null;
-  return {state:current.length?'current_snapshot':sources.some(item=>item.state==='stale')?'stale':'unavailable',coverage:current.length===sources.length?'complete':'partial',publisher:current.map(item=>item.publisher).join(' + ')||null,sourceUrl:current[0]?.sourceUrl||sources[0]?.sourceUrl||PUBLISHERS.ESPN.feed,asOf,sources:sources.map(({publisher,state,sourceUrl,asOf})=>({publisher,state,sourceUrl,asOf})),articles};
+  return {state:current.length?'current_snapshot':sources.some(item=>item.state==='stale')?'stale':'unavailable',coverage:current.length===sources.length?'complete':'partial',publisher:current.map(item=>item.publisher).join(' + ')||null,sourceUrl:current[0]?.sourceUrl||sources[0]?.sourceUrl||PUBLISHERS.ESPN.feed,asOf,sources:sources.map(({publisher,state,sourceUrl,asOf})=>({publisher,state,sourceUrl,asOf})),articles,matchupCandidates,teamDiscovery};
 }

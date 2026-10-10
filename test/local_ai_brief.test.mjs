@@ -15,8 +15,8 @@ test('local model packet is public only and refuses stale or changed sources',()
 });
 
 test('local AI packet includes only source-linked ESPN RSS headlines, never case records',()=>{
-  const article={publisher:'ESPN',matchBasis:'one_team_mentioned',title:'Bears game news',description:'Public sports context',url:'https://www.espn.com/nfl/story/_/id/1/example',publishedAt:'2026-10-09T16:00:00Z'};
-  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',articles:[article,{...article,url:'https://unapproved.example/article'}]}}}}};
+  const article={publisher:'ESPN',matchBasis:'both_teams_in_title',title:'Bears at Packers game news',description:'Public sports context',url:'https://www.espn.com/nfl/story/_/id/1/example',publishedAt:'2026-10-09T16:00:00Z'};
+  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',matchupCandidates:[article,{...article,url:'https://unapproved.example/article'}],teamDiscovery:[]}}}}};
   const packet=buildLocalAiPacket(withNews);
   assert.equal(packet.evidence.find(item=>item.id==='N1')?.sourceUrl,article.url);
   assert.equal(packet.evidence.find(item=>item.id==='N2'),undefined);
@@ -24,9 +24,16 @@ test('local AI packet includes only source-linked ESPN RSS headlines, never case
 });
 
 test('local AI packet accepts only publisher-linked CBS fallback headlines',()=>{
-  const cbs={publisher:'CBS Sports',matchBasis:'one_team_mentioned',title:'Bears news',description:'',url:'https://www.cbssports.com/nfl/news/example',publishedAt:'2026-10-09T16:00:00Z'};
-  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',articles:[cbs]}}}}};
+  const cbs={publisher:'CBS Sports',matchBasis:'matchup_phrase_in_title',title:'Bears at Packers news',description:'',url:'https://www.cbssports.com/nfl/news/example',publishedAt:'2026-10-09T16:00:00Z'};
+  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',matchupCandidates:[cbs],teamDiscovery:[]}}}}};
   assert.equal(buildLocalAiPacket(withNews).evidence.find(item=>item.id==='N1')?.sourceUrl,cbs.url);
+});
+
+test('broader team-name discovery does not enter the event AI evidence packet',()=>{
+  const article={publisher:'CBS Sports',matchBasis:'one_team_mentioned',title:'Other Titans roster news',description:'',url:'https://www.cbssports.com/nfl/news/other-team-story',publishedAt:'2026-10-09T16:00:00Z'};
+  const evidence={...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',articles:[article],matchupCandidates:[article],teamDiscovery:[article]}}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}});
+  assert.equal(packet.evidence.some(item=>item.kind==='publisher_headline'),false);
 });
 
 test('local AI packet admits only current official Green Bay city notices',()=>{

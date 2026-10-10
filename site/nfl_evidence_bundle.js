@@ -33,7 +33,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       gameArticle:picture.gameArticle,
       clubAnnouncedPeople:picture.announcedPeople,
       selectedGameDirectCheck:picture.directGame,
-      nflHeadlines:{state:news.state,coverage:news.coverage,sourceUrl:news.sourceUrl,sources:news.sources,articles:news.articles},
+      nflHeadlines:{state:news.state,coverage:news.coverage,sourceUrl:news.sourceUrl,sources:news.sources,articles:news.articles,matchupCandidates:news.matchupCandidates,teamDiscovery:news.teamDiscovery},
       weather:Array.isArray(alerts)?alerts.map(feature=>{const p=feature.properties||{};return {sourceId:feature.id||null,sourceUrl:p['@id']||null,event:p.event||null,severity:p.severity||null,urgency:p.urgency||null,status:p.status||null,effective:p.effective||null,ends:p.ends||p.expires||null}}):null,
       kickoffForecast:picture.forecastContext,
       currentStationObservation:picture.observationContext,
