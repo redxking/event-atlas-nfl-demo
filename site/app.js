@@ -1,4 +1,4 @@
-import {initializeWorkspaceViews,showWorkspaceView} from './workspace_views.js';
+import {initializeWorkspaceViews,showWorkspaceView} from './workspace_views.js?v=focused-navigation-1';
 import {renderDemoPeople} from './demo_people.js';
 import {createGeographicExplorer} from './geographic_explorer.js';
 import {renderEventGeographicMap} from './event_geographic_map.js';
