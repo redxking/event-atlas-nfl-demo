@@ -11,3 +11,5 @@
 .attention-panel{margin:20px 0;padding:18px;border:1px solid #33465e;border-radius:12px}
 .attention-panel h4{margin-top:0}.attention-note,.quiet-state{color:#a9b9cd;font-size:.88rem}
 .source-drilldown{border-top:1px solid #33465e;padding:14px 0}.source-drilldown>summary{cursor:pointer;font-weight:600}.source-drilldown .detail-section{border:0}
+
+#event-geographic-map{height:420px;width:100%;border-radius:12px;isolation:isolate;background:#e6eced;color:#172b42}.event-map-actions{display:flex;gap:8px;margin:10px 0}.event-map-actions button{padding:8px 12px;cursor:pointer}.event-map-panel>p{font-size:.85rem;color:#b7c6d8}.event-map-panel .leaflet-control-layers{color:#172b42;background:white}.event-map-panel .leaflet-control-layers label{color:#172b42}.event-map-panel .leaflet-control-layers input{width:auto;margin:3px}.event-map-panel .leaflet-control-attribution{color:#333}@media(max-width:600px){#event-geographic-map{height:350px}}
