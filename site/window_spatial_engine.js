@@ -1,3 +1,4 @@
+import {infrastructureContext} from './window_infrastructure.js';
 export function distanceMeters(a,b){const rad=Math.PI/180,x=(b.lat-a.lat)*rad,y=(b.lon-a.lon)*rad,h=Math.sin(x/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(y/2)**2;return 6371000*2*Math.atan2(Math.sqrt(h),Math.sqrt(Math.max(0,1-h)))}
 export function makeMonitoringArea(venue,change={},previous=null){
  const area={schema:'event-atlas.exercise-area.v1',dataMode:'synthetic_exercise',venueId:venue.id,lat:change.lat??venue.lat,lon:change.lon??venue.lon,radiusM:change.radiusM??600,revision:(previous?.revision||0)+1,basis:'Operator exercise circle; not an official stadium perimeter or legal geofence'};
@@ -9,5 +10,5 @@ export function withSpatialContext(brief,venue,area){
  if(brief.dataMode!=='synthetic_exercise'||area.dataMode!=='synthetic_exercise'||area.venueId!==venue.id||String(brief.event.venue.id)!==String(venue.id))throw Error('Cross-venue or live spatial context');
  makeMonitoringArea(venue,area);
  const features=brief.observations.filter(r=>offsets[r.recordId]).map(r=>{const [east,north]=offsets[r.recordId],point={lat:venue.lat+north/111195,lon:venue.lon+east/(111195*Math.cos(venue.lat*Math.PI/180))};const distanceM=Math.round(distanceMeters(point,area));return {evidenceId:r.evidenceId,recordId:r.recordId,dataMode:'synthetic_exercise',positionBasis:'Fictional offset from unreviewed venue point',...point,distanceM,withinArea:distanceM<=area.radiusM}});
- return {...brief,venuePoint:{...venue,reviewState:'unreviewed_candidate'},monitoringArea:area,spatialContext:{features,inside:features.filter(f=>f.withinArea).length,outside:features.filter(f=>!f.withinArea).length,limitation:'Spatial inclusion is exercise context only; it does not establish threat, identity or operational impact.'}};
+ return {...brief,venuePoint:{...venue,reviewState:'unreviewed_candidate'},monitoringArea:area,spatialContext:{features,infrastructure:infrastructureContext(brief,venue,area),inside:features.filter(f=>f.withinArea).length,outside:features.filter(f=>!f.withinArea).length,limitation:'Spatial inclusion is exercise context only; it does not establish threat, identity or operational impact.'}};
 }

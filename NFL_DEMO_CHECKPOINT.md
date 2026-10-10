@@ -20,7 +20,7 @@ Guided scenario stages now expose baseline, emerging observations, duplicate/con
 
 The schedule builder now retains originally scoped games moved outside the window and surfaces publisher-status exceptions, missing frozen IDs, entrants and kickoff changes. Equivalent timestamp formatting does not create a false change. The latest source fetch matched the frozen scope and preserved applicability of all 29 recorded model runs.
 
-- 246 targeted local tests passed: `node --test test/window*.test.mjs`. Mocked model error tests are separate from actual model execution evidence.
+- 277 targeted local tests passed: `node --test test/window*.test.mjs`. Mocked model error tests are separate from actual model execution evidence.
 - All 29 actual model results completed, with no failures; packet hashes and current input bindings verified.
 - Local browser smoke test: all 29 games reached 35/35 deliveries and enabled synthetic camera playback. This does not prove playback for every game.
 - Representative browser checks covered actual advancing synthetic video, camera outage/recovery, area editing, review invalidation, model applicability, cross-game duplicate claims, and a downloaded three-snapshot history archive.
@@ -35,7 +35,7 @@ The schedule builder now retains originally scoped games moved outside the windo
 - Public participant coverage is mapped for all 29 games: 31 validated snapshot announcements across nine games; other games explicitly report missing public-role coverage and retain fictional examples. Verify the rendered role panel after deployment. Complete remaining per-dataset end-to-end coverage checks.
 - Changed-input analysis now has a labeled rule-driven backend simulation across seven guided stages. Local browser checks passed all 203 game/stage combinations, including applicable-model visibility, camera-outage coverage and stale-source counts. Verify this workflow after deployment. Actual model runs remain recorded full-replay rankings.
 - All 29 local browser exports now have saved hash evidence and passing citation, model, review and edited-area checks. All 29 mobile/keyboard checks and public-role panels passed. Deployed acceptance remains open.
-- Add explicit simulated utility corridors, hospital routes, transit hubs and choke points to the spatial demonstration; current points and circles do not fully represent these requested layer examples.
+- Five synthetic infrastructure layers now arrive through the GIS feed: utility corridor, hospital access route, transit hub, choke point and construction zone. All 29 local browser checks passed layer arrival and area-intersection updates; a downloaded export retained all five geometry records and evidence IDs. Verify the deployed layers.
 - Complete the final requirement-by-requirement audit after deployed verification.
 
 Other uncommitted changes to the main application and local analysis backend predate this increment and have been preserved. Their presence is not evidence of verified or deployed functionality. The goal remains active and incomplete.

@@ -8,7 +8,7 @@
     "label": "October 10 through October 23, 2026 (America/New_York)",
     "frozenAt": "2026-10-10T14:45:12.821Z"
   },
-  "updatedAt": "2026-10-10T18:22:39.133Z",
+  "updatedAt": "2026-10-10T18:25:23.155Z",
   "completion": "incomplete",
   "evidence": {
     "engine": {
@@ -100,7 +100,7 @@
     },
     "localSuite": {
       "command": "node --test test/window*.test.mjs",
-      "result": "246 passed; 0 failed",
+      "result": "277 passed; 0 failed",
       "boundary": "Includes mocked model failure tests; actual execution evidence is recorded separately"
     },
     "browserWindow": {
@@ -370,6 +370,22 @@
         "International missing-role coverage notice visible"
       ],
       "boundary": "Local browser, published snapshots; no attendance confirmation"
+    },
+    "infrastructure": {
+      "games": 29,
+      "browserChecks": [
+        "No infrastructure before GIS record",
+        "Five layers after injection",
+        "All five intersect expanded 3000 m area"
+      ],
+      "failures": 0,
+      "export": {
+        "eventId": "nfl:401873010",
+        "filename": "nfl-401873010-SYNTHETIC-revision-35 (1).json",
+        "sha256": "e0ba8533599f69d03e3aae3f178be08942301ae728581f2730b0b2fff5969432",
+        "features": 5
+      },
+      "boundary": "Local synthetic geometry. No actual utility data, hospital route, operational chokepoint or surveyed perimeter represented."
     }
   },
   "games": [
@@ -575,7 +591,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "international_schedule_and_simulation",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -780,7 +797,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -985,7 +1003,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -1190,7 +1209,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -1395,7 +1415,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -1600,7 +1621,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -1805,7 +1827,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -2010,7 +2033,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -2215,7 +2239,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -2420,7 +2445,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -2625,7 +2651,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -2830,7 +2857,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -3035,7 +3063,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -3240,7 +3269,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -3445,7 +3475,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -3650,7 +3681,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "international_schedule_and_simulation",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -3855,7 +3887,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -4060,7 +4093,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -4265,7 +4299,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -4470,7 +4505,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -4675,7 +4711,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -4880,7 +4917,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -5085,7 +5123,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -5290,7 +5329,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -5495,7 +5535,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -5700,7 +5741,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -5905,7 +5947,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -6110,7 +6153,8 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     },
     {
@@ -6315,13 +6359,13 @@
         "deployed_end_to_end": "pending",
         "brief_history": "implemented; representative_browser_export_verified",
         "public_source_context": "local_bundle_validation_pass",
-        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend"
+        "changing_input_analysis": "local_browser_all_7_stages_verified; explicitly_simulated_backend",
+        "infrastructure_layers": "local_browser_all_5_layers_verified; deployed_pending"
       }
     }
   ],
   "remainingSubtypeChecks": [
-    "Explicit simulated utility, hospital-route, transit-hub and choke-point map layers",
-    "Deployed end-to-end verification of the latest revision",
+    "Latest revision deployed end-to-end verification",
     "Final requirement-by-requirement completion audit"
   ]
 }

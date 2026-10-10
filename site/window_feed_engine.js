@@ -1,5 +1,6 @@
 import {buildExerciseBrief,exerciseDomains} from './demo_exercise.js';
 import {supplementalFeeds,supplementalCandidates,validateSupplementalPayload} from './window_supplemental_feeds.js';
+import {infrastructurePayload,validateInfrastructurePayload} from './window_infrastructure.js';
 export const MODE='synthetic_exercise';
 export const feedCatalog=exerciseDomains.flatMap((domain,domainIndex)=>domain.sources.map((name,index)=>({id:`feed-${domainIndex+1}-${index+1}`,domain:domain.name,name,dataMode:MODE}))).concat(supplementalFeeds.map(({id,domain,name})=>({id,domain,name,dataMode:MODE})));
 
@@ -11,7 +12,7 @@ export function createGameFeed(game){
     const sequence=deliveries.length+1;
     deliveries.push({schema:'event-atlas.demo-feed-record.v1',dataMode:MODE,eventId:game.id,deliveryId:`${game.id}:delivery:${sequence}`,sequence,sourceId:feedCatalog[sourceIndex].id,operation,recordId,claim,observedAt:new Date(start+sequence*30000).toISOString(),...extra});
   };
-  template.observations.forEach((item,index)=>push(index,'observe',item.id,item.summary));
+  template.observations.forEach((item,index)=>push(index,'observe',item.id,item.summary,item.id==='S-17'?{payload:structuredClone(infrastructurePayload)}:{}));
   push(15,'duplicate','S-16',template.observations[15].summary,{duplicateOf:'S-16'});
   push(15,'observe','X-01','Fictional service owner reports a scheduled load test; this contradicts the inference that the traffic spike establishes an attack.');
   push(9,'outage',null,'Fictional CAD adapter disconnected; incident coverage unavailable.');
@@ -39,6 +40,7 @@ export function replayGameFeed(feed,count=feed?.deliveries?.length,clock=null){
     if(item.operation==='recovery'){history.push(item);continue}
     if(item.operation==='duplicate'){if(!records.has(item.duplicateOf))throw Error('Unknown duplicate origin');duplicates++;history.push(item);continue}
     validateSupplementalPayload(item.sourceId,item.payload);
+    if(item.recordId==='S-17')validateInfrastructurePayload(item.payload);
     if(!/^([SX]-\d{2})$/.test(item.recordId||''))throw Error('Invalid exercise record ID');
     if(item.operation==='correct'&&(!records.has(item.supersedes)||item.supersedes!==item.recordId))throw Error('Missing correction origin');
     if(item.operation==='observe'&&records.has(item.recordId))throw Error('Conflicting observation ID');
