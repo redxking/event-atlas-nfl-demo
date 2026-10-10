@@ -8,12 +8,12 @@ import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitori
 import {getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
 import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=map-key-1';
 import {stopMovementTracking} from './movement_map.js?v=palette-2';
-import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=evidence-timeline-2';
+import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=coverage-1';
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
-import {createGeographicExplorer} from './geographic_explorer.js?v=palette-2';
+import {createGeographicExplorer} from './geographic_explorer.js?v=coverage-1';
 import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=palette-2';
-import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=transit-labels-1';
+import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=coverage-1';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
@@ -701,7 +701,7 @@ function renderAttention(game,picture){
   if(badge){badge.textContent=summary.label;badge.dataset.tone=summary.tone;}
   renderEventNotifications($('event-notifications'),game,summary.items);
   const target=$('game-attention');if(!target)return;
-  target.innerHTML=`<h4>Threat assessment</h4>${summary.items.length?`<p>${summary.items.length} source concern${summary.items.length===1?'':'s'} require verification. Review the notifications above, map markers and event report for supporting records and decisions.</p>`:'<p class="quiet-state">No flagged concerns in the reviewed feed results.</p>'}<p class="attention-note">Known high threats have not been established by these feeds. Potential concerns require assessment; supporting records and coverage gaps are in Source feeds.</p>`;
+  target.innerHTML=`<h4>Threat assessment</h4>${summary.items.length?`<p>${summary.items.length} source concern${summary.items.length===1?'':'s'} require verification. Review the notifications above, map markers and event report for supporting records and decisions.</p>`:`<p class="quiet-state">${summary.screeningState==='pending'?'Source screening has not started. Event conditions are unknown.':'No flagged concerns in the reviewed feed results.'}</p>`}<p class="attention-note">Known high threats have not been established by these feeds. Potential concerns require assessment; supporting records and coverage gaps are in Source feeds.</p>`;
 }
 function installBriefingNavigation(){
   const detail=$('detail');

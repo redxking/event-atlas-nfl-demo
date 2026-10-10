@@ -1,5 +1,6 @@
+import {screeningPending} from './source_coverage.js?v=coverage-1';
 import {overviewKey,renderMapKey} from './map_key.js?v=palette-2';
-import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=evidence-timeline-2';
+import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=coverage-1';
 import {setGeographicTrail,showWorkspaceView} from './workspace_views.js?v=multi-events-1';
 // FEMA state groupings: https://www.fema.gov/about/organization/regions
 export const regions={1:['CT','ME','MA','NH','RI','VT'],2:['NJ','NY','PR','VI'],3:['DE','DC','MD','PA','VA','WV'],4:['AL','FL','GA','KY','MS','NC','SC','TN'],5:['IL','IN','MI','MN','OH','WI'],6:['AR','LA','NM','OK','TX'],7:['IA','KS','MO','NE'],8:['CO','MT','ND','SD','UT','WY'],9:['AZ','CA','HI','NV','AS','GU','MP'],10:['AK','ID','OR','WA']};
@@ -7,7 +8,7 @@ export const stateOf=game=>game.venue?.address?.match(/,\s*([A-Z]{2}),\s*USA$/)?
 export const regionOf=game=>Object.keys(regions).find(id=>regions[id].includes(stateOf(game)))||null;
 export const easternDate=value=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
 export function scopeGames(games,{start,end,region,state,venue,eventType}){return games.filter(game=>{const date=easternDate(game.kickoff);return date<=end&&easternDate(game.endsAt||game.kickoff)>=start&&(!eventType||(game.eventType||'nfl')===eventType)&&(!region||regionOf(game)===region)&&(!state||stateOf(game)===state)&&(!venue||game.venue.id===venue);});}
-export function rollup(games,summaries){const records=new Set();let affected=0,urgent=0,pending=0;for(const game of games){const summary=summaries.get(game.id);if(!summary||summary.label==='Monitoring not started'){pending++;continue;}if(summary.items.length)affected++;if(summary.urgent.length)urgent++;for(const item of summary.items)records.add([item.sourceUrl,item.trigger,item.sourceAt].join('|'));}return {events:games.length,venues:new Set(games.map(g=>g.venue.id)).size,affected,urgent,pending,sourceConcerns:records.size};}
+export function rollup(games,summaries){const records=new Set();let affected=0,urgent=0,pending=0;for(const game of games){const summary=summaries.get(game.id);if(screeningPending(summary)){pending++;continue;}if(summary.items.length)affected++;if(summary.urgent.length)urgent++;for(const item of summary.items)records.add([item.sourceUrl,item.trigger,item.sourceAt].join('|'));}return {events:games.length,venues:new Set(games.map(g=>g.venue.id)).size,affected,urgent,pending,sourceConcerns:records.size};}
 const node=(tag,text,className)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(className)n.className=className;return n;};
 const button=(label,click)=>{const n=node('button',label);n.type='button';n.onclick=click;return n;};
 export function createGeographicExplorer({openGame,onScopeChange}){

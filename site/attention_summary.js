@@ -1,8 +1,9 @@
 // Display only event-relevant source concerns. Coverage recovery belongs in source details.
 export function attentionSummary(picture) {
   const items=(picture?.reviewQueue?.items||[]).filter(item=>item.status==='unreviewed_source_cue'&&item.sourceUrl);
+  const pending=!Array.isArray(picture?.reviewQueue?.items)||picture.reviewQueue.state==='not_started';
   const urgent=items.filter(item=>item.domain==='weather alert');
-  return {items,urgent,sources:picture?.sources||[],label:picture?.reviewQueue?.state==='not_started'?'Monitoring not started':urgent.length?`${urgent.length} urgent weather concern${urgent.length===1?'':'s'}`:items.length?`${items.length} potential concern${items.length===1?'':'s'}`:'No flagged concerns',tone:urgent.length?'urgent':items.length?'review':'quiet'};
+  return {items,urgent,screeningState:pending?'pending':'available',sources:picture?.sources||[],label:pending?'Monitoring not started':urgent.length?`${urgent.length} urgent weather concern${urgent.length===1?'':'s'}`:items.length?`${items.length} potential concern${items.length===1?'':'s'}`:'No flagged concerns',tone:urgent.length?'urgent':items.length?'review':'quiet'};
 }
 export function humanLabel(value) {
   // Sounder route labels verified in Sound Transit's https://www.soundtransit.org/GTFS-rail/40_gtfs.zip routes.txt (2026-10-10).
