@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildPublishedReportState} from '../site/published_report_changes.js';
+import {buildPublishedReportState,retainPublishedChanges} from '../site/published_report_changes.js';
 
 const at=Date.parse('2026-10-10T02:00:00Z');
 const game={id:'nfl:123',kickoff:'2026-10-11T17:00:00Z',status:'scheduled',timeTbd:false,sourceUrl:'https://www.espn.com/nfl/game/_/gameId/123'};
@@ -67,4 +67,13 @@ test('published state retains dated wildfire and PM2.5 observations for the next
   const result=buildPublishedReportState(next,game,null,prior,at);
   assert.equal(result.changes.find(item=>item.kind==='pm25_observation_changed')?.sourceUrl,sourceUrl);
   assert.equal(result.newChangeCount,1);
+});
+
+test('repeated coverage flaps cannot evict a substantive city revision from bounded history',()=>{
+  const substantive={kind:'city_regional_notice_revised',title:'Lakefront festival hours revised',detail:'Check city source',observedAt:'2026-10-10T02:00:00Z',sourceUrl:'https://ready.nola.gov/incident/'};
+  const status=Array.from({length:40},(_,index)=>({kind:'source_status_changed',title:index%2?'NOPD calls: checked → stale':'NOPD calls: stale → checked',detail:'Check source',observedAt:new Date(Date.parse('2026-10-10T03:00:00Z')+index*60000).toISOString(),sourceUrl:'https://data.nola.gov/'})).reverse();
+  const history=retainPublishedChanges(status,[substantive]);
+  assert.equal(history.filter(item=>item.kind==='source_status_changed').length,2);
+  assert.ok(history.includes(substantive));
+  assert.equal(history.find(item=>item.title==='NOPD calls: checked → stale')?.observedAt,status.find(item=>item.title==='NOPD calls: checked → stale').observedAt);
 });
