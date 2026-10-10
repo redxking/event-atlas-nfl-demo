@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-74';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-75';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
 
@@ -53,6 +53,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       titansGameSpecificGuide:picture.titansGuideContext,
       falconsGameSpecificGuide:picture.falconsGuideContext,
       saintsGameSpecificGuide:picture.saintsGuideContext,
+      saintsPregameRoadComparison:picture.saintsAccessComparison,
       nortaServiceAlerts:picture.nortaAlertContext,
       nolaPublicCallAggregate:picture.nolaCallsContext,
       martaPublishedRailSchedule:picture.martaRailContext,
