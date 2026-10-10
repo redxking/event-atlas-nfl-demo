@@ -7,7 +7,7 @@ import {MASSDOT_CCTV_LAYER,massdotCameraQuery,parseMassdotCameraInventory} from 
 import {TXDOT_CCTV_LAYER,txdotCameraQuery,parseTxdotCameraInventory} from '../lib/txdot_camera_inventory.mjs';
 import {NJTA_CAMERA_PAGE,parseNjtaCameraInventory} from '../lib/njta_camera_inventory.mjs';
 import {TDOT_CONFIG_URL,TDOT_CAMERA_API,tdotCameraRequestConfig,parseTdotCameraInventory} from '../lib/tdot_camera_inventory.mjs';
-import {LA511_CAMERA_API,LA511_CAMERA_DOC,parseLouisianaCameras} from '../lib/louisiana_camera_inventory.mjs';
+import {LA511_CAMERA_API,LA511_CAMERA_DOC,LA511_CAMERA_PAGE,LA511_PUBLIC_LIST,louisianaPublicListUrl,parseLouisianaPublicCameraList,parseLouisianaCameras} from '../lib/louisiana_camera_inventory.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const site=path.join(root,'site');
@@ -17,14 +17,24 @@ const venues=[...new Map(schedule.games.map(game=>[game.venue.id,game.venue])).v
 const sources=[];
 const cameras=[];
 async function get(url){const response=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.4 public-road-camera-metadata'},signal:AbortSignal.timeout(25000)});if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json()}
-if(process.env.LA511_API_KEY){
-  try{
-    const url=new URL(LA511_CAMERA_API);url.searchParams.set('key',process.env.LA511_API_KEY);
-    const records=parseLouisianaCameras(await get(url));
-    cameras.push(...records);
-    sources.push({id:'la511-public-cameras',url:LA511_CAMERA_DOC,status:'ok',records:records.length,imageryAccess:'public roadway HLS listed by 511; playback on demand; no stadium field of view verified'});
-  }catch(error){sources.push({id:'la511-public-cameras',url:LA511_CAMERA_DOC,status:'failed',error:String(error).slice(0,200)})}
-}else sources.push({id:'la511-public-cameras',url:LA511_CAMERA_DOC,status:'not_configured',reason:'Official 511LA API requires a developer key'});
+try{
+  const first=await get(louisianaPublicListUrl(0));
+  if(!Number.isSafeInteger(first.recordsTotal)||first.recordsTotal<100||first.recordsTotal>5000)throw Error('Invalid public list total');
+  const pages=[first];
+  for(let start=100;start<first.recordsTotal;start+=100)pages.push(await get(louisianaPublicListUrl(start)));
+  const records=parseLouisianaPublicCameraList(pages);
+  cameras.push(...records);
+  sources.push({id:'la511-public-cameras',url:LA511_CAMERA_PAGE,status:'ok',records:records.length,imageryAccess:'public roadway HLS listed by 511; playback on demand; no stadium field of view verified',upstreamFreshness:'unknown'});
+}catch(publicError){
+  if(process.env.LA511_API_KEY){
+    try{
+      const url=new URL(LA511_CAMERA_API);url.searchParams.set('key',process.env.LA511_API_KEY);
+      const records=parseLouisianaCameras(await get(url));
+      cameras.push(...records);
+      sources.push({id:'la511-public-cameras',url:LA511_CAMERA_DOC,status:'ok',records:records.length,imageryAccess:'public roadway HLS listed by 511; playback on demand; no stadium field of view verified'});
+    }catch(error){sources.push({id:'la511-public-cameras',url:LA511_CAMERA_DOC,status:'failed',error:`Public list: ${String(publicError).slice(0,100)}; keyed API: ${String(error).slice(0,100)}`})}
+  }else sources.push({id:'la511-public-cameras',url:LA511_PUBLIC_LIST,status:'failed',error:`Public list: ${String(publicError).slice(0,150)}; keyed fallback not configured`});
+}
 try{
   const config=await get(TDOT_CONFIG_URL);
   const request=tdotCameraRequestConfig(config);

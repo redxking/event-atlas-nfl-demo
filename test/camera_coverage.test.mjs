@@ -64,6 +64,11 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
       assert.match(item.id,/^njta-\d{1,6}$/);
       assert.match(item.videoUrl,/^https:\/\/wink\.njta\.com\/\d{1,4}\/public\/hls\/[A-Za-z0-9-]+_nj\.m3u8$/);
       assert.equal(item.viewerUrl,'https://www.njta.gov/travel-resources/camera-list/');
+    }else if(item.agency==='Louisiana 511'){
+      assert.equal(item.inService,true);
+      assert.match(item.id,/^la511-\d{1,7}-\d{1,7}$/);
+      assert.match(item.videoUrl,/^https:\/\/itsstreaming[a-z0-9-]*\.dotd\.la\.gov\/public\/[A-Za-z0-9_-]+\.streams?\/playlist\.m3u8$/i);
+      assert.match(item.viewerUrl,/^https:\/\/511la\.org\/map\/Cctv\/\d+$/);
     }else{
       assert.equal(item.agency,'TDOT SmartWay');
       assert.equal(item.inService,true);
