@@ -7,6 +7,16 @@ const game={kickoff:'2026-10-11T17:00:00Z',status:'scheduled',timeTbd:false,sour
 const weatherCue={type:'weather alert',title:'NWS warning',basis:'Published window overlaps event',sourceUrl:'https://weather.example/alert',sourceAt:'2026-10-11T16:00:00Z'};
 const picture=(state,cues=[])=>({eventId:'nfl:test',sources:[source('NWS point alerts',state)],cues});
 
+test('Chiefs game-center passage revisions enter the event change trail only across newer complete checks',()=>{
+  const url='https://www.chiefs.com/game-day/2026/reg-week6/chargers-at-chiefs/';
+  const game={id:'nfl:401873006',kickoff:'2026-10-18T20:25:00Z',status:'scheduled',timeTbd:false,sourceUrl:url};
+  const claim={id:'stadium_gates',category:'club_operating_plan',sourceUrl:url,sourceTextSha256:'a'.repeat(64)};
+  const before={...picture('checked'),eventId:game.id,chiefsPlanContext:{state:'current_published_plan',asOf:'2026-10-10T12:00:00Z',sourceUrl:url,claims:[claim]}};
+  const after={...before,chiefsPlanContext:{...before.chiefsPlanContext,asOf:'2026-10-10T13:00:00Z',claims:[{...claim,sourceTextSha256:'b'.repeat(64)}]}};
+  assert.equal(diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='club_passage_revised')?.sourceUrl,url);
+  assert.equal(diffEventPicture({...before,chiefsPlanContext:{...before.chiefsPlanContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='club_passage_revised'),false);
+});
+
 test('new Houston corridor RSS item is observed only across newer complete feed checks',()=>{
   const url='https://traffic.houstontranstar.org/data/rss/incidents_rss.xml';
   const item={id:'1854994_Verified',title:'IH-610 South Loop Eastbound Before Scott St - Stall',sourceTextSha256:'a'.repeat(64),sourceUrl:url};

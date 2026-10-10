@@ -1,8 +1,24 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildLocalAiPacket,generateLocalAiDraft,validateLocalAiDraft} from '../lib/local_ai_brief.mjs';
+import fs from 'node:fs';
+import {selectChiefsGameCenter} from '../site/chiefs_game_center.js';
 
 const brief={event:{sourceId:'nfl'},sourceComparison:{status:'unchanged_since_intake'},nflContext:{status:'snapshot_available_unreviewed',scheduleSnapshotAt:'2026-10-09T12:00:00Z',evidence:{event:{id:'game-1',title:'Home at Away',kickoff:'2026-10-11T17:00:00Z',status:'scheduled',sourceUrl:'https://example.org/game'},venue:{name:'Example Stadium'},picture:{cues:[{type:'road condition',title:'Closure',basis:'Publisher window overlap',sourceUrl:'https://example.org/road'}],sources:[{name:'Road source',state:'checked',detail:'No route impact established',sourceUrl:'https://example.org/roads'}],gaps:['No verified stadium CCTV stream is connected.']}}},protectedPeople:[{displayName:'PRIVATE PERSON'}],reviewedAssessments:[{analysis:'PRIVATE ANALYSIS'}],case:{openingRationale:'PRIVATE RATIONALE'}};
+
+test('local AI packet receives the Chiefs published access plan only while current',()=>{
+  const snapshot=JSON.parse(fs.readFileSync(new URL('../site/chiefs_game_center.json',import.meta.url)));
+  const game={id:'nfl:401873006',kickoff:'2026-10-18T20:25:00Z',venue:{id:'3622'}};
+  const now=Date.parse(snapshot.checkedAt)+60000;
+  const plan=selectChiefsGameCenter(game,snapshot,now);
+  const evidence={...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:game.id,kickoff:game.kickoff},venue:{id:'3622',name:'Arrowhead Stadium'},picture:{...brief.nflContext.evidence.picture,chiefsPlanContext:plan}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now});
+  assert.equal(packet.evidence.find(row=>row.id==='KC1')?.sourceUrl,snapshot.sourceUrl);
+  assert.match(packet.evidence.find(row=>row.id==='KC1').text,/actual parking and gate status unverified/);
+  const stale={...plan,state:'stale_or_unavailable'};
+  const staleEvidence={...evidence,picture:{...evidence.picture,chiefsPlanContext:stale}};
+  assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence:staleEvidence}},{now}).evidence.some(row=>row.id==='KC1'),false);
+});
 
 test('local AI packet can rank the exact-game NDOT permit plan without claiming field closure',()=>{
   const at=Date.parse('2026-10-10T12:30:00Z');
