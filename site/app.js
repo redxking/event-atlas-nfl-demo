@@ -267,8 +267,8 @@ function renderVenueMap(rows){
   if(!overviewMap){
     target.replaceChildren();
     const usBounds=L.latLngBounds([[24,-125],[50,-66]]);
-    overviewMap=L.map(target,{scrollWheelZoom:false,maxBounds:usBounds,maxBoundsViscosity:1,worldCopyJump:false}).fitBounds(usBounds,{padding:[8,8]});
-    const constrainOverview=()=>{overviewMap.invalidateSize();overviewMap.setMinZoom(overviewMap.getBoundsZoom(usBounds,true));overviewMap.panInsideBounds(usBounds,{animate:false});};
+    overviewMap=L.map(target,{scrollWheelZoom:false,dragging:false,touchZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,zoomControl:false,zoomSnap:0,zoomAnimation:false});
+    const constrainOverview=()=>{overviewMap.invalidateSize();overviewMap.fitBounds(usBounds,{padding:[18,18],animate:false});};
     constrainOverview();
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(overviewMap).on('tileerror',()=>{$('overview-map-status').textContent='Street tiles unavailable. Event markers and the game list remain available.';});
     overviewMarkers=L.layerGroup().addTo(overviewMap);
@@ -294,7 +294,7 @@ function renderVenueMap(rows){
     open.onclick=()=>{selectGame(choices[position].id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});};
     navigation.append(previous,next);popup.append(counter,card,navigation,open);show();
     const tooltip=document.createElement('span');tooltip.textContent=venue.name+' · '+upcoming.length+' upcoming games';
-    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:300,minWidth:220}).addTo(overviewMarkers);
+    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:300,minWidth:220,autoPan:false}).addTo(overviewMarkers);
   }
 }
 function renderGround(game){

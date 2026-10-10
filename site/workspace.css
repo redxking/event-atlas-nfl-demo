@@ -19,3 +19,5 @@
 .event-location-marker{background:#2279d4;border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #17364b}.event-location-marker:focus{outline:3px solid #ffb52e}
 
 .event-map-popup .map-game-navigation{display:flex;gap:8px}.event-map-popup .map-game-navigation button{width:auto;flex:1;text-align:center}.event-map-popup button:disabled{opacity:.4;cursor:default}.event-map-popup .map-game-open{background:#175eb6;color:white;text-align:center}.map-game-card{padding:12px;background:#f1f5fa;border-radius:8px}.map-game-card strong{font-size:15px}.map-game-card p{margin:8px 0 0}
+/* Keep the fixed national overview wide enough to show the whole country. */
+#venue-map{height:auto;aspect-ratio:1.8 / 1}
