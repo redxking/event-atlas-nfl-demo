@@ -1,4 +1,4 @@
-import {validateExerciseCatalog,exerciseFrame} from './exercise_scenarios.js?v=20261010-1';
+import {validateExerciseCatalog,exerciseFrame} from './exercise_scenarios.js?v=20261010-2';
 
 const $=id=>document.getElementById(id);
 const node=(tag,text,parent,cls)=>{const element=document.createElement(tag);element.textContent=text;if(cls)element.className=cls;parent.append(element);return element};
@@ -22,6 +22,34 @@ function renderGeometry(geometry){
   $('area-toggle').textContent=area==='base'?'Preview expanded area':'Show base area';
 }
 
+function renderPlanning(planning){
+  const card=$('planning-card'),body=$('planning-details');
+  card.hidden=!planning;
+  body.replaceChildren();
+  if(!planning)return;
+  if(planning.organizer){
+    node('h4','Organizer and capacity · sx-p1',body);
+    node('p',`${planning.organizer.name} is the fictional permit applicant and organizer. Permit cap: ${planning.attendance.permitCap.toLocaleString()}; organizer estimate: ${planning.attendance.value.toLocaleString()} (${planning.attendance.method}). Observed attendance: ${planning.attendance.observed===null?'unknown':planning.attendance.observed.toLocaleString()}.`,body);
+    for(const permit of planning.permits)node('p',`${permit.type.replaceAll('_',' ')}: ${permit.state.replaceAll('_',' ')} · ${permit.authority} · ${permit.sourceId}${permit.verifiedAt?` · record ${fmt(permit.verifiedAt)}`:' · no verified record time'}.`,body,'planning-detail');
+  }
+  if(planning.areaHistory){
+    const history=planning.areaHistory;
+    node('h4','Historical context · sx-p2',body);
+    node('p',`${history.violentIncidentReports} reports among ${history.comparableEvents} comparable fictional events during ${history.period}. ${history.comparableDefinition}. Geocoding: ${history.geocodeQuality}; coverage gap: ${history.coverageGap}. Outcomes and exposure hours are unavailable. ${history.interpretation}.`,body);
+  }
+  if(planning.promoter){
+    node('h4','Promoter and RSVPs · sx-p3',body);
+    node('p',`${planning.promoter.name} is identified as the fictional promoter by the organizer. The fixture records ${planning.promoter.priorEventCount} prior events (${planning.promoter.priorEventCountBasis}); this does not verify current attendance.`,body);
+  }
+  if(planning.agencyPicture){
+    const agency=planning.agencyPicture;
+    node('h4','Agency awareness · sx-p4',body);
+    node('p',`Owner: ${agency.owner}. Local police: ${agency.localPoliceAwareness}. County EOC: ${agency.countyEocAwareness}. Federal partners: ${agency.federalPartnerAwareness}.`,body);
+    node('p',`Possible ${agency.resourceNeed.capability}: ${agency.resourceNeed.state.replaceAll('_',' ')}. ${agency.resourceNeed.rationale}. No request or notification was sent.`,body,'planning-detail');
+  }
+  if(!body.children.length)node('p','Planning details appear when their fictional source records are revealed.',body,'empty');
+}
+
 function render(){
   const frame=exerciseFrame(catalog,scenarioId,revealed,area);
   $('exercise-workspace').hidden=false;
@@ -40,6 +68,7 @@ function render(){
   $('next').disabled=frame.step===frame.totalSteps;
   $('play').textContent=playTimer?'Pause playback':'Play exercise';
   renderGeometry(frame.geometry);
+  renderPlanning(frame.planning);
 
   const candidate=frame.candidate;
   $('candidate-state').textContent=candidate?candidate.status.replaceAll('_',' '):'awaiting evidence';

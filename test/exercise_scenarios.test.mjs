@@ -5,9 +5,9 @@ import {validateExerciseCatalog,exerciseFrame,EXERCISE_MODE} from '../site/exerc
 
 const catalog=JSON.parse(readFileSync(new URL('../data/demo_scenarios.json',import.meta.url)));
 
-test('three fictional scenarios keep their source and evidence identities isolated',()=>{
+test('fictional scenarios keep their source and evidence identities isolated',()=>{
   validateExerciseCatalog(catalog);
-  assert.equal(catalog.scenarios.length,3);
+  assert.equal(catalog.scenarios.length,4);
   for(const scenario of catalog.scenarios){
     const initial=exerciseFrame(catalog,scenario.id,0);
     assert.equal(initial.dataMode,EXERCISE_MODE);
@@ -19,6 +19,30 @@ test('three fictional scenarios keep their source and evidence identities isolat
     assert.deepEqual(complete.report.claimIds.sort(),scenario.observations.map(item=>item.id).sort());
     assert.ok(complete.sourceStates.every(item=>item.dataMode===EXERCISE_MODE));
   }
+});
+
+test('pop-up event planning details follow the source record order',()=>{
+  const first=exerciseFrame(catalog,'sx-popup',0);
+  assert.equal(first.planning.organizer,null);
+  assert.equal(first.planning.permits,null);
+  assert.equal(first.planning.areaHistory,null);
+  assert.equal(first.planning.agencyPicture,null);
+  const permit=exerciseFrame(catalog,'sx-popup',1);
+  assert.equal(permit.planning.attendance.permitCap,1200);
+  assert.equal(permit.planning.attendance.value,1800);
+  assert.equal(permit.planning.permits.find(item=>item.type==='temporary_structures').state,'unknown');
+  assert.equal(permit.planning.areaHistory,null);
+  const history=exerciseFrame(catalog,'sx-popup',2);
+  assert.equal(history.planning.areaHistory.comparableEvents,18);
+  assert.equal(history.planning.areaHistory.violentIncidentReports,2);
+  assert.equal(history.candidate,null);
+  const promoter=exerciseFrame(catalog,'sx-popup',3);
+  assert.equal(promoter.planning.promoter.name,'Fictional Market Circuit');
+  assert.equal(promoter.candidate.reviewState,'incomplete_scripted_evidence');
+  const complete=exerciseFrame(catalog,'sx-popup',4);
+  assert.equal(complete.planning.agencyPicture.resourceNeed.state,'proposed_not_sent');
+  assert.deepEqual(complete.candidate.visibleExcludedIds,['sx-p2']);
+  assert.equal(complete.report.status,'simulated_analyst_draft');
 });
 
 test('stadium candidate gains counterevidence and outage only when their records appear',()=>{

@@ -85,6 +85,30 @@
       "state": "simulated_connected",
       "cadenceSeconds": 120,
       "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-permit",
+      "name": "Fictional municipal permit registry",
+      "kind": "event_permits",
+      "state": "simulated_connected",
+      "cadenceSeconds": 300,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-history",
+      "name": "Fictional agency event-history aggregate",
+      "kind": "historical_event_incidents",
+      "state": "simulated_connected",
+      "cadenceSeconds": 86400,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-resource",
+      "name": "Fictional interagency coordination desk",
+      "kind": "resource_requests",
+      "state": "simulated_connected",
+      "cadenceSeconds": 60,
+      "dataMode": "synthetic_exercise"
     }
   ],
   "scenarios": [
@@ -490,6 +514,176 @@
           "sx-v2",
           "sx-v3",
           "sx-v4"
+        ],
+        "dataMode": "synthetic_exercise"
+      }
+    },
+    {
+      "id": "sx-popup",
+      "dataMode": "synthetic_exercise",
+      "title": "Foundry Plaza Night Market",
+      "place": "Fictional Foundry Plaza, Riverton",
+      "jurisdictionPath": [
+        "FEMA Region IV",
+        "Fictional State",
+        "Riverton County",
+        "Riverton Central District"
+      ],
+      "localStart": "2026-10-10T19:00:00-04:00",
+      "lifecycle": "planned_pop_up",
+      "organizer": {
+        "name": "Fictional Lantern Events Cooperative",
+        "role": "permit applicant and organizer",
+        "identityState": "exercise_verified_by_permit_record",
+        "dataMode": "synthetic_exercise"
+      },
+      "promoter": {
+        "name": "Fictional Market Circuit",
+        "role": "promoter",
+        "identityState": "exercise_verified_by_organizer",
+        "priorEventCount": 6,
+        "priorEventCountBasis": "fictional permit registry identity match",
+        "dataMode": "synthetic_exercise"
+      },
+      "attendance": {
+        "value": 1800,
+        "method": "fictional organizer estimate",
+        "verified": false,
+        "permitCap": 1200,
+        "observed": null
+      },
+      "permits": [
+        {
+          "type": "assembly",
+          "state": "issued",
+          "authority": "Fictional Riverton Events Office",
+          "limit": 1200,
+          "sourceId": "sx-permit",
+          "verifiedAt": "2026-10-10T13:00:00-04:00",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "type": "amplified_sound",
+          "state": "application_pending",
+          "authority": "Fictional Riverton Events Office",
+          "sourceId": "sx-permit",
+          "verifiedAt": "2026-10-10T13:00:00-04:00",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "type": "temporary_structures",
+          "state": "unknown",
+          "authority": "Fictional Fire Marshal",
+          "sourceId": "sx-permit",
+          "verifiedAt": null,
+          "dataMode": "synthetic_exercise"
+        }
+      ],
+      "areaHistory": {
+        "sourceId": "sx-history",
+        "period": "prior 24 months",
+        "comparableEvents": 18,
+        "comparableDefinition": "fictional evening markets with 500 to 2500 planned attendees in similar public plazas",
+        "violentIncidentReports": 2,
+        "verifiedOffenses": null,
+        "exposureHours": null,
+        "geocodeQuality": "area-level only",
+        "coverageGap": "one contributing agency supplied only aggregate calls",
+        "interpretation": "Context for review; no validated prediction or causal attribution",
+        "dataMode": "synthetic_exercise"
+      },
+      "agencyPicture": {
+        "owner": "Fictional Riverton Events Office",
+        "localPoliceAwareness": "acknowledged",
+        "countyEocAwareness": "unknown",
+        "federalPartnerAwareness": "unknown",
+        "resourceNeed": {
+          "capability": "event planning liaison",
+          "state": "proposed_not_sent",
+          "receivingAgency": null,
+          "rationale": "Reconcile estimated attendance with permit cap before deciding whether any additional capability is needed"
+        },
+        "dataMode": "synthetic_exercise"
+      },
+      "observations": [
+        {
+          "id": "sx-p1",
+          "sourceId": "sx-permit",
+          "observedAt": "2026-10-10T13:00:00-04:00",
+          "kind": "permit_capacity",
+          "claim": "The fictional assembly permit caps attendance at 1,200 while the organizer estimates 1,800.",
+          "geometryScope": "event_footprint",
+          "reliability": "exercise_authoritative",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-p2",
+          "sourceId": "sx-history",
+          "observedAt": "2026-10-10T12:00:00-04:00",
+          "kind": "historical_aggregate",
+          "claim": "Two violent-incident reports appear among 18 comparable fictional evening markets over 24 months; outcomes and exposure hours are unavailable.",
+          "geometryScope": "comparable_event_cohort",
+          "reliability": "exercise_agency_aggregate",
+          "freshness": "historical",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-p3",
+          "sourceId": "sx-venue",
+          "observedAt": "2026-10-10T13:30:00-04:00",
+          "kind": "organizer_update",
+          "claim": "The fictional organizer identifies Fictional Market Circuit as promoter and says 600 additional RSVPs came from a repost; promoter history and RSVPs do not establish observed attendance.",
+          "geometryScope": "event_footprint",
+          "reliability": "exercise_organizer_report",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-p4",
+          "sourceId": "sx-resource",
+          "observedAt": "2026-10-10T13:40:00-04:00",
+          "kind": "awareness_state",
+          "claim": "The fictional local police liaison acknowledged the event; county EOC and federal awareness are unverified.",
+          "geometryScope": "jurisdiction",
+          "reliability": "exercise_coordination_record",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        }
+      ],
+      "candidate": {
+        "id": "sx-c5",
+        "status": "analyst_review_pending",
+        "severity": "possible_moderate_event_management_impact",
+        "confidence": "moderate",
+        "summary": "The organizer estimate exceeds the fictional permit capacity; verify the event plan and expected attendance before any resource decision.",
+        "supportingIds": [
+          "sx-p1",
+          "sx-p3"
+        ],
+        "contradictingIds": [],
+        "excludedIds": [
+          "sx-p2"
+        ],
+        "limitations": [
+          "Historical reports do not predict violence at this event",
+          "RSVPs are not observed attendance",
+          "Temporary-structure permit state is unknown"
+        ],
+        "nextVerification": "Contact the fictional organizer and permitting office to reconcile capacity, footprint and controls.",
+        "dataMode": "synthetic_exercise"
+      },
+      "report": {
+        "id": "sx-r4",
+        "version": 1,
+        "status": "simulated_analyst_draft",
+        "classification": "EXERCISE ONLY",
+        "abstract": "The fictional night market has an issued assembly permit for 1,200 people and an organizer estimate of 1,800. This mismatch warrants an event-management review. Two historical violent-incident reports from 18 comparable fictional markets provide limited context and do not predict violence here. Sound approval is pending, temporary-structure status is unknown, and no federal resource request has been sent.",
+        "claimIds": [
+          "sx-p1",
+          "sx-p2",
+          "sx-p3",
+          "sx-p4"
         ],
         "dataMode": "synthetic_exercise"
       }
