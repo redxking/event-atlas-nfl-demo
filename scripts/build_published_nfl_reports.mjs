@@ -118,7 +118,7 @@ for(const game of games){
   const filename=`${id}.md`;
   await fs.writeFile(path.join(outDir,filename),frontmatter+body,'utf8');
   const htmlName=`${id}.html`;
-  await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename}),'utf8');
+  await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename,liveContext:{monitoringMode,lat:game.venue.lat,lon:game.venue.lon,kickoff:game.kickoff,status:game.status}}),'utf8');
   if(changeState)await fs.writeFile(path.join(outDir,`${id}.state.json`),JSON.stringify(changeState)+'\n','utf8');
   entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,monitoringMode,nwsAlerts:conditions?conditions.alertsError?'unavailable':'checked':'not checked outside near-term window',nwsObservation:monitoringMode==='near_term_monitoring'?bundle.picture.observationContext?.state||'unavailable or stale':'not checked outside near-term window',nwsForecast:monitoringMode==='near_term_monitoring'?bundle.picture.forecastContext.state:'not checked outside near-term window',directGame:directGame?.state||'not checked outside near-term window',mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState?.newChangeCount??null});
 }
