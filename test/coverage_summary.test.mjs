@@ -54,3 +54,11 @@ test('WZDx road source failure stays visible for its stadium',()=>{
   const road={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'njit-transcom-wzdx',status:'failed'}],byVenue:{}};
   assert.equal(summarizeCoverage(stadium,null,road,now).rows[0].road,'source_failed');
 });
+
+test('Dallas-area TxDOT inventory does not claim Houston coverage',()=>{
+  const texas=[{venue:{id:'arlington',name:'AT&T Stadium',address:'Arlington, TX, USA',lat:32.74769,lon:-97.09288}},{venue:{id:'houston',name:'Reliant Stadium',address:'Houston, TX, USA',lat:29.6847,lon:-95.4108}}];
+  const camera={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'txdot-dfw-camera-assets',status:'ok'}],byVenue:{arlington:[{}]}};
+  const rows=summarizeCoverage(texas,camera,null,now).rows;
+  assert.equal(rows.find(row=>row.id==='arlington').camera,'connected');
+  assert.equal(rows.find(row=>row.id==='houston').camera,'not_connected');
+});

@@ -12,6 +12,7 @@
     "scan:authorized": "node scripts/scan_authorized_targets.mjs",
     "sync:sports": "node scripts/sync_sports_events.mjs",
     "sync:cameras": "node scripts/sync_road_cameras.mjs",
+    "sync:news": "python3 scripts/sync_nfl_news.py",
     "sync:roads": "node scripts/sync_road_conditions.mjs",
     "sync:police": "node scripts/sync_indianapolis_public_safety.mjs",
     "sync:charlotte-police": "node scripts/sync_charlotte_public_safety.mjs",

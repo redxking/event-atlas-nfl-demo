@@ -14,6 +14,15 @@ test('local model packet is public only and refuses stale or changed sources',()
   assert.throws(()=>buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,status:'stale_schedule_snapshot'}}),/fresh, matched/);
 });
 
+test('local AI packet includes only source-linked ESPN RSS headlines, never case records',()=>{
+  const article={publisher:'ESPN',matchBasis:'one_team_mentioned',title:'Bears game news',description:'Public sports context',url:'https://www.espn.com/nfl/story/_/id/1/example',publishedAt:'2026-10-09T16:00:00Z'};
+  const withNews={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,publicObservations:{nflHeadlines:{state:'current_snapshot',articles:[article,{...article,url:'https://unapproved.example/article'}]}}}}};
+  const packet=buildLocalAiPacket(withNews);
+  assert.equal(packet.evidence.find(item=>item.id==='N1')?.sourceUrl,article.url);
+  assert.equal(packet.evidence.find(item=>item.id==='N2'),undefined);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE PERSON'));
+});
+
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
   const draft={selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Is the road condition relevant to event access?',evidenceIds:['C1']}]};

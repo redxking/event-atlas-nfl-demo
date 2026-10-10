@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,9 +21,11 @@ jobs:
         with:
           node-version: '26'
       - run: npm test
+      - run: python3 -m unittest discover -s test -p test_nfl_news.py
       - run: npm run sync:sports
       - run: npm run build:site
       - run: npm run sync:cameras
+      - run: npm run sync:news
       - run: npm run sync:roads
       - run: npm run sync:police
       - run: npm run sync:charlotte-police

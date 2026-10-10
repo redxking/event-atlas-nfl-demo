@@ -1,6 +1,7 @@
 import {selectRoadContext} from './road_relevance.js?v=20261009-5';
 import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
+import {selectNflNews} from './nfl_news_context.js';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -10,7 +11,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,roadDirect,conditions,police,cmpdTraffic,transit,transitSchedule,transitPredictions,ntas}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,roadDirect,conditions,police,cmpdTraffic,transit,transitSchedule,transitPredictions,ntas,news}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -34,6 +35,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const transitPredictionsFresh=venueId==='3738'&&['retrieved','partial'].includes(transitPredictions?.state)&&Number.isFinite(transitPredictions.checkedAt)&&transitPredictions.checkedAt<=now+60000&&now-transitPredictions.checkedAt<=10*60000&&Array.isArray(transitPredictions.entries)&&Number.isSafeInteger(transitPredictions.totalReturned);
   const transitPredictionsContext=transitPredictionsFresh?{state:transitPredictions.state,checkedAt:new Date(transitPredictions.checkedAt).toISOString(),sourceUrl:transitPredictions.sourceUrl,stopId:transitPredictions.stopId,routeId:transitPredictions.routeId,totalReturned:transitPredictions.totalReturned,invalidCount:transitPredictions.invalidCount,omittedEntryCount:transitPredictions.omittedEntryCount,entries:transitPredictions.entries.map(item=>({tripId:item.tripId,headsign:item.headsign,arrivalAt:item.arrivalAt,departureAt:item.departureAt,status:item.status,sourceUrl:item.sourceUrl})),interpretation:transitPredictions.interpretation}:null;
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
+  const newsContext=selectNflNews(game,news,now);
   const usgsFresh=!conditions?.quakesError&&Array.isArray(conditions?.quakes?.features)&&Number.isFinite(conditions?.at)&&conditions.at<=now+60000&&now-conditions.at<=5*60000;
   const zoneReview=[
     {name:'Stadium ground perimeter',state:footprint?'unreviewed mapped candidate':'no mapped candidate',owner:'Venue operator approval required',purpose:'Entrances, queues, parking and controlled areas need separate operator geometry.',sourceUrl:footprint?.sourceUrl||null},
@@ -50,6 +52,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('USGS earthquakes',conditions?.quakesError?'source failed':!conditions?'not yet checked':usgsFresh?'checked':'stale or unavailable',usgsFresh?new Date(conditions.at).toISOString():null,'Magnitude 2.5+ weekly feed; proximity does not establish event impact.','https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson'),
     row('Road conditions',road.timingState==='matched'?'time screened':road.timingState,roads?.builtAt,'Proximity and time overlap do not prove route impact.',road.records[0]?.sourceUrl),
     row('Roadway cameras',!cameras?'not yet loaded':!cameraFresh?'stale snapshot':cameraItems?venueId==='3738'?'staging metadata connected':'metadata connected':'no connector',cameras?.builtAt,venueId==='3738'?'MassDOT staging asset inventory has unknown upstream freshness; no live imagery feed is connected. A listed camera is not a verified stadium view.':'A listed camera is not a verified stadium view.',cameraItems?.[0]?.sourceUrl),
+    row('ESPN NFL headlines',newsContext.state==='current_snapshot'?`${newsContext.articles.length} team-mention headline${newsContext.articles.length===1?'':'s'}`:newsContext.state,newsContext.asOf,'Publisher RSS headlines are team news context. Name matching does not verify game relevance, attendance, venue impact, or a threat.',newsContext.sourceUrl),
+    row('VIP attendance and protective intelligence','not verified',null,'No authoritative attendee or protection roster is connected for this event. Public sports news and player rosters do not establish attendance, protected status, or a threat.',null),
     row('DHS NTAS',!ntas?'not yet loaded':ntasFresh?'current national snapshot':'stale or unavailable',ntas?.retrievedAt,'National advisories are not venue-specific findings.',ntas?.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml'),
     row('Local police activity',!policeConnected?'no connector':police?.state==='failed'?'source failed':policeFresh?['3933','3812','3628'].includes(venueId)?'delayed historical count checked':'public call count checked':'not current',policeFresh?new Date(police.checkedAt).toISOString():null,venueId==='3673'?'Seattle publishes closed CAD responses; these are not active police alerts or threat findings.':venueId==='3687'?'Arlington public calls are delayed; these are not threat findings.':venueId==='3933'?'Chicago excludes recent records and some records lack coordinates; this historical count is not a current alert or threat finding.':venueId==='3812'?'Indianapolis CFS is a seven-day area aggregate with a separately checked citywide source lag; it is not a current alert or threat finding.':venueId==='3628'?'Charlotte-Mecklenburg incident reports include criminal, noncriminal and potentially unfounded cases; this historical count is not a current alert or threat finding.':'No jurisdictional source connected.',venueId==='3673'?'https://experience.arcgis.com/experience/6ee2574e047d4cdb9cb5ad287b76d091':venueId==='3687'?'https://policeincidents.arlingtontx.gov/':venueId==='3933'?'https://data.cityofchicago.org/Public-Safety/Crimes-2001-to-Present/ijzp-q8t2':venueId==='3812'?'https://gis.indy.gov/server/rest/services/IMPD/IMPD_Public_Data/FeatureServer/0':venueId==='3628'?'https://gis.charlottenc.gov/arcgis/rest/services/CMPD/CMPDIncidents/MapServer/0':null),
     row('CMPD open roadway incidents',venueId!=='3628'?'outside source jurisdiction':cmpdTraffic?.state==='failed'?'source failed':!cmpdTrafficFresh?'not current':cmpdTraffic.state==='partial'?'partial source data':'open-feed count checked',cmpdTrafficFresh?new Date(cmpdTraffic.checkedAt).toISOString():null,'Currently open traffic crashes, control malfunctions and obstructions; approximate source points counted within 5 km. No route impact, stadium incident or threat is inferred.',venueId==='3628'?'https://cmpdinfo.charlottenc.gov/api/v2.1/TrafficRSS':null),
@@ -68,7 +72,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(transitFresh&&transit.state==='retrieved'&&transit.screenable)for(const item of transit.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
     cues.push({type:'transit alert',title:item.header,basis:`MBTA Foxboro station; ${item.effect}; published active period overlaps illustrative event window. Service or route impact requires verification.`,sourceUrl:item.sourceUrl,sourceAt:item.updatedAt});
   }
-  const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.','No authorized drone-detection feed is connected.','No active jurisdictional police alert feed is connected.'];
+  const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.','No authorized drone-detection feed is connected.','No active jurisdictional police alert feed is connected.','No verified protected-person attendance or protective-intelligence source is connected.'];
   if(!policeConnected)gaps.push('No jurisdictional police incident feed is connected for this venue.');
   else if(!policeFresh)gaps.push(`${venueId==='3673'?'Seattle':venueId==='3933'?'Chicago':venueId==='3812'?'Indianapolis':venueId==='3628'?'Charlotte-Mecklenburg':'Arlington'} public police context is unavailable or not current.`);
   if(venueId==='3933')gaps.push('Chicago reported-crime data excludes recent days and records without usable coordinates; no active police alert feed is connected.');
@@ -90,6 +94,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(!faa||!faaFresh)gaps.push('FAA SEAMS event snapshot is absent or stale.');
   if(!tfrFresh)gaps.push('FAA TFR list and geometry snapshot is absent or stale.');
   if(!ntasFresh)gaps.push('Current DHS NTAS national advisory context is unavailable.');
+  if(newsContext.state!=='current_snapshot')gaps.push('Current ESPN NFL headline context is unavailable; team news may be missing.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
   return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,road:road.timingState==='matched'?road.overlapCount:0,transit:transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0},zoneReview,sources,gaps,policeContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }
