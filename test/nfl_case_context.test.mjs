@@ -71,6 +71,18 @@ test('Charlotte case includes only a current bounded public police aggregate',()
   assert.equal(stale.evidence.publicObservations.policeAggregate,null);
 });
 
+test('Arlington case carries a fresh count-only public listing without incident details',()=>{
+  const arlingtonGame={...game,venue:{...game.venue,id:'3687',lat:32.74728,lon:-97.09449}};
+  const context={nearby:26,radiusKm:5,sourceLatestAt:now-10*60000,sourceLagMinutes:10,checkedAt:now-15*60000,privateAddress:'must not export'};
+  const snapshots={schedule:{builtAt:'2026-10-09T19:55:00Z',games:[arlingtonGame]},arlington:{status:'ok',builtAt:new Date(now-15*60000).toISOString(),byVenue:{3687:context}}};
+  const result=buildNflCaseContext(subject,event,snapshots,now);
+  assert.equal(result.evidence.publicObservations.policeAggregate.nearby,26);
+  assert.equal(result.evidence.publicObservations.policeAggregate.privateAddress,undefined);
+  assert.equal(result.evidence.picture.sources.find(item=>item.name==='Local police activity').state,'public call count checked');
+  const stale=buildNflCaseContext(subject,event,{...snapshots,arlington:{...snapshots.arlington,builtAt:new Date(now-3*3600000).toISOString()}},now);
+  assert.equal(stale.evidence.publicObservations.policeAggregate,null);
+});
+
 test('Gillette case retains current bounded MBTA context and marks failed checks as gaps',()=>{
   const foxboroGame={...game,venue:{...game.venue,id:'3738'}};
   const schedule={builtAt:'2026-10-09T19:55:00Z',games:[foxboroGame]};

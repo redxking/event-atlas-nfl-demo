@@ -50,6 +50,19 @@ test('report keeps delayed police counts and station service plans distinct from
   assert.ok(report.includes('not a train position'));
 });
 
+test('AT&T Stadium report labels publisher-visible Arlington call count as delayed context',()=>{
+  const arlington=structuredClone(bundle);
+  arlington.venue.id='3687';
+  arlington.picture.sources.push({name:'Local police activity',sourceUrl:'https://policeincidents.arlingtontx.gov/'});
+  arlington.publicObservations.policeAggregate={nearby:26,radiusKm:5,sourceLatestAt:Date.parse('2026-10-10T05:40:00Z'),sourceLagMinutes:10};
+  arlington.sourceSnapshots.police='2026-10-10T05:50:00Z';
+  const report=buildNflPublicReport(arlington);
+  assert.match(report,/Arlington delayed public police-call listing/);
+  assert.match(report,/at least 60 minutes/);
+  assert.match(report,/26/);
+  assert.doesNotMatch(report,/## Delayed public safety context/);
+});
+
 test('active event report labels hourly forecast as a forecast for the event hour',()=>{
   const active=structuredClone(bundle);
   active.event.status='in progress in source';

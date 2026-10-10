@@ -17,7 +17,7 @@ const read=async name=>{try{return JSON.parse(await fs.readFile(path.join(site,n
 const required=await read('nfl.json');
 const now=Date.now();
 if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFinite(Date.parse(required.builtAt))||now-Date.parse(required.builtAt)>12*3600000)throw Error('Fresh NFL schedule snapshot required for published reports');
-const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',eonet:'eonet.json',nifc:'nifc_wildfire.json',airnow:'airnow_pm25.json',hmsSmoke:'hms_smoke.json',news:'news.json',gameArticles:'game_articles.json',ntas:'ntas.json',septa:'septa_b_alerts.json',njTransitRail:'njtransit_event_rail.json',nj511:'nj511_events.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json',denverPolice:'denver_public_safety.json',phillyAlerts:'philly_city_alerts.json',phillyPermits:'philly_lane_permits.json',greenBayAlerts:'green_bay_alerts.json',lambeauPlan:'lambeau_gameday.json'};
+const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',eonet:'eonet.json',nifc:'nifc_wildfire.json',airnow:'airnow_pm25.json',hmsSmoke:'hms_smoke.json',news:'news.json',gameArticles:'game_articles.json',ntas:'ntas.json',septa:'septa_b_alerts.json',njTransitRail:'njtransit_event_rail.json',nj511:'nj511_events.json',indianapolisPolice:'indianapolis_public_safety.json',charlottePolice:'charlotte_public_safety.json',arlingtonPolice:'arlington_public_safety.json',denverPolice:'denver_public_safety.json',phillyAlerts:'philly_city_alerts.json',phillyPermits:'philly_lane_permits.json',greenBayAlerts:'green_bay_alerts.json',lambeauPlan:'lambeau_gameday.json'};
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
 const games=required.games.filter(game=>publishedNflReportMode(game,now));
@@ -36,10 +36,10 @@ try{
 }catch(error){quakes=null;quakesError=`USGS ${String(error.message).slice(0,100)}`}
 const venueChecks=new Map();
 function publishedPolice(game){
-  const feed=game.venue.id==='3812'?inputs.indianapolisPolice:game.venue.id==='3628'?inputs.charlottePolice:game.venue.id==='3937'?inputs.denverPolice:null;
+  const feed=game.venue.id==='3812'?inputs.indianapolisPolice:game.venue.id==='3628'?inputs.charlottePolice:game.venue.id==='3687'?inputs.arlingtonPolice:game.venue.id==='3937'?inputs.denverPolice:null;
   if(!feed)return null;
   const checkedAt=Date.parse(feed.builtAt),context=feed.byVenue?.[game.venue.id];
-  if(feed.status!=='ok'||!context||!Number.isFinite(checkedAt)||checkedAt>now+60000||now-checkedAt>12*3600000)return {state:'failed'};
+  if(feed.status!=='ok'||!context||!Number.isFinite(checkedAt)||checkedAt>now+60000||now-checkedAt>(game.venue.id==='3687'?2:12)*3600000)return {state:'failed'};
   return {state:'retrieved',checkedAt,context,sourceId:feed.sourceId};
 }
 async function publishedMbta(game){

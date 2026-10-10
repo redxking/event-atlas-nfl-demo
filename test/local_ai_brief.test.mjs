@@ -40,6 +40,16 @@ test('local AI packet admits only current official Green Bay city notices',()=>{
   assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+3*3600000}).evidence.some(item=>item.id==='B1'),false);
 });
 
+test('local AI packet treats Arlington public calls as delayed count context',()=>{
+  const at=Date.parse('2026-10-10T06:30:00Z');
+  const evidence={...brief.nflContext.evidence,venue:{id:'3687',name:'AT&T Stadium'},sourceSnapshots:{police:'2026-10-10T06:20:00Z'},picture:{...brief.nflContext.evidence.picture,policeContext:{nearby:26,radiusKm:5,sourceLatestAt:at-20*60000,privateAddress:'must not export'}}};
+  const packet=buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at});
+  assert.match(packet.evidence.find(item=>item.id==='R1').text,/delays publication at least 60 minutes/);
+  assert.equal(JSON.stringify(packet).includes('must not export'),false);
+  assert.match(validateLocalAiDraft('R1',packet).reviewQuestions[0].question,/authorized incident source/);
+  assert.equal(buildLocalAiPacket({...brief,nflContext:{...brief.nflContext,evidence}},{now:at+3*3600000}).evidence.some(item=>item.id==='R1'),false);
+});
+
 test('local AI packet labels the Packers operations page as a published plan',()=>{
   const at=Date.parse('2026-10-10T06:30:00Z');
   const sourceUrl='https://www.packers.com/lambeau-field/gameday-information';

@@ -19,6 +19,7 @@
     "sync:wpc-rain": "node scripts/sync_wpc_rain_outlooks.mjs",
     "sync:police": "node scripts/sync_indianapolis_public_safety.mjs",
     "sync:charlotte-police": "node scripts/sync_charlotte_public_safety.mjs",
+    "sync:arlington-police": "node scripts/sync_arlington_public_safety.mjs",
     "sync:denver-police": "node scripts/sync_denver_public_safety.mjs",
     "sync:philly-alerts": "node scripts/sync_philly_city_alerts.mjs",
     "sync:philly-permits": "node scripts/sync_philly_lane_permits.mjs",

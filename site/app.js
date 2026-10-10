@@ -2,11 +2,12 @@ import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
-import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
+import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
+import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-54';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-48';
-import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-20';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-55';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-49';
+import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-21';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
@@ -40,8 +41,6 @@ const gameTime=game=>game.timeTbd?new Date(game.kickoff).toLocaleDateString(unde
 const gameStateText=game=>game.gameState?`${game.gameState.phase.toUpperCase()} · ${game.gameState.away.name} ${game.gameState.away.score}, ${game.gameState.home.name} ${game.gameState.home.score}${game.gameState.period?` · period ${game.gameState.period}${game.gameState.clock?` · ${game.gameState.clock}`:''}`:''}`:null;
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
 const cache=new Map(),changeHistory=new Map();let snapshot,cameraSnapshot,roadSnapshot,seamsSnapshot,tfrSnapshot,groundSnapshot,spcSnapshot,wpcRainSnapshot,eonetSnapshot,nifcSnapshot,airnowSnapshot,hmsSmokeSnapshot,greenBayAlertsSnapshot,lambeauPlanSnapshot,publishedReports,newsSnapshot,gameArticlesSnapshot,directGame,ntasSnapshot,septaSnapshot,njTransitRailSnapshot,indyPoliceSnapshot,charlottePoliceSnapshot,denverPoliceSnapshot,phillyAlertsSnapshot,phillyPermitsSnapshot,nj511Snapshot,selected,cameraRefreshTimer,cameraPlayer,cameraFrame,hlsLoader,publicSafetyRefreshTimer,briefRefreshTimer,conditionsRefreshTimer,conditionsRequestSerial=0,conditionsPendingFor=null,briefConditions,briefForecast,briefPolice,cmpdTraffic,mbtaTransit,mbtaSchedule,mbtaPredictions,transitRefreshTimer,liveTennesseeRoad,tennesseeRoadRefreshTimer,directGameRefreshTimer,directGameRequestSerial=0,exerciseEnabled=false,exerciseStage=0,exercisePlaybackTimer,publicationRefreshPending=false,lastPublicationCheckAt=0;
-const arlingtonSource='https://gis2.arlingtontx.gov/agsext2/rest/services/Police/ActiveIncident/MapServer/0';
-const arlingtonQuery=arlingtonSource+'/query?'+new URLSearchParams({where:'1=1',outFields:'OBJECTID,CallDate,UpdatedDate',returnGeometry:'true',outSR:'4326',f:'geojson'});
 async function json(url,timeoutMs=0){const local=new URL(url,location.href).origin===location.origin;const result=await fetch(url,{headers:{Accept:'application/geo+json, application/json'},cache:local?'no-store':'default',signal:timeoutMs?AbortSignal.timeout(timeoutMs):undefined});if(!result.ok)throw Error('HTTP '+result.status);return result.json()}
 function sorted(games){const now=Date.now(),upcoming=$('time').value==='upcoming';return games.sort((a,b)=>{const at=Date.parse(a.kickoff),bt=Date.parse(b.kickoff);if(!upcoming)return at-bt;const aLive=a.status==='in progress in source',bLive=b.status==='in progress in source';if(aLive!==bLive)return aLive?-1:1;const af=at>=now,bf=bt>=now;return af!==bf?af?-1:1:af?at-bt:bt-at})}
 function renderList(){const q=$('search').value.trim().toLowerCase(),week=$('week').value;const items=sorted(snapshot.games.filter(game=>(!week||String(game.week)===week)&&(!q||[game.title,game.venue.name,game.venue.address].some(value=>value.toLowerCase().includes(q)))));$('result-count').textContent=items.length+' games';$('games').innerHTML=items.length?items.map(game=>`<button class="game ${game.id===selected?'selected':''}" data-id="${esc(game.id)}"><span class="game-top"><span>WEEK ${game.week}</span><span class="date">${esc(gameTime(game))}</span></span><strong>${esc(game.title)}</strong><small>${esc(game.venue.name)} · ${esc(game.venue.address)}</small></button>`).join(''):'<p class="empty" style="padding:20px">No games match these filters.</p>';for(const button of $('games').querySelectorAll('.game'))button.onclick=()=>selectGame(button.dataset.id)}
@@ -558,11 +557,12 @@ function renderPublicSafety(game){
   }
   async function refresh(){
     try{
-      const feed=await json(arlingtonQuery),checkedAt=Date.now();
+      const query=arlingtonAggregateQueries(game.venue);
+      const [count,latest]=await Promise.all([json(query.countUrl),json(query.latestUrl)]),checkedAt=Date.now();
       if(selected!==game.id)return;
-      const context=summarizeArlingtonCalls(feed,game.venue,game,checkedAt);
+      const context=summarizeArlingtonAggregate(count,latest,checkedAt);
       briefPolice={state:'retrieved',checkedAt,context};renderBrief(game);
-      target.innerHTML=`<p class="feed-state">ARLINGTON POLICE INCIDENT LAYER · CHECKED ${esc(fmt(checkedAt))}</p><p>${context.nearby} publicly listed call${context.nearby===1?'':'s'} within 5 km of the unreviewed AT&amp;T Stadium point and dated in the past 12 hours.${context.gameWindowCurrent?' '+context.windowCount+' of these fall in the illustrative interval from four hours before to five hours after kickoff. This is a review cue only.':''} ${context.newestUpdate?'Newest included record update: '+esc(fmt(context.newestUpdate))+'.':''}</p><p>The city delays calls by at least 60 minutes and refreshes its public display every 15 minutes. Records may be open or closed, omit incidents, or change. This area count does not establish a stadium incident, risk level, police alert, or threat. The app does not publish incident locations or call details. ${link('https://policeincidents.arlingtontx.gov/','City public viewer')} · ${link(arlingtonSource,'City data layer')}</p>`;
+      target.innerHTML=`<p class="feed-state">ARLINGTON POLICE PUBLIC LISTING · CHECKED ${esc(fmt(checkedAt))}</p><p>${context.nearby} publisher-visible call${context.nearby===1?'':'s'} within 5 km of the unreviewed AT&amp;T Stadium point. Latest citywide source update: ${esc(fmt(context.sourceLatestAt))}, ${esc(context.sourceLagMinutes)} minutes before this check.</p><p>The city delays calls by at least 60 minutes and refreshes its public display every 15 minutes. Calls may be open or closed, omitted, or changed. This count does not establish a stadium incident, police alert, trend, risk level, or threat. The app requests no incident locations or call details. ${link('https://policeincidents.arlingtontx.gov/','City public viewer')} · ${link(arlingtonPoliceLayer,'City data layer')}</p>`;
     }catch(error){if(selected===game.id){briefPolice={state:'failed'};renderBrief(game);target.innerHTML=`<p>Arlington police incident layer unavailable or incomplete (${esc(error.message)}). No negative finding can be inferred. ${link('https://policeincidents.arlingtontx.gov/','City public viewer')}</p>`}}
   }
   target.innerHTML='<p>Checking Arlington’s delayed public incident layer…</p>';

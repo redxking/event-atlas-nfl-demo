@@ -79,7 +79,10 @@ export function buildNflPublicReport(bundle){
   ],'No linked FAA airspace record or TFR spatial candidate in this snapshot. Confirm the current NOTAM directly.'));
   rows.push('Published airspace and TFR geometry do not detect drones or establish a ground security perimeter.','');
   const police=observations.policeAggregate;
-  if(police){
+  if(police&&venue.id==='3687'){
+    const policeSource=picture.sources?.find(item=>item.name==='Local police activity');
+    rows.push('## Arlington delayed public police-call listing',line('Publisher-visible calls within 5 km',police.nearby),line('Latest citywide source update',iso(police.sourceLatestAt)),line('Source update age at check',police.sourceLagMinutes==null?'not supplied':`${police.sourceLagMinutes} minutes`),line('Checked',iso(sourceSnapshots.police)),`- **Source:** ${source(policeSource?.sourceUrl,'City public incident viewer')}`,'The city delays calls by at least 60 minutes and refreshes its public display every 15 minutes. This count retains no individual call identifiers, addresses, categories or coordinates. Calls can remain listed while open or disappear after closure. The count is not a live police alert, stadium incident, trend or threat finding.','');
+  }else if(police){
     const policeSource=picture.sources?.find(item=>item.name==='Local police activity');
     rows.push('## Delayed public safety context',line('Nearby public records',police.nearby??'unavailable'),line('Reporting window',police.start&&police.end?`${police.start} through ${police.end}`:'not supplied'),line('Publisher lag at check',police.sourceLagHours==null?'not supplied':`${police.sourceLagHours} hours`),line('Radius',police.radiusKm==null?'unavailable':`${police.radiusKm} km`),line('Checked',iso(sourceSnapshots.police)),`- **Source:** ${source(policeSource?.sourceUrl,'Jurisdictional public data')}`,'These are delayed area counts, not active police alerts, confirmed crimes, stadium incidents, a trend, or a threat finding.','');
   }
