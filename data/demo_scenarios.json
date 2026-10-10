@@ -109,6 +109,54 @@
       "state": "simulated_connected",
       "cadenceSeconds": 60,
       "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-psap",
+      "name": "Fictional 911 and CAD adapter",
+      "kind": "call_for_service",
+      "state": "simulated_connected",
+      "cadenceSeconds": 1,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-uas",
+      "name": "Fictional public-safety drone mission",
+      "kind": "uas_mission_metadata",
+      "state": "simulated_connected",
+      "cadenceSeconds": 1,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-rtcc",
+      "name": "Fictional real-time crime center",
+      "kind": "human_verified_video_observation",
+      "state": "simulated_connected",
+      "cadenceSeconds": 1,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-field",
+      "name": "Fictional field-unit update",
+      "kind": "responder_observation",
+      "state": "simulated_connected",
+      "cadenceSeconds": 1,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-local-rms",
+      "name": "Fictional local records management system",
+      "kind": "local_case_and_arrest_records",
+      "state": "simulated_connected",
+      "cadenceSeconds": 300,
+      "dataMode": "synthetic_exercise"
+    },
+    {
+      "id": "sx-federal-gateway",
+      "name": "Federal record gateway placeholder",
+      "kind": "restricted_federal_query",
+      "state": "not_connected_in_demo",
+      "cadenceSeconds": null,
+      "dataMode": "synthetic_exercise"
     }
   ],
   "scenarios": [
@@ -686,6 +734,360 @@
           "sx-p4"
         ],
         "dataMode": "synthetic_exercise"
+      }
+    },
+    {
+      "id": "sx-call",
+      "dataMode": "synthetic_exercise",
+      "title": "Fictional Gunfire Call and Drone First-Response Playback",
+      "place": "Fictional Riverton East District",
+      "jurisdictionPath": [
+        "FEMA Region IV",
+        "Fictional State",
+        "Riverton County",
+        "Riverton East District"
+      ],
+      "localStart": "2026-10-10T14:02:00-04:00",
+      "lifecycle": "call_in_progress",
+      "call": {
+        "id": "sx-911-0042",
+        "sourceId": "sx-psap",
+        "receivedAt": "2026-10-10T14:02:00-04:00",
+        "cadCreatedAt": "2026-10-10T14:02:12-04:00",
+        "reportedType": "possible_gunfire",
+        "cadPriority": "exercise_priority_1",
+        "locationPrecision": "caller-described block; exact address unverified",
+        "callerIdentity": "withheld",
+        "dataMode": "synthetic_exercise"
+      },
+      "drone": {
+        "missionId": "sx-uas-0042",
+        "authorityState": "exercise_launch_authorized_by_fictional_operator",
+        "requestedAt": "2026-10-10T14:02:20-04:00",
+        "launchedAt": "2026-10-10T14:02:50-04:00",
+        "firstUsableViewAt": "2026-10-10T14:03:25-04:00",
+        "media": "synthetic_placeholder_only",
+        "cameraPrecision": "block-level only",
+        "lostLinkBranch": {
+          "triggerAt": "2026-10-10T14:03:20-04:00",
+          "state": "simulated_stream_unavailable",
+          "screenMessage": "Drone stream unavailable; continue with CAD and field updates. No camera all-clear is inferred.",
+          "recovery": "operator verification required",
+          "dataMode": "synthetic_exercise"
+        },
+        "dataMode": "synthetic_exercise"
+      },
+      "timeline": [
+        {
+          "at": "2026-10-10T14:02:00-04:00",
+          "state": "received",
+          "claimId": "sx-k1",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:02:12-04:00",
+          "state": "triaged",
+          "claimId": "sx-k2",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:02:20-04:00",
+          "state": "drone_requested",
+          "claimId": "sx-k3",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:02:40-04:00",
+          "state": "launch_authorized",
+          "claimId": "sx-k3",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:03:25-04:00",
+          "state": "stream_available",
+          "claimId": "sx-k4",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:03:48-04:00",
+          "state": "operator_observation",
+          "claimId": "sx-k5",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:04:30-04:00",
+          "state": "field_corroborated",
+          "claimId": "sx-k6",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "at": "2026-10-10T14:07:00-04:00",
+          "state": "field_corroborated",
+          "claimId": "sx-k11",
+          "dataMode": "synthetic_exercise"
+        }
+      ],
+      "observations": [
+        {
+          "id": "sx-k1",
+          "sourceId": "sx-psap",
+          "observedAt": "2026-10-10T14:02:00-04:00",
+          "kind": "caller_report",
+          "claim": "A fictional caller reports hearing possible gunfire near a block; no source has confirmed gunfire.",
+          "geometryScope": "uncertain_block",
+          "reliability": "exercise_unverified_caller",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k2",
+          "sourceId": "sx-psap",
+          "observedAt": "2026-10-10T14:02:12-04:00",
+          "kind": "cad_priority",
+          "claim": "A fictional dispatcher assigns exercise priority 1; the platform does not set dispatch priority.",
+          "geometryScope": "uncertain_block",
+          "reliability": "exercise_authoritative_cad_state",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k3",
+          "sourceId": "sx-uas",
+          "observedAt": "2026-10-10T14:02:40-04:00",
+          "kind": "launch_authorization",
+          "claim": "A fictional qualified operator authorizes a drone launch under an exercise-only mission.",
+          "geometryScope": "mission_area",
+          "reliability": "exercise_mission_log",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k4",
+          "sourceId": "sx-uas",
+          "observedAt": "2026-10-10T14:03:25-04:00",
+          "kind": "stream_state",
+          "claim": "The fictional mission reports a usable video view; no real video is attached.",
+          "geometryScope": "block_level_view",
+          "reliability": "exercise_mission_log",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k5",
+          "sourceId": "sx-rtcc",
+          "observedAt": "2026-10-10T14:03:48-04:00",
+          "kind": "human_visual_observation",
+          "claim": "A fictional trained operator sees a dark vehicle leave the block eastbound; no plate or occupant is identified.",
+          "geometryScope": "block_level_view",
+          "reliability": "exercise_human_annotation",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k6",
+          "sourceId": "sx-field",
+          "observedAt": "2026-10-10T14:04:30-04:00",
+          "kind": "field_correction",
+          "claim": "A fictional field unit reports no gunfire evidence at the caller-described corner and requests a location recheck; the call remains open.",
+          "geometryScope": "caller_described_corner",
+          "reliability": "exercise_field_report",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k7",
+          "sourceId": "sx-psap",
+          "observedAt": "2026-10-03T20:10:00-04:00",
+          "kind": "prior_exact_address_call",
+          "claim": "A fictional prior call at the same unit concerned a disturbance; final disposition was unfounded.",
+          "geometryScope": "exercise_exact_unit",
+          "reliability": "exercise_cad_record",
+          "freshness": "historical",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k8",
+          "sourceId": "sx-psap",
+          "observedAt": "2026-10-09T21:00:00-04:00",
+          "kind": "prior_nearby_call",
+          "claim": "A fictional call on another block is nearby but has no demonstrated link to the current incident.",
+          "geometryScope": "nearby_only",
+          "reliability": "exercise_cad_record",
+          "freshness": "historical",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k9",
+          "sourceId": "sx-local-rms",
+          "observedAt": "2026-10-04T11:00:00-04:00",
+          "kind": "local_arrest_record",
+          "claim": "A fictional local record reports an arrest of exercise subject PX-17 after a knife was recovered; case disposition is unknown.",
+          "geometryScope": "person_case",
+          "reliability": "exercise_local_record",
+          "freshness": "historical",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k10",
+          "sourceId": "sx-local-rms",
+          "observedAt": "2025-08-12T18:00:00-04:00",
+          "kind": "unresolved_same_name_record",
+          "claim": "A different fictional record shares an alias with PX-17 but has conflicting identifiers and is excluded from the workup.",
+          "geometryScope": "identity_unresolved",
+          "reliability": "exercise_ambiguous_record",
+          "freshness": "historical",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "id": "sx-k11",
+          "sourceId": "sx-field",
+          "observedAt": "2026-10-10T14:07:00-04:00",
+          "kind": "corrected_location_finding",
+          "claim": "A fictional field unit confirms a shooting scene on a different block after the caller location is corrected; identities and cause remain under investigation.",
+          "geometryScope": "corrected_block",
+          "reliability": "exercise_field_report",
+          "freshness": "current",
+          "dataMode": "synthetic_exercise"
+        }
+      ],
+      "candidate": {
+        "id": "sx-c6",
+        "status": "dispatcher_review_pending",
+        "severity": "unassessed_call_hazard",
+        "confidence": "low",
+        "summary": "Possible gunfire remains unconfirmed; a vehicle observation is not evidence of involvement.",
+        "supportingIds": [
+          "sx-k1",
+          "sx-k2"
+        ],
+        "contradictingIds": [
+          "sx-k6"
+        ],
+        "excludedIds": [
+          "sx-k5"
+        ],
+        "limitations": [
+          "Caller location is uncertain",
+          "No actual video or audio is present",
+          "No vehicle identity or incident nexus is established"
+        ],
+        "nextVerification": "Dispatcher confirms the corrected location and obtains field verification through authorized channels.",
+        "dataMode": "synthetic_exercise"
+      },
+      "report": {
+        "id": "sx-r5",
+        "version": 2,
+        "status": "simulated_provisional_dispatch_brief",
+        "classification": "EXERCISE ONLY — RESTRICTED VIEW",
+        "abstract": "A fictional caller reported possible gunfire. CAD assigned exercise priority 1 and an operator authorized a drone launch. A trained fictional viewer noted an eastbound dark vehicle but did not identify its plate, occupants or connection to the call. A field unit found no gunfire evidence at the caller-described corner and requested a location recheck. The call remains open; the available record does not confirm gunfire or identify a threat actor.",
+        "claimIds": [
+          "sx-k1",
+          "sx-k2",
+          "sx-k3",
+          "sx-k4",
+          "sx-k5",
+          "sx-k6"
+        ],
+        "dataMode": "synthetic_exercise"
+      },
+      "deliveryReceipts": [
+        {
+          "recipient": "fictional dispatcher console",
+          "briefVersion": 1,
+          "sentAt": "2026-10-10T14:02:15-04:00",
+          "receivedAt": "2026-10-10T14:02:16-04:00",
+          "dataMode": "synthetic_exercise"
+        },
+        {
+          "recipient": "fictional responding unit",
+          "briefVersion": 2,
+          "sentAt": "2026-10-10T14:04:35-04:00",
+          "receivedAt": "2026-10-10T14:04:38-04:00",
+          "dataMode": "synthetic_exercise"
+        }
+      ],
+      "recentActivity": {
+        "requestedAt": "2026-10-10T14:02:15-04:00",
+        "casePurpose": "active fictional CAD response",
+        "matchResults": [
+          {
+            "claimId": "sx-k7",
+            "matchType": "exact_unit",
+            "eligibleForPreArrivalBrief": true,
+            "dataMode": "synthetic_exercise"
+          },
+          {
+            "claimId": "sx-k8",
+            "matchType": "nearby_unlinked",
+            "eligibleForPreArrivalBrief": false,
+            "dataMode": "synthetic_exercise"
+          }
+        ],
+        "federalGatewayState": "not_queried",
+        "dataMode": "synthetic_exercise"
+      },
+      "followUp": {
+        "caseId": "sx-case-0042",
+        "openedAt": "2026-10-10T20:02:00-04:00",
+        "workupAt": "2026-10-11T02:02:00-04:00",
+        "purpose": "fictional felony-assault investigation",
+        "investigatorRole": "simulated_authorized_investigator",
+        "subject": {
+          "id": "PX-17",
+          "name": "EXERCISE PERSON PX-17",
+          "identityState": "exercise_verified_from_local_case",
+          "basis": "fictional field identification recorded in case",
+          "dataMode": "synthetic_exercise"
+        },
+        "localRecordIds": [
+          "sx-k9"
+        ],
+        "excludedRecordIds": [
+          "sx-k10"
+        ],
+        "federalSource": {
+          "sourceId": "sx-federal-gateway",
+          "state": "not_connected_in_demo",
+          "recordsReturned": 0,
+          "interpretation": "No federal query occurred; this is not a no-record result",
+          "dataMode": "synthetic_exercise"
+        },
+        "correction": {
+          "at": "2026-10-11T02:08:00-04:00",
+          "action": "exclude_ambiguous_same_name_record",
+          "recordId": "sx-k10",
+          "reason": "Conflicting identifiers",
+          "dataMode": "synthetic_exercise"
+        },
+        "products": [
+          {
+            "id": "sx-r6-field",
+            "audience": "fictional responding units",
+            "state": "simulated_short_update",
+            "claimIds": [
+              "sx-k7",
+              "sx-k9"
+            ],
+            "text": "Prior exact-unit call was unfounded. A separate local arrest record for identified exercise subject PX-17 is historical; present possession or presence is not inferred.",
+            "dataMode": "synthetic_exercise"
+          },
+          {
+            "id": "sx-r6-investigator",
+            "audience": "fictional assigned investigators",
+            "state": "simulated_case_workup",
+            "claimIds": [
+              "sx-k11",
+              "sx-k7",
+              "sx-k8",
+              "sx-k9",
+              "sx-k10"
+            ],
+            "text": "The exact-unit prior call and local arrest record are separately sourced. A nearby call is unlinked. A same-name record is excluded after identity review. No federal gateway query occurred.",
+            "dataMode": "synthetic_exercise"
+          }
+        ],
+        "dataMode": "synthetic_exercise",
+        "incidentBasisClaimId": "sx-k11"
       }
     }
   ]

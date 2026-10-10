@@ -1,9 +1,9 @@
-import {validateExerciseCatalog,exerciseFrame} from './exercise_scenarios.js?v=20261010-2';
+import {validateExerciseCatalog,exerciseFrame} from './exercise_scenarios.js?v=20261010-3';
 
 const $=id=>document.getElementById(id);
 const node=(tag,text,parent,cls)=>{const element=document.createElement(tag);element.textContent=text;if(cls)element.className=cls;parent.append(element);return element};
 const fmt=value=>value?new Date(value).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}):'Not supplied';
-let catalog,scenarioId,revealed=0,area='base',playTimer=null;
+let catalog,scenarioId,revealed=0,area='base',callBranch='normal',playTimer=null;
 
 function stopPlayback(){if(playTimer){clearInterval(playTimer);playTimer=null}}
 function addDetail(list,label,value){node('dt',label,list);node('dd',value,list)}
@@ -50,25 +50,58 @@ function renderPlanning(planning){
   if(!body.children.length)node('p','Planning details appear when their fictional source records are revealed.',body,'empty');
 }
 
+function renderCall(call){
+  const card=$('call-card');card.hidden=!call;if(!call)return;
+  const summary=$('call-summary'),timeline=$('call-timeline'),receipts=$('call-receipts'),recent=$('call-recent'),followUp=$('call-follow-up');
+  for(const element of [summary,timeline,receipts,recent,followUp])element.replaceChildren();
+  $('call-state').textContent=call.branch==='lost_link'?'simulated link lost':call.followUp?'corrected field location':call.streamState||call.cadPriority||'awaiting call record';
+  if(call.record)node('p',`${call.record.id} · ${call.record.reportedType.replaceAll('_',' ')} reported ${fmt(call.record.receivedAt)}. Location: ${call.record.locationPrecision}. Caller identity ${call.record.callerIdentity}. The report is unconfirmed.`,summary);
+  if(call.cadPriority)node('p',`Fictional CAD ${call.cadPriority.replaceAll('_',' ')} created ${fmt(call.cadCreatedAt)}. Priority was assigned by a fictional dispatcher, not by this application.`,summary);
+  if(call.drone)node('p',`Mission ${call.drone.missionId}: ${call.drone.authorityState.replaceAll('_',' ')}. Requested ${fmt(call.drone.requestedAt)}; launched ${fmt(call.drone.launchedAt)}. First usable view ${fmt(call.drone.firstUsableViewAt)}; ${call.drone.cameraPrecision}.`,summary);
+  if(call.lostLinkMessage)node('p',call.lostLinkMessage,summary,'call-warning');
+  const branchButton=$('call-branch');branchButton.hidden=!call.streamState;branchButton.textContent=call.branch==='lost_link'?'Resume scripted main path':'Replay lost-link branch';
+  if(call.timeline.length){
+    node('h4','Scripted source timeline',timeline,'call-subhead');
+    for(const item of call.timeline)node('p',`${fmt(item.at)} · ${item.state==='field_corroborated'?'field report received':item.state.replaceAll('_',' ')} · ${item.claimId}.`,timeline,'call-line');
+  }
+  if(call.deliveryReceipts.length){
+    node('h4','Simulated delivery receipts',receipts,'call-subhead');
+    for(const item of call.deliveryReceipts)node('p',`Brief v${item.briefVersion} to ${item.recipient}: sent ${fmt(item.sentAt)}, received ${fmt(item.receivedAt)}. No real dispatch transmission occurred.`,receipts,'call-line');
+  }
+  if(call.recentActivity){
+    node('h4','Case-scoped activity lookup',recent,'call-subhead');
+    for(const item of call.recentActivity.matchResults)node('p',`${item.claimId} · ${item.matchType.replaceAll('_',' ')} · eligible for fictional prearrival brief: ${item.eligibleForPreArrivalBrief}.`,recent,'call-line');
+    node('p',`Federal gateway: ${call.recentActivity.federalGatewayState.replaceAll('_',' ')}. No federal record result is implied.`,recent,'call-line');
+  }
+  if(call.followUp){
+    node('h4','Later corrected field finding and case workup',followUp,'call-subhead');
+    node('p',`Corrected incident basis ${call.followUp.incidentBasisClaimId}; fictional case ${call.followUp.caseId} opened ${fmt(call.followUp.openedAt)}. ${call.followUp.subject.name} appears only after fictional field identification.`,followUp,'call-warning');
+    node('p',`Federal source: ${call.followUp.federalSource.state.replaceAll('_',' ')}; ${call.followUp.federalSource.interpretation}. Same-name record ${call.followUp.correction.recordId} excluded: ${call.followUp.correction.reason}.`,followUp,'call-line');
+    for(const product of call.followUp.products)node('p',`${product.id} · ${product.audience} · ${product.state.replaceAll('_',' ')} · claims ${product.claimIds.join(', ')}. ${product.text} No actual notice was sent.`,followUp,'call-line');
+  }
+}
+
 function render(){
-  const frame=exerciseFrame(catalog,scenarioId,revealed,area);
+  const frame=exerciseFrame(catalog,scenarioId,revealed,area,callBranch);
   $('exercise-workspace').hidden=false;
   $('load-state').hidden=true;
   $('exercise-clock').textContent=`Scripted exercise clock: ${fmt(frame.clock)} · Seed ${frame.seed}`;
   const nav=$('scenario-nav');nav.replaceChildren();
   for(const scenario of catalog.scenarios){
-    const button=node('button',scenario.title,nav);button.type='button';button.setAttribute('aria-current',String(scenario.id===scenarioId));button.onclick=()=>{stopPlayback();scenarioId=scenario.id;revealed=0;area='base';history.replaceState(null,'',`?scenario=${encodeURIComponent(scenarioId)}`);render()};
+    const button=node('button',scenario.title,nav);button.type='button';button.setAttribute('aria-current',String(scenario.id===scenarioId));button.onclick=()=>{stopPlayback();scenarioId=scenario.id;revealed=0;area='base';callBranch='normal';history.replaceState(null,'',`?scenario=${encodeURIComponent(scenarioId)}`);render()};
   }
   $('event-jurisdiction').textContent=Array.isArray(frame.scenario.jurisdictionPath)?frame.scenario.jurisdictionPath.join(' › '):String(frame.scenario.jurisdictionPath);
   $('event-title').textContent=frame.scenario.title;
   $('event-place').textContent=frame.scenario.place;
   $('event-state').textContent=frame.scenario.lifecycle.replaceAll('_',' ');
   $('event-start').textContent=`Scripted start ${fmt(frame.scenario.localStart)}`;
-  $('step-label').textContent=`${frame.step} of ${frame.totalSteps} fictional records visible`;
-  $('next').disabled=frame.step===frame.totalSteps;
+  $('step-label').textContent=`${frame.step} of ${frame.totalSteps} fictional records visible${callBranch==='lost_link'?' · lost-link branch':''}`;
+  $('next').disabled=frame.step===frame.totalSteps||callBranch==='lost_link';
+  $('play').disabled=callBranch==='lost_link';
   $('play').textContent=playTimer?'Pause playback':'Play exercise';
   renderGeometry(frame.geometry);
   renderPlanning(frame.planning);
+  renderCall(frame.call);
 
   const candidate=frame.candidate;
   $('candidate-state').textContent=candidate?candidate.status.replaceAll('_',' '):'awaiting evidence';
@@ -117,12 +150,13 @@ function render(){
   $('report-state').textContent=frame.report?`v${frame.report.version} · ${frame.report.status.replaceAll('_',' ')}`:'not assembled';
   if(frame.report){
     node('p',frame.report.abstract,report,'report-abstract');
-    node('p',`Report ${frame.report.id} · ${frame.report.classification} · claims ${frame.report.claimIds.join(', ')} · scripted clock ${fmt(frame.clock)}. No real approval or dissemination occurred.`,report,'report-meta');
-  }else node('p','The scripted report becomes available after every exercise record is revealed. It will cite only this fictional evidence set.',report,'empty');
+    if(frame.report.supersededBy)node('p',`This provisional version predates corrected field finding ${frame.report.supersededBy}. Review the later case workup above before using it.`,report,'call-warning');
+    node('p',`Report ${frame.report.id} · ${frame.report.classification} · claims ${frame.report.claimIds.join(', ')} · evidence through ${fmt(frame.report.asOfAt)}. No real approval or dissemination occurred.`,report,'report-meta');
+  }else node('p',frame.call?'The provisional brief appears after its cited call and field records. Later case workup is shown separately.':'The scripted report becomes available after every exercise record is revealed. It will cite only this fictional evidence set.',report,'empty');
 }
 
-$('reset').onclick=()=>{stopPlayback();revealed=0;area='base';render()};
-$('next').onclick=()=>{if(revealed<catalog.scenarios.find(item=>item.id===scenarioId).observations.length){revealed++;render()}};
+$('reset').onclick=()=>{stopPlayback();revealed=0;area='base';callBranch='normal';render()};
+$('next').onclick=()=>{if(callBranch==='normal'&&revealed<catalog.scenarios.find(item=>item.id===scenarioId).observations.length){revealed++;render()}};
 $('play').onclick=()=>{
   if(playTimer){stopPlayback();render();return}
   const total=catalog.scenarios.find(item=>item.id===scenarioId).observations.length;
@@ -130,8 +164,9 @@ $('play').onclick=()=>{
   playTimer=setInterval(()=>{revealed++;if(revealed>=total){revealed=total;stopPlayback()}render()},1800);render();
 };
 $('area-toggle').onclick=()=>{area=area==='base'?'expanded':'base';render()};
+$('call-branch').onclick=()=>{stopPlayback();const scenario=catalog.scenarios.find(item=>item.id===scenarioId);const streamStep=scenario.observations.findIndex(item=>item.kind==='stream_state')+1;if(!scenario.call||!streamStep||revealed<streamStep)return;revealed=streamStep;callBranch=callBranch==='normal'?'lost_link':'normal';render()};
 $('download').onclick=()=>{
-  const frame=exerciseFrame(catalog,scenarioId,revealed,area);
+  const frame=exerciseFrame(catalog,scenarioId,revealed,area,callBranch);
   const url=URL.createObjectURL(new Blob([JSON.stringify(frame,null,2)+'\n'],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=`event-atlas-${scenarioId}-synthetic-step-${revealed}.json`;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
 };

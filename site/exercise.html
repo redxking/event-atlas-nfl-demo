@@ -6,8 +6,8 @@
   <meta name="author" content="Angelis Pseftis">
   <meta name="creator" content="Angelis Pseftis">
   <title>Event Atlas | Simulated Briefing Desk</title>
-  <link rel="stylesheet" href="exercise.css?v=20261010-1">
-  <script type="module" src="exercise_app.js?v=20261010-2"></script>
+  <link rel="stylesheet" href="exercise.css?v=20261010-2">
+  <script type="module" src="exercise_app.js?v=20261010-3"></script>
 </head>
 <body>
   <header class="topbar"><a href="./" class="brand"><span class="brand-mark">EA</span><span>EVENT ATLAS <small>SIMULATED BRIEFING DESK</small></span></a><a href="./">Public NFL demo ↗</a></header>
@@ -22,6 +22,7 @@
       <div class="columns"><div class="primary">
         <section class="card"><div class="section-title"><div><p class="eyebrow">01 / SITUATION</p><h3>What the evidence supports</h3></div><span class="pill" id="candidate-state"></span></div><p class="lead" id="candidate-summary"></p><dl id="candidate-details" class="key-values"></dl><div id="candidate-evidence"></div></section>
         <section class="card" id="planning-card" hidden><p class="eyebrow">EVENT PLANNING / FICTIONAL RECORDS</p><h3>Permits, attendance and coordination</h3><div id="planning-details"></div></section>
+        <section class="card" id="call-card" hidden><div class="section-title"><div><p class="eyebrow">CALL RESPONSE / FICTIONAL PLAYBACK</p><h3>Call, drone and field sequence</h3></div><span class="pill" id="call-state"></span></div><div id="call-summary"></div><div class="media-placeholder" role="img" aria-label="No live video or audio; fictional drone metadata only">NO LIVE VIDEO OR AUDIO<br><small>Synthetic mission metadata only</small></div><button id="call-branch" type="button" hidden>Replay lost-link branch</button><div id="call-timeline"></div><div id="call-receipts"></div><div id="call-recent"></div><div id="call-follow-up"></div></section>
         <section class="card"><div class="section-title"><div><p class="eyebrow">02 / SOURCE RECORDS</p><h3>Observed in this replay</h3></div><span id="record-count" class="pill"></span></div><div id="records"></div></section>
         <section class="card"><div class="section-title"><div><p class="eyebrow">03 / REPORT</p><h3>Versioned exercise brief</h3></div><span id="report-state" class="pill"></span></div><div id="report"></div></section>
       </div><aside class="rail">

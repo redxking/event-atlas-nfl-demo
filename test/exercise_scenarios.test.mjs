@@ -46,6 +46,55 @@ test('pop-up event planning details follow the source record order',()=>{
   assert.equal(complete.report.status,'simulated_analyst_draft');
 });
 
+test('call playback separates unconfirmed report, human view, field correction, and later workup',()=>{
+  const initial=exerciseFrame(catalog,'sx-call',0);
+  assert.equal(initial.call.record,null);
+  assert.equal(initial.call.cadPriority,null);
+  assert.equal(initial.call.drone,null);
+  const caller=exerciseFrame(catalog,'sx-call',1);
+  assert.equal(caller.call.record.reportedType,'possible_gunfire');
+  assert.equal(caller.call.record.cadPriority,undefined);
+  assert.equal(caller.call.cadPriority,null);
+  const cad=exerciseFrame(catalog,'sx-call',2);
+  assert.equal(cad.call.cadPriority,'exercise_priority_1');
+  assert.equal(cad.call.deliveryReceipts.length,1);
+  const launch=exerciseFrame(catalog,'sx-call',3);
+  assert.equal(launch.call.drone.launchedAt,null);
+  assert.equal(launch.call.drone.firstUsableViewAt,null);
+  const stream=exerciseFrame(catalog,'sx-call',4);
+  assert.equal(stream.call.streamState,'simulated_usable_view_metadata');
+  assert.equal(stream.call.drone.media,'synthetic_placeholder_only');
+  assert.equal(stream.clock,'2026-10-10T14:03:25-04:00');
+  assert.equal(stream.call.timeline.some(item=>item.claimId==='sx-k5'),false);
+  const view=exerciseFrame(catalog,'sx-call',5);
+  assert.equal(view.call.timeline.some(item=>item.claimId==='sx-k5'),true);
+  const field=exerciseFrame(catalog,'sx-call',6);
+  assert.deepEqual(field.candidate.visibleContradictingIds,['sx-k6']);
+  assert.equal(field.report.version,2);
+  assert.equal(field.report.asOfAt,'2026-10-10T14:04:30-04:00');
+  assert.equal(field.call.followUp,null);
+  const later=exerciseFrame(catalog,'sx-call',11);
+  assert.equal(later.call.followUp.incidentBasisClaimId,'sx-k11');
+  assert.equal(later.report.supersededBy,'sx-k11');
+  assert.equal(later.report.asOfAt,field.report.asOfAt);
+  assert.equal(later.call.followUp.federalSource.state,'not_connected_in_demo');
+  assert.equal(later.clock,'2026-10-11T02:08:00-04:00');
+});
+
+test('lost-link branch freezes before camera observations and the provisional report',()=>{
+  const lost=exerciseFrame(catalog,'sx-call',11,'base','lost_link');
+  assert.equal(lost.step,4);
+  assert.equal(lost.call.streamState,'simulated_stream_unavailable');
+  assert.equal(lost.call.drone.firstUsableViewAt,null);
+  assert.equal(lost.call.timeline.at(-1).state,'stream_unavailable');
+  assert.match(lost.observations.at(-1).claim,/before a usable view/);
+  assert.equal(lost.clock,'2026-10-10T14:03:20-04:00');
+  assert.equal(lost.observations.some(item=>item.id==='sx-k5'),false);
+  assert.equal(lost.report,null);
+  assert.equal(lost.call.followUp,null);
+  assert.throws(()=>exerciseFrame(catalog,'sx-stadium',4,'base','lost_link'),/Invalid exercise step/);
+});
+
 test('stadium candidate gains counterevidence and outage only when their records appear',()=>{
   const early=exerciseFrame(catalog,'sx-stadium',4);
   assert.equal(early.candidate.reviewState,'incomplete_scripted_evidence');
