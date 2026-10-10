@@ -52,6 +52,19 @@ test('local AI packet admits only fresh NASA regional points with dated source l
   assert.match(draft.reviewQuestions[0].question,/NASA record/);
 });
 
+test('local AI packet admits only fresh linked USGS observations without publisher extras',()=>{
+  const at=Date.parse('2026-10-09T20:00:00Z');
+  const quake={title:'M 3.1 synthetic',magnitude:3.1,distanceKm:16,occurredAt:'2026-10-09T19:00:00Z',updatedAt:'2026-10-09T19:30:00Z',sourceUrl:'https://earthquake.usgs.gov/earthquakes/eventpage/usgs-42',privateNote:'PRIVATE SOURCE FIELD'};
+  const context={state:'current_snapshot',asOf:'2026-10-09T19:59:00Z',events:[quake,{...quake,sourceUrl:'https://unapproved.example/quake'}]};
+  const withQuake={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,usgsContext:context}}}};
+  const packet=buildLocalAiPacket(withQuake,{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='Q1')?.sourceUrl,quake.sourceUrl);
+  assert.equal(packet.evidence.find(item=>item.id==='Q2'),undefined);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE SOURCE FIELD'));
+  assert.match(validateLocalAiDraft('Q1',packet).reviewQuestions[0].question,/USGS record/);
+  assert.equal(buildLocalAiPacket(withQuake,{now:at+6*60000}).evidence.some(item=>item.id==='Q1'),false);
+});
+
 test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
   const at=Date.parse('2026-10-10T02:00:00Z');
   const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};

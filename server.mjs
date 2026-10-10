@@ -138,9 +138,13 @@ async function draftCaseBrief(id,user,includeContext){
       if(!predictionResponse.stale&&predictionResponse.data)try{transitPredictions=summarizeMbtaFoxboroPredictions(predictionResponse.data,predictionResponse.at)}catch{transitPredictions={state:'failed',checkedAt:Date.now()}}
       else transitPredictions={state:'failed',checkedAt:Date.now()};
     }
-    let eonet=await readSiteSnapshot('eonet.json');
-    if(game){const check=await remote('eonet',sources.eonet.url,900000);if(!check.stale&&check.data)try{eonet=buildEonetNflSnapshot(check.data,nflSnapshots.schedule.games)}catch{eonet=null}}
-    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
+    let eonet=await readSiteSnapshot('eonet.json'),conditions=null;
+    if(game){
+      const [eonetCheck,usgsCheck]=await Promise.all([remote('eonet',sources.eonet.url,900000),remote('usgs',sources.usgs.url,300000)]);
+      if(!eonetCheck.stale&&eonetCheck.data)try{eonet=buildEonetNflSnapshot(eonetCheck.data,nflSnapshots.schedule.games)}catch{eonet=null}
+      conditions={at:usgsCheck.at,quakes:usgsCheck.stale?null:usgsCheck.data,quakesError:usgsCheck.stale?usgsCheck.error||'USGS source unavailable':null};
+    }
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,conditions,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
   }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});

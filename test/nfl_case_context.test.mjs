@@ -24,6 +24,15 @@ test('matched NFL case carries dated NASA regional point context into its eviden
   assert.equal(result.evidence.publicObservations.naturalEvents.events[0].sourceAt,point.sourceAt);
 });
 
+test('matched NFL case carries a fresh linked USGS observation into its evidence bundle',()=>{
+  const quake={id:'usgs-42',geometry:{type:'Point',coordinates:[-75.1,40.1,5]},properties:{title:'M 3.1 synthetic',mag:3.1,time:now-3600000,updated:now-600000,url:'https://earthquake.usgs.gov/earthquakes/eventpage/usgs-42',privateNote:'must not export'}};
+  const conditions={at:now,quakes:{type:'FeatureCollection',metadata:{generated:now-60000},features:[quake]}};
+  const result=buildNflCaseContext(subject,event,{schedule:{builtAt:'2026-10-09T19:55:00Z',games:[game]},conditions},now);
+  assert.equal(result.evidence.picture.usgsContext.state,'current_snapshot');
+  assert.equal(result.evidence.publicObservations.earthquakes[0].sourceUrl,quake.properties.url);
+  assert.ok(!JSON.stringify(result.evidence).includes('must not export'));
+});
+
 test('changed game and stale schedule cannot masquerade as current matched context',()=>{
   const schedule={builtAt:'2026-10-09T19:55:00Z',games:[game]};
   const mismatch=buildNflCaseContext(subject,{...event,startsAtLocal:'2026-10-11T21:00:00Z'},{schedule},now);
