@@ -11,6 +11,13 @@ test('public report binds event, current source cues, records, gaps, and source 
   assert.ok(report.includes('[Publisher event record](https://example.org/game)'));
 });
 
+test('season planning report does not imply live event checks',()=>{
+  const planning={...structuredClone(bundle),reportMonitoringMode:'season_planning'};
+  const report=buildNflPublicReport(planning);
+  assert.match(report,/Season planning snapshot; point alerts and event-hour forecasts are not checked until the event enters the seven-day window/);
+  assert.ok(!report.includes('Near-term source monitoring'));
+});
+
 test('public report flattens untrusted publisher text and omits unsafe links',()=>{
   const altered=structuredClone(bundle);altered.picture.cues[0].title='Lane work\n## FALSE ASSESSMENT';altered.picture.cues[0].sourceUrl='javascript:alert(1)';
   const report=buildNflPublicReport(altered);

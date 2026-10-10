@@ -13,6 +13,7 @@ export function buildNflPublicReport(bundle){
     'Automated public-source compilation. Unreviewed; severity and confidence have not been assessed. This is not an operational threat determination or dissemination approval.',
     '',
     line('Generated',iso(bundle.generatedAt)),
+    line('Monitoring mode',bundle.reportMonitoringMode==='season_planning'?'Season planning snapshot; point alerts and event-hour forecasts are not checked until the event enters the seven-day window':bundle.reportMonitoringMode==='near_term_monitoring'?'Near-term source monitoring; point alert and event-hour forecast checks attempted in this run':'not supplied'),
     line('Event',`${event.title} · week ${event.week??'unknown'} · ${event.status||'status unknown'}`),
     line('Kickoff',event.timeTbd?'Time to be determined':iso(event.kickoff)),
     ...(event.gameState?[line('Publisher game state',`${event.gameState.phase}; ${event.gameState.away.name} ${event.gameState.away.score}, ${event.gameState.home.name} ${event.gameState.home.score}${event.gameState.period?`; period ${event.gameState.period}${event.gameState.clock?`, clock ${event.gameState.clock}`:''}`:''}`),line('Game-state retrieved',iso(event.sourceRetrievedAt))]:[]),
@@ -23,12 +24,12 @@ export function buildNflPublicReport(bundle){
     '',
     '## Review summary',
     line('Assessment','Severity not assessed; confidence not assessed'),
-    line('NWS alert review candidates',picture.cueCounts?.weather??0),
-    line('SPC forecast review candidates',picture.cueCounts?.outlook??0),
-    line('WPC rainfall forecast review candidates',picture.cueCounts?.rainfall??0),
-    line('Roadway time overlaps',picture.cueCounts?.road??0),
-    line('Transit alert time overlaps',picture.cueCounts?.transit??0),
-    'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
+    line('NWS alert review candidates',bundle.reportMonitoringMode==='season_planning'?'not checked outside near-term window':picture.cueCounts?.weather??0),
+    line('SPC forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.outlook??0),
+    line('WPC rainfall forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.rainfall??0),
+    line('Roadway time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.road??0),
+    line('Transit alert time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.transit??0),
+    bundle.reportMonitoringMode==='season_planning'?'Event-window checks have not started. Current source records are planning context and do not establish conditions at kickoff.':'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
     ''
   ];
   if(bundle.publishedChanges){
@@ -41,7 +42,7 @@ export function buildNflPublicReport(bundle){
   rows.push('## NOAA SPC Day 1–3 outlook',line('State',outlook?.state||'unavailable'),...(outlook?.match?[line('Published category',`${outlook.match.category} on Day ${outlook.match.day}`),line('Issued',iso(outlook.match.issuedAt)),line('Valid',`${iso(outlook.match.validAt)} to ${iso(outlook.match.expiresAt)}`)]:[]),`- **Source:** ${source(outlook?.sourceUrl,'NOAA SPC categorical outlook')}`,'Regional forecast context at the candidate point and listed kickoff; not a warning, observed condition, venue impact, or threat finding.','');
   const rain=observations.excessiveRainOutlook;
   rows.push('## NOAA WPC excessive-rainfall outlook',line('State',rain?.state||'unavailable'),...(rain?.match?[line('Published category',`${rain.match.category} on Day ${rain.match.day}`),line('Issued',iso(rain.match.issuedAt)),line('Valid',`${iso(rain.match.validAt)} to ${iso(rain.match.expiresAt)}`)]:[]),`- **Source:** ${source(rain?.sourceUrl,'NOAA WPC rainfall outlook')}`,'Regional flash-flood planning context at the candidate point and listed kickoff; not a flood warning, observed condition, route or venue impact, or threat finding.','');
-  rows.push(section('Time-screened review cues',(picture.cues||[]).map(item=>`- **${clean(item.type)} — ${clean(item.title)}:** ${clean(item.basis)}. Source time: ${iso(item.sourceAt)}. ${source(item.sourceUrl)}`),'No time-screened cue is present in the current bounded sample; this is not an all-clear.'));
+  rows.push(bundle.reportMonitoringMode==='season_planning'?'## Time-screened review cues\nEvent-window screening starts when this game enters the seven-day monitoring window. Current source snapshots are planning context, not a finding about conditions at kickoff.\n':section('Time-screened review cues',(picture.cues||[]).map(item=>`- **${clean(item.type)} — ${clean(item.title)}:** ${clean(item.basis)}. Source time: ${iso(item.sourceAt)}. ${source(item.sourceUrl)}`),'No time-screened cue is present in the current bounded sample; this is not an all-clear.'));
   rows.push(section('Public source status',(picture.sources||[]).map(item=>`- **${clean(item.name)}:** ${clean(item.state)}; as of ${iso(item.asOf)}. ${clean(item.detail)} ${source(item.sourceUrl)}`),'Source status unavailable.'));
   const gameArticle=observations.gameArticle;
   rows.push('## Game-linked publisher article',line('State',gameArticle?.state||'unavailable'),...(gameArticle?.state==='current_snapshot'?[line('ESPN article',`${gameArticle.article.type}: ${gameArticle.article.headline}`),line('Published',iso(gameArticle.article.publishedAt)),line('Modified',iso(gameArticle.article.modifiedAt)),`- **Article:** ${source(gameArticle.article.url,'ESPN game article')}`]:[`- **Game summary source:** ${source(gameArticle?.sourceUrl,'ESPN game summary')}`]),'This publisher headline is keyed to the exact game ID. Open the article to verify its claims; the headline does not establish a person’s attendance, venue impact, or a threat.','');
