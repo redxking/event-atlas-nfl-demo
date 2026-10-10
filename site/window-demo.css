@@ -4,3 +4,5 @@
 
 #area-form{display:flex;flex-wrap:wrap;align-items:end;gap:12px;margin:16px 0}#area-form label{display:grid;gap:5px}#area-form input{font:inherit;color:inherit;background:#17283d;border:1px solid #59718f;border-radius:5px;padding:8px;max-width:190px}.leaflet-container{color:#132436}.leaflet-tooltip{color:#132436}pre{white-space:pre-wrap;overflow-wrap:anywhere}
 *,*::before,*::after{box-sizing:border-box}header,main,section{min-width:0}body{overflow-wrap:anywhere}select{min-width:0}#area-form label{min-width:0;flex:1 1 180px}#area-form input{width:100%;max-width:100%}button{white-space:normal}#exercise-map{overflow-wrap:normal}.scroll{max-width:100%}
+
+.workspace-nav{padding:12px 0;border-bottom:1px solid #39465c;margin-bottom:20px;gap:8px 18px}.workspace-nav a{padding:4px 0;text-decoration-thickness:1px}section{scroll-margin-top:18px}#analysis-simulation details{padding:12px 0;border-top:1px solid #39465c}summary{cursor:pointer}

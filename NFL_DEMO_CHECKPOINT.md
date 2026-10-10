@@ -16,9 +16,11 @@ Regenerate changed model inputs locally with `node scripts/build_window_model_sn
 
 ## Latest evidence
 
+Guided scenario stages now expose baseline, emerging observations, duplicate/contrary evidence, corrections, camera outage, recovery and staleness. A labeled simulated analysis service updates verification work with source references and is exported independently of the recorded-model result. No live inference claim is made.
+
 The schedule builder now retains originally scoped games moved outside the window and surfaces publisher-status exceptions, missing frozen IDs, entrants and kickoff changes. Equivalent timestamp formatting does not create a false change. The latest source fetch matched the frozen scope and preserved applicability of all 29 recorded model runs.
 
-- 215 targeted local tests passed: `node --test test/window*.test.mjs`. Mocked model error tests are separate from actual model execution evidence.
+- 245 targeted local tests passed: `node --test test/window*.test.mjs`. Mocked model error tests are separate from actual model execution evidence.
 - All 29 actual model results completed, with no failures; packet hashes and current input bindings verified.
 - Local browser smoke test: all 29 games reached 35/35 deliveries and enabled synthetic camera playback. This does not prove playback for every game.
 - Representative browser checks covered actual advancing synthetic video, camera outage/recovery, area editing, review invalidation, model applicability, cross-game duplicate claims, and a downloaded three-snapshot history archive.
@@ -31,7 +33,7 @@ The schedule builder now retains originally scoped games moved outside the windo
 - Improve demo navigation and presentation; assess whether shared templates provide sufficient scenario diversity for the requested demonstration.
 - Current schedule was refreshed and matches all 29 frozen games. Cancellation, postponement, missing-record and moved-outside-window handling now have six passing mutation tests. Verify the new status presentation after deployment; future publisher changes still require reconciliation.
 - Finish per-game real-versus-synthetic source coverage and public participant-role coverage without conflating announcements with attendance.
-- Demonstrate model behavior for changed or emerging inputs, with actual local execution or clearly labeled backend simulation. The current browser only presents matching recorded full-replay runs.
+- Changed-input analysis now has a labeled rule-driven backend simulation across seven guided stages. Local browser checks passed all 203 game/stage combinations, including applicable-model visibility, camera-outage coverage and stale-source counts. Verify this workflow after deployment. Actual model runs remain recorded full-replay rankings.
 - Complete mobile and keyboard checks beyond the representative game, citation/provenance checks and final requirement-by-requirement audit.
 
 Other uncommitted changes to the main application and local analysis backend predate this increment and have been preserved. Their presence is not evidence of verified or deployed functionality. The goal remains active and incomplete.
