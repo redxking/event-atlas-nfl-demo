@@ -1,0 +1,309 @@
+{
+  "schema": "event-atlas.browser-export-acceptance.v1",
+  "checkedAt": "2026-10-10T18:20:54.657Z",
+  "environment": "local browser downloads",
+  "checks": [
+    "Game identity",
+    "Synthetic mode",
+    "All 26 source adapters and 27 current observations",
+    "35 delivery-history records",
+    "Edited area and area revision history",
+    "Review invalidated after contrary evidence",
+    "Applicable recorded-model result",
+    "Simulated analysis labeled no model invoked",
+    "All current candidate and analysis citations resolve"
+  ],
+  "results": [
+    {
+      "eventId": "nfl:401872981",
+      "filename": "nfl-401872981-SYNTHETIC-revision-35.json",
+      "sha256": "2b3319e1f5f12472a39ed605b3d88b397fa10cfd663049363e127525c6b748f7",
+      "bytes": 76630,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872982",
+      "filename": "nfl-401872982-SYNTHETIC-revision-35.json",
+      "sha256": "3c312b3ee49891259f13031131246c889e5b8e1e89c9d6f48bfb25b8462bbe92",
+      "bytes": 77173,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872983",
+      "filename": "nfl-401872983-SYNTHETIC-revision-35.json",
+      "sha256": "2ab8b4a1f18ba9e327da7a745caff12238c2be23e9070cf7f249ddc03ac3336e",
+      "bytes": 78232,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872984",
+      "filename": "nfl-401872984-SYNTHETIC-revision-35.json",
+      "sha256": "927cfbad47db1f87794d9cdec8ca3c2e7368fc8def3f93ce4a0ed9dc8a44aa88",
+      "bytes": 78603,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872985",
+      "filename": "nfl-401872985-SYNTHETIC-revision-35.json",
+      "sha256": "52bafe2ca94e1618017444f8245a0c43c9941cdfed2bbbe76a65a273192a9f4e",
+      "bytes": 79420,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872986",
+      "filename": "nfl-401872986-SYNTHETIC-revision-35.json",
+      "sha256": "f89853e3303d88422b8efad3a797e95511c9f6ff9e2fb7b5209bf43fac2866ee",
+      "bytes": 80498,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872987",
+      "filename": "nfl-401872987-SYNTHETIC-revision-35.json",
+      "sha256": "5d3f61a7929aba918ec5f2a039cb6afe9a58de6b0df50e25862716b68b122f22",
+      "bytes": 80892,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872988",
+      "filename": "nfl-401872988-SYNTHETIC-revision-35.json",
+      "sha256": "9c822b328f1f55bda71757c3d4b93c4c3bfacc6ff6eb76ede2015f0b9fde6d2f",
+      "bytes": 81610,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872990",
+      "filename": "nfl-401872990-SYNTHETIC-revision-35.json",
+      "sha256": "7d5e2deec23f55d977ed247f464356e7fbf4db53a3e6d9ab61f93ab877e49c03",
+      "bytes": 82669,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872989",
+      "filename": "nfl-401872989-SYNTHETIC-revision-35.json",
+      "sha256": "f13a584e21cd86b2cfa05629d42f47a3bd9f9afb92ad7939d24bbb471061cacc",
+      "bytes": 83866,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872991",
+      "filename": "nfl-401872991-SYNTHETIC-revision-35.json",
+      "sha256": "572ba49ee9e00667709828ca2c453a6848b734b8aa4430a69aacd162faff4f7a",
+      "bytes": 83760,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872992",
+      "filename": "nfl-401872992-SYNTHETIC-revision-35.json",
+      "sha256": "f649cd18a86a2a70905f0666a13eea82672f42e0058d5c3b3787a564c697aa13",
+      "bytes": 84436,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872993",
+      "filename": "nfl-401872993-SYNTHETIC-revision-35.json",
+      "sha256": "874d99578eda8207164d55400e78c2856817c7ef7ade3e32f28220de574bb3bf",
+      "bytes": 85515,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872994",
+      "filename": "nfl-401872994-SYNTHETIC-revision-35.json",
+      "sha256": "04ab188ae7534ac0cf4014faf26504808651ce073e7874df53dc1b2dc9b56143",
+      "bytes": 86772,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872995",
+      "filename": "nfl-401872995-SYNTHETIC-revision-35.json",
+      "sha256": "cc28cd018f07b1ba65aa5de6c17290006eee5e0513652088bfa6d02ac817ecd5",
+      "bytes": 86686,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872996",
+      "filename": "nfl-401872996-SYNTHETIC-revision-35.json",
+      "sha256": "b40ab8b55deb1f5a1df19394e615812c3e7a1a7b07cd3a0f6db6ccdef5454dbb",
+      "bytes": 87496,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872997",
+      "filename": "nfl-401872997-SYNTHETIC-revision-35.json",
+      "sha256": "7deb31a0acb4c2c2b5bcee18608fc1ed6157bd468f13c33f1578f90e36f1b14d",
+      "bytes": 88156,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872998",
+      "filename": "nfl-401872998-SYNTHETIC-revision-35.json",
+      "sha256": "208cdfa9b0c83b5c765c23542e33cfc7b6e368dbf308229242710b1a5eb9c52d",
+      "bytes": 88852,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401872999",
+      "filename": "nfl-401872999-SYNTHETIC-revision-35.json",
+      "sha256": "2a1b1ef7206b3cce0d77ec491f6b5e24b8a2aa7132e3a4d9701565acc1376238",
+      "bytes": 89871,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873000",
+      "filename": "nfl-401873000-SYNTHETIC-revision-35.json",
+      "sha256": "fc4df175b2fed77c5d65ac5825d769ef8c6f400407d189de08d19b5fb54f1ba7",
+      "bytes": 90575,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873001",
+      "filename": "nfl-401873001-SYNTHETIC-revision-35.json",
+      "sha256": "fb8d72753fb59769601ced12bc6a90466c9556f96621f4de141d7c10b1d7af83",
+      "bytes": 91326,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873002",
+      "filename": "nfl-401873002-SYNTHETIC-revision-35.json",
+      "sha256": "a0a7257f0c40b934fadf085f054e2b11251f4b65f88b37c8487a69e2ece6a122",
+      "bytes": 91712,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873003",
+      "filename": "nfl-401873003-SYNTHETIC-revision-35.json",
+      "sha256": "7cfeebb953697cacf635bcc914ef1a89703496a8d9d8dbdbbf50fa5eafebb4c1",
+      "bytes": 92409,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873004",
+      "filename": "nfl-401873004-SYNTHETIC-revision-35.json",
+      "sha256": "3ef1acc97ee9e03ddf1865bafbd51c9b1d9c414e538713bcded08c1f51259b94",
+      "bytes": 93968,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873005",
+      "filename": "nfl-401873005-SYNTHETIC-revision-35.json",
+      "sha256": "f7938adc5c41bc06947f705cd415e812dde5b603bca5322143d692a1b37ca04e",
+      "bytes": 93877,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873006",
+      "filename": "nfl-401873006-SYNTHETIC-revision-35.json",
+      "sha256": "c551e417461c7c880bfa5d14b4b53f26f7c451dc4de8b61156f21c5989c62c19",
+      "bytes": 94586,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873007",
+      "filename": "nfl-401873007-SYNTHETIC-revision-35.json",
+      "sha256": "9de192f4407892e1a4c81c34c58e85bd670257f4c2482adec56d7bf4672b478f",
+      "bytes": 95678,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873008",
+      "filename": "nfl-401873008-SYNTHETIC-revision-35.json",
+      "sha256": "ead44316e6a09d3aa45308446745539736bdf169a190588238f75b901a626a0d",
+      "bytes": 96035,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    },
+    {
+      "eventId": "nfl:401873010",
+      "filename": "nfl-401873010-SYNTHETIC-revision-35.json",
+      "sha256": "5ca12b46c468253be9d6c0e1e4bdaab4197dfee2b5c49376d33dcf51ed30563d",
+      "bytes": 96867,
+      "observations": 27,
+      "sources": 26,
+      "snapshotCount": 6,
+      "status": "passed"
+    }
+  ],
+  "boundary": "Downloaded artifacts from local browser workflow; deployed downloads still need verification."
+}

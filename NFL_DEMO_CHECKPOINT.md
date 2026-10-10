@@ -34,6 +34,8 @@ The schedule builder now retains originally scoped games moved outside the windo
 - Current schedule was refreshed and matches all 29 frozen games. Cancellation, postponement, missing-record and moved-outside-window handling now have six passing mutation tests. Verify the new status presentation after deployment; future publisher changes still require reconciliation.
 - Public participant coverage is mapped for all 29 games: 31 validated snapshot announcements across nine games; other games explicitly report missing public-role coverage and retain fictional examples. Verify the rendered role panel after deployment. Complete remaining per-dataset end-to-end coverage checks.
 - Changed-input analysis now has a labeled rule-driven backend simulation across seven guided stages. Local browser checks passed all 203 game/stage combinations, including applicable-model visibility, camera-outage coverage and stale-source counts. Verify this workflow after deployment. Actual model runs remain recorded full-replay rankings.
-- Complete mobile and keyboard checks beyond the representative game, citation/provenance checks and final requirement-by-requirement audit.
+- All 29 local browser exports now have saved hash evidence and passing citation, model, review and edited-area checks. All 29 mobile/keyboard checks and public-role panels passed. Deployed acceptance remains open.
+- Add explicit simulated utility corridors, hospital routes, transit hubs and choke points to the spatial demonstration; current points and circles do not fully represent these requested layer examples.
+- Complete the final requirement-by-requirement audit after deployed verification.
 
 Other uncommitted changes to the main application and local analysis backend predate this increment and have been preserved. Their presence is not evidence of verified or deployed functionality. The goal remains active and incomplete.
