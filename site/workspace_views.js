@@ -29,6 +29,7 @@ export function showWorkspaceView(view,{record=true}={}){
  document.querySelectorAll('[data-workspace-view]').forEach(button=>button.setAttribute('aria-current',button.dataset.workspaceView===view?'page':'false'));
  if(record){history.pushState({...history.state,workspaceView:view,eventId:selectedEvent?.id,eventOrigin},'',view==='overview'?'#overview':'#'+view);window.scrollTo({top:0,behavior:'instant'});}
  renderNavigation();
+ window.dispatchEvent(new Event('workspaceviewchange'));
  window.dispatchEvent(new Event('resize'));
 }
 export function initializeWorkspaceViews({onRestoreEvent}={}){

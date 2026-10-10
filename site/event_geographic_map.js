@@ -1,4 +1,4 @@
-import {attachMovementTracking} from './movement_map.js';
+import {attachMovementTracking} from './movement_map.js?v=auto-tracking-1';
 let map,groundLayer,airLayer,venueLayer,controls,eventId,resizeObserver;
 const textNode=text=>{const node=document.createElement('div');node.textContent=text;return node;};
 const validRing=ring=>Array.isArray(ring)&&ring.length>=4&&ring.every(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);
