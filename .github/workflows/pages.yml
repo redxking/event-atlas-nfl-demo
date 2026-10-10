@@ -41,6 +41,7 @@ jobs:
       - run: npm run sync:ntas
       - run: npm run sync:eonet
       - run: npm run sync:nifc
+      - run: npm run sync:airnow
       - run: npm run sync:septa
       - run: npm run sync:seams
       - run: npm run sync:tfr

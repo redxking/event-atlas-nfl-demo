@@ -78,6 +78,19 @@ test('local AI packet admits only dated source-linked NIFC wildfire points',()=>
   assert.equal(buildLocalAiPacket(withFire,{now:at+13*3600000}).evidence.some(item=>item.id==='W1'),false);
 });
 
+test('local AI packet admits only a current source-linked EPA PM2.5 station row',()=>{
+  const at=Date.parse('2026-10-10T12:00:00Z');
+  const sourceUrl='https://ofmpub.epa.gov/rsig/rsigserver?SERVICE=wcs&COVERAGE=airnow.pm25';
+  const observation={stationId:'123',distanceKm:12.3,pm25UgM3:9.8,observedAt:'2026-10-10T10:00:00Z',sourceUrl,privateNote:'PRIVATE AIR NOTE'};
+  const airQualityContext={state:'current_station_observation',asOf:'2026-10-10T11:00:00Z',sourceUrl,observation};
+  const withAir={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,airQualityContext}}}};
+  const packet=buildLocalAiPacket(withAir,{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='M1')?.sourceUrl,sourceUrl);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE AIR NOTE'));
+  assert.match(validateLocalAiDraft('M1',packet).reviewQuestions[0].question,/air-quality authority/);
+  assert.equal(buildLocalAiPacket(withAir,{now:at+13*3600000}).evidence.some(item=>item.id==='M1'),false);
+});
+
 test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
   const at=Date.parse('2026-10-10T02:00:00Z');
   const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};

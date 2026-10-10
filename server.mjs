@@ -144,7 +144,7 @@ async function draftCaseBrief(id,user,includeContext){
       if(!eonetCheck.stale&&eonetCheck.data)try{eonet=buildEonetNflSnapshot(eonetCheck.data,nflSnapshots.schedule.games)}catch{eonet=null}
       conditions={at:usgsCheck.at,quakes:usgsCheck.stale?null:usgsCheck.data,quakesError:usgsCheck.stale?usgsCheck.error||'USGS source unavailable':null};
     }
-    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,nifc:await readSiteSnapshot('nifc_wildfire.json'),conditions,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,nifc:await readSiteSnapshot('nifc_wildfire.json'),airnow:await readSiteSnapshot('airnow_pm25.json'),conditions,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
   }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});
