@@ -1,4 +1,4 @@
-const allowedHosts=new Set(['www.packers.com','www.patriots.com','www.newyorkjets.com','www.seahawks.com','www.atlantafalcons.com']);
+const allowedHosts=new Set(['www.packers.com','www.patriots.com','www.newyorkjets.com','www.seahawks.com','www.atlantafalcons.com','www.neworleanssaints.com']);
 const currentStates=new Set(['current_published_announcements','partial_published_announcements','current_published_plan','partial_published_plan']);
 const validName=name=>typeof name==='string'&&name.length>1&&name.length<=80&&/^[\p{L}\p{M}][\p{L}\p{M}\p{N} .,'’\-]*$/u.test(name);
 const validSource=url=>{try{const parsed=new URL(url);return parsed.protocol==='https:'&&allowedHosts.has(parsed.hostname)}catch{return false}};
@@ -10,7 +10,8 @@ export function selectAnnouncedPeople(game,contexts,now=Date.now()){
     ['Patriots','nfl:401872986','3738',contexts?.patriotsPreviewContext],
     ['Jets','nfl:401872983','3839',contexts?.jetsGuideContext],
     ['Seahawks','nfl:401872992','3673',contexts?.seahawksGuideContext],
-    ['Falcons','nfl:401872993','5348',contexts?.falconsGuideContext]
+    ['Falcons','nfl:401872993','5348',contexts?.falconsGuideContext],
+    ['Saints','nfl:401872987','3493',contexts?.saintsGuideContext]
   ];
   const records=[],seen=new Set();
   for(const [publisher,eventId,venueId,context] of sources){
@@ -27,7 +28,7 @@ export function selectAnnouncedPeople(game,contexts,now=Date.now()){
         if(seen.has(key))continue;
         seen.add(key);
         const publishedAt=matchingSource?.publishedAt||context.publishedAt||null;
-        records.push({eventId:game.id,venueId:game.venue.id,name,publisher,claimId:claim.id,announcedRole:claim.summary,sourceUrl:claim.sourceUrl,sourceTextSha256:claim.sourceTextSha256,sourceCheckedAt:context.asOf,sourcePublishedAt:Number.isFinite(Date.parse(publishedAt))?new Date(publishedAt).toISOString():null,attendanceStatus:'unverified',protectiveStatus:'not_assigned'});
+        records.push({eventId:game.id,venueId:game.venue.id,name,publisher,claimId:claim.id,announcedRole:claim.summary,sourceUrl:claim.sourceUrl,sourceTextSha256:claim.sourceTextSha256,sourceCheckedAt:context.asOf,sourcePublishedAt:Number.isFinite(Date.parse(publishedAt))?new Date(publishedAt).toISOString():null,sourcePublicationText:publisher==='Saints'?context.sourcePublicationText:null,attendanceStatus:'unverified',protectiveStatus:'not_assigned'});
       }
     }
   }

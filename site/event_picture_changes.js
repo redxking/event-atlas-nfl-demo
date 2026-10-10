@@ -102,6 +102,7 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     {key:'seahawksGuideContext',eventId:'nfl:401872992',url:'https://www.seahawks.com/game-day/',states:['current_published_plan','partial_published_plan'],max:7,label:'Seahawks'},
     {key:'titansGuideContext',eventId:'nfl:401872984',url:'https://www.tennesseetitans.com/stadium/gameday/',states:['current_published_plan','partial_published_plan'],max:6,label:'Titans'},
     {key:'falconsGuideContext',eventId:'nfl:401872993',url:'https://www.atlantafalcons.com/tickets/gameday',states:['current_published_plan','partial_published_plan'],max:9,label:'Falcons'},
+    {key:'saintsGuideContext',eventId:'nfl:401872987',url:'https://www.neworleanssaints.com/news/saints-vs-vikings-2026-nfl-week-5-gameday-guide',states:['current_published_plan','partial_published_plan'],max:5,label:'Saints'},
     {key:'martaRailContext',eventId:'nfl:401872993',url:'https://itsmarta.com/special-rail-schedules.aspx',states:['current_published_schedule','partial_published_schedule'],max:4,label:'MARTA'}
   ]){
     const prior=before[spec.key],next=after[spec.key];
