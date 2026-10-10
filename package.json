@@ -34,6 +34,7 @@
     "sync:eonet": "node scripts/sync_nasa_eonet.mjs",
     "sync:nifc": "node scripts/sync_nifc_wildfire.mjs",
     "sync:calfire": "node scripts/sync_calfire_active.mjs",
+    "sync:chargers-themes": "node scripts/sync_chargers_themes.mjs",
     "sync:septa": "node scripts/sync_septa_b_alerts.mjs",
     "sync:seams": "node scripts/sync_faa_seams.mjs",
     "sync:tfr": "node scripts/sync_faa_tfr.mjs",

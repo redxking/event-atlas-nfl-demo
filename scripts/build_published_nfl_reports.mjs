@@ -11,6 +11,7 @@ import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from '../site/mbt
 import {fetchSelectedGame} from '../site/espn_game_summary.js';
 import {fetchNwsStationObservation} from '../site/nws_observation.js';
 import {calfireCountyContext} from '../site/calfire_active.js';
+import {selectChargersTheme} from '../site/chargers_themes.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
@@ -21,6 +22,7 @@ if(required?.source?.status!=='ok'||!Array.isArray(required.games)||!Number.isFi
 const names={ground:'ground_footprints.json',airspace:'seams.json',tfr:'tfr.json',cameras:'cameras.json',roads:'roads.json',spc:'spc_outlooks.json',wpcRain:'wpc_rain_outlooks.json',eonet:'eonet.json',nifc:'nifc_wildfire.json',calfire:'calfire_active.json',airnow:'airnow_pm25.json',hmsSmoke:'hms_smoke.json',news:'news.json',gameArticles:'game_articles.json',ntas:'ntas.json',spaceWeather:'noaa_space_weather.json',septa:'septa_b_alerts.json',njTransitRail:'njtransit_event_rail.json',nj511:'nj511_events.json',indianapolisPolice:'indianapolis_public_safety.json',glendalePolice:'glendale_public_calls.json',charlottePolice:'charlotte_public_safety.json',arlingtonPolice:'arlington_public_safety.json',denverPolice:'denver_public_safety.json',phillyAlerts:'philly_city_alerts.json',phillyPermits:'philly_lane_permits.json',greenBayAlerts:'green_bay_alerts.json',lambeauPlan:'lambeau_gameday.json',packersGameRelease:'packers_game_release.json',patriotsGamePreview:'patriots_game_preview.json',jetsGamedayGuide:'jets_gameday_guide.json',seahawksGameday:'seahawks_gameday.json',titansGameday:'titans_gameday.json',chiefsGameCenter:'chiefs_game_center.json',ridekcArrowhead:'ridekc_arrowhead.json',cardinalsLionsBroadcast:'cardinals_lions_broadcast.json',steelersColtsBroadcast:'steelers_colts_broadcast.json',az511PublicAlerts:'az511_public_alerts.json',houstonTranstarRss:'houston_transtar_rss.json',houstonActiveIncidents:'houston_active_incidents.json',falconsGameday:'falcons_gameday.json',commandersGameday:'commanders_gameday.json',dolphinsCrucialCatch:'dolphins_crucial_catch.json',saintsGameday:'saints_gameday.json',nolaReadyEvent:'nola_ready_event.json',nolaReadyActive:'nola_ready_active.json',nolaReadyUpdates:'nola_ready_updates.json',nashvilleOemNews:'nashville_oem_news.json',nashvilleTitansClosures:'nashville_titans_closures.json',wegoTitansAlert:'wego_titans_alert.json',nolaReadyRegional:'nola_ready_regional.json',nortaAlerts:'norta_alerts.json',nolaPublicCalls:'nola_public_calls.json',martaRail:'marta_rail.json',martaAlertPreview:'marta_alert_preview.json',georgiaTraffic:'georgia_traffic.json',soundTransitSeahawks:'sound_transit_seahawks.json',soundTransitAlerts:'sound_transit_alerts.json',seattleFireAggregate:'seattle_fire_aggregate.json',seattleSpdBlotter:'seattle_spd_blotter.json',nashvillePoliceCount:'nashville_police_count.json'};
 const inputs={schedule:required};
 for(const [key,name] of Object.entries(names))inputs[key]=await read(name);
+inputs.chargersThemes=await read('chargers_themes.json');
 const games=required.games.filter(game=>publishedNflReportMode(game,now));
 if(games.length>300)throw Error('Unexpectedly many NFL games in the season report set');
 const headers={Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public report (https://github.com/redxking/event-atlas-nfl-demo)'};
@@ -118,6 +120,7 @@ for(const game of games){
     :[null,{transit:null,transitSchedule:null},null];
   const bundle=buildNflEvidenceBundle(game,{...inputs,monitoringMode,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
   bundle.calfireRegional=monitoringMode==='near_term_monitoring'?calfireCountyContext(inputs.calfire,game.venue.id,Date.parse(bundle.generatedAt)):null;
+  bundle.chargersTheme=selectChargersTheme(game,inputs.chargersThemes,Date.parse(bundle.generatedAt));
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){

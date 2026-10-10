@@ -85,6 +85,7 @@ jobs:
       - run: npm run sync:eonet
       - run: npm run sync:nifc
       - run: npm run sync:calfire
+      - run: npm run sync:chargers-themes
       - run: npm run sync:airnow
       - run: npm run sync:hms-smoke
       - run: npm run sync:septa
