@@ -32,3 +32,13 @@ test('report keeps delayed police counts and station service plans distinct from
   assert.ok(report.includes('not active police alerts'));
   assert.ok(report.includes('not a train position'));
 });
+
+test('active event report labels hourly forecast as a forecast for the event hour',()=>{
+  const active=structuredClone(bundle);
+  active.event.status='in progress in source';
+  active.publicObservations.kickoffForecast={state:'current event-hour forecast',checkedAt:'2026-10-11T21:05:00Z',sourceUrl:'https://api.weather.gov/gridpoints/PHI/50,73/forecast/hourly',period:{shortForecast:'Rain Showers',temperature:65,temperatureUnit:'F',windSpeed:'8 mph',windDirection:'NW',precipitationPercent:60}};
+  const report=buildNflPublicReport(active);
+  assert.ok(report.includes('## Current event-hour forecast'));
+  assert.ok(report.includes('Forecast, not an observed condition'));
+  assert.ok(!report.includes('## Kickoff forecast'));
+});

@@ -64,16 +64,16 @@ async function checkVenue(venue){
   return result;
 }
 async function forecastFor(game){
-  const venue=game.venue,kickoff=Date.parse(game.kickoff);
-  if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon))return null;
+  const venue=game.venue,active=game.status==='in progress in source',target=active?Date.now():Date.parse(game.kickoff);
+  if(!Number.isFinite(venue.lat)||!Number.isFinite(venue.lon)||game.status==='completed in source'||!active&&target<Date.now())return null;
   try{
     const point=await fetchJson(`https://api.weather.gov/points/${venue.lat},${venue.lon}`);
     const url=point?.properties?.forecastHourly;
     if(!nwsHost.test(url||''))throw Error('Unexpected NWS forecast URL');
     const hourly=await fetchJson(url),periods=hourly?.properties?.periods;
     if(!Array.isArray(periods)||periods.length>300)throw Error('Invalid NWS hourly forecast');
-    const period=periods.find(item=>Date.parse(item.startTime)<=kickoff&&kickoff<Date.parse(item.endTime));
-    if(!period)throw Error('Listed kickoff outside returned hourly periods');
+    const period=periods.find(item=>Date.parse(item.startTime)<=target&&target<Date.parse(item.endTime));
+    if(!period)throw Error('Event hour outside returned hourly periods');
     return {state:'ok',checkedAt:Date.now(),kickoff:game.kickoff,sourceUrl:url,period};
   }catch{return {state:'failed',kickoff:game.kickoff}}
 }

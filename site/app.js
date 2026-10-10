@@ -4,9 +4,9 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-29';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-22';
-import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-2';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-30';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-23';
+import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-3';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
@@ -16,14 +16,14 @@ import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_al
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
 import {publicRoadVideoAgency} from './camera_video.js';
-import {selectKickoffForecast} from './nws_forecast.js';
+import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
 import {selectSeptaForGame,septaAlertsPage} from './septa_b_alerts.js';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {selectNflNews} from './nfl_news_context.js';
 import {shouldAdoptPublishedSnapshot} from './published_snapshot_refresh.js';
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-1';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-2';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -89,11 +89,11 @@ function renderBrief(game){
   const updates=[...observed.reverse(),...(prior?.items||[])].slice(0,24);
   changeHistory.set(game.id,{picture,news,game:currentGame,items:updates});
   const published=publishedReports?.reports?.find(item=>item.eventId===game.id&&item.path===`reports/${game.id.replace(':','-')}.html`);
-  const publishedLink=published?`<p class="bundle-note">Hourly published report generated ${esc(fmt(published.generatedAt))}; NWS alerts ${esc(published.nwsAlerts)}, kickoff forecast ${esc(published.nwsForecast)}; ${Number.isSafeInteger(published.newPublishedChanges)?esc(published.newPublishedChanges)+' new bounded source change'+(published.newPublishedChanges===1?'':'s')+' since the prior comparable report; ':''}review the change trail in the report. This is a point-in-time, unreviewed report and may be older than the browser checks. <a href="${esc(published.path)}" target="_blank" rel="noopener noreferrer">Open published source-linked report ↗</a></p>`:'';
+  const publishedLink=published?`<p class="bundle-note">Hourly published report generated ${esc(fmt(published.generatedAt))}; NWS alerts ${esc(published.nwsAlerts)}, hourly forecast ${esc(published.nwsForecast)}; ${Number.isSafeInteger(published.newPublishedChanges)?esc(published.newPublishedChanges)+' new bounded source change'+(published.newPublishedChanges===1?'':'s')+' since the prior comparable report; ':''}review the change trail in the report. This is a point-in-time, unreviewed report and may be older than the browser checks. <a href="${esc(published.path)}" target="_blank" rel="noopener noreferrer">Open published source-linked report ↗</a></p>`:'';
   const total=picture.cueCounts.weather+(picture.cueCounts.outlook||0)+(picture.cueCounts.rainfall||0)+picture.cueCounts.road+picture.cueCounts.transit;
   target.innerHTML=`<p class="feed-state">PUBLIC-SOURCE EVENT PICTURE · GENERATED ${esc(fmt(picture.generatedAt))}</p><p><strong>Assessment: severity and confidence not assessed.</strong> ${picture.cueCounts.weather} NWS alert review candidate${picture.cueCounts.weather===1?'':'s'}; ${picture.cueCounts.outlook||0} SPC forecast review candidate${picture.cueCounts.outlook===1?'':'s'}; ${picture.cueCounts.rainfall||0} WPC rainfall forecast review candidate${picture.cueCounts.rainfall===1?'':'s'}; ${picture.cueCounts.road} published roadway time overlap${picture.cueCounts.road===1?'':'s'}; ${picture.cueCounts.transit} transit alert time overlap${picture.cueCounts.transit===1?'':'s'}. ${esc(picture.interpretation)}</p>`+
     `<details class="brief-details"><summary>Changes observed since this page opened · ${updates.length}</summary>${updates.length?updates.map(item=>`<div class="brief-cue"><strong>${esc(item.title)}</strong><span>${esc(item.kind.replaceAll('_',' '))} · noticed ${esc(fmt(item.observedAt))} · ${esc(item.detail)}</span>${link(item.sourceUrl,'Publisher source')}</div>`).join(''):'<p>No source-status transition or newly displayed cue has been observed in this browser session. This does not establish that conditions are unchanged or safe.</p>'}<p>This is an in-memory comparison of bounded displayed samples, not a complete change history. A disappearing item is not treated as resolved.</p></details>`+
-    (picture.forecastContext.state==='current forecast'?`<div class="brief-cue"><strong>NWS KICKOFF FORECAST · ${esc(picture.forecastContext.period.shortForecast)}</strong><span>${picture.forecastContext.period.temperature==null?'Temperature unavailable':esc(picture.forecastContext.period.temperature)+'°'+esc(picture.forecastContext.period.temperatureUnit||'')} · wind ${esc(picture.forecastContext.period.windSpeed||'not supplied')} ${esc(picture.forecastContext.period.windDirection||'')} · precipitation ${picture.forecastContext.period.precipitationPercent==null?'not supplied':esc(picture.forecastContext.period.precipitationPercent)+'%'} · checked ${esc(fmt(picture.forecastContext.checkedAt))}. Forecast, not an observed condition or threat finding.</span>${link(picture.forecastContext.sourceUrl,'NWS hourly forecast')}</div>`:'')+
+    (['current forecast','current event-hour forecast'].includes(picture.forecastContext.state)?`<div class="brief-cue"><strong>${picture.forecastContext.state==='current event-hour forecast'?'NWS EVENT-HOUR FORECAST':'NWS KICKOFF FORECAST'} · ${esc(picture.forecastContext.period.shortForecast)}</strong><span>${picture.forecastContext.period.temperature==null?'Temperature unavailable':esc(picture.forecastContext.period.temperature)+'°'+esc(picture.forecastContext.period.temperatureUnit||'')} · wind ${esc(picture.forecastContext.period.windSpeed||'not supplied')} ${esc(picture.forecastContext.period.windDirection||'')} · precipitation ${picture.forecastContext.period.precipitationPercent==null?'not supplied':esc(picture.forecastContext.period.precipitationPercent)+'%'} · checked ${esc(fmt(picture.forecastContext.checkedAt))}. Forecast, not an observed condition or threat finding.</span>${link(picture.forecastContext.sourceUrl,'NWS hourly forecast')}</div>`:'')+
     (picture.cues.length?`<div class="brief-cues">${picture.cues.map(cue=>`<div class="brief-cue"><strong>${esc(cue.type.toUpperCase())} · ${esc(cue.title)}</strong><span>${esc(cue.basis)}${cue.sourceAt?' · source time '+esc(fmt(cue.sourceAt)):''}</span>${link(cue.sourceUrl,cue.type==='road condition'?'Agency data layer':cue.type==='transit alert'?'Transit agency alert':cue.type==='convective outlook'?'NOAA SPC outlook':cue.type==='excessive rainfall outlook'?'NOAA WPC outlook':'NWS alert')}</div>`).join('')}${total>picture.cues.length?`<p>These panels show bounded samples. Consult the agency feeds for the complete set of source records.</p>`:''}</div>`:'')+
     `<details class="brief-details"><summary>NFL publisher headlines · ${news.state==='current_snapshot'?news.articles.length+' team mention'+(news.articles.length===1?'':'s'):esc(news.state)}</summary>${news.state==='current_snapshot'?news.articles.length?news.articles.map(item=>`<div class="brief-cue"><strong>${esc(item.title)}</strong><span>${esc(item.description)} · ${esc(item.publisher)} RSS · ${esc(fmt(item.publishedAt))} · ${item.matchBasis==='both_teams_mentioned'?'Both teams named':'One team named'}</span>${link(item.url,'Full publisher article')}</div>`).join(''):`<p>No team-name match in the current ${esc(news.publisher)} NFL RSS snapshot. This does not establish an absence of relevant news.</p>`:'<p>NFL publisher RSS snapshot is unavailable or stale.</p>'}<p>Headlines and any shown descriptions are supplied by ${esc(news.publisher||'the publisher')}. Team-name matching is discovery context; it does not confirm relevance to this game, a person’s attendance, venue impact, or a threat. ${link(news.sourceUrl,'Publisher NFL RSS')}</p></details>`+
     `<details class="brief-details"><summary>Zone and sensor status</summary><div class="brief-grid">${picture.zoneReview.map(zone=>`<div><strong>${esc(zone.name)}</strong><span>${esc(zone.state)} · ${esc(zone.owner)}</span><small>${esc(zone.purpose)} ${link(zone.sourceUrl,'Source')}</small></div>`).join('')}</div></details><details class="brief-details"><summary>Source status and gaps</summary><div class="brief-grid">${picture.sources.map(source=>`<div><strong>${esc(source.name)}</strong><span>${esc(source.state)}${source.asOf?' · '+esc(fmt(source.asOf)):''}</span><small>${esc(source.detail)} ${link(source.sourceUrl,'Source')}</small></div>`).join('')}</div><p><strong>Unresolved for this brief</strong></p><ul>${picture.gaps.map(gap=>`<li>${esc(gap)}</li>`).join('')}</ul></details>${publishedLink}<button type="button" class="report-download">Download current public-source report (Markdown)</button> <button type="button" class="evidence-download">Download public evidence bundle (JSON)</button><p class="bundle-note">Both downloads reflect the latest loaded public evidence for this game. They are point-in-time, unreviewed exports; no threat assessment or named-person records.</p>`;
@@ -531,30 +531,31 @@ async function loadConditions(game,force=false){
       weather.alerts.map(({feature:item,candidate})=>`<div class="alert"><strong>${candidate?'<span class="time-match">TIME-ALIGNED NWS ALERT · REVIEW</span> ':''}${esc(item.properties?.event||'Alert')}</strong><br>${esc(item.properties?.severity||'Severity not supplied')} · ${esc(item.properties?.urgency||'Urgency not supplied')} · ${item.properties?.effective?esc(fmt(item.properties.effective)):'start not supplied'} to ${item.properties?.ends||item.properties?.expires?esc(fmt(item.properties.ends||item.properties.expires)):'end not supplied'} · ${link(item.properties?.['@id']||item.id,'NWS source')}</div>`).join(''))+
     `<p class="feed-state">USGS EARTHQUAKES · ${result.quakesError?'UNAVAILABLE':'RETRIEVED '+esc(fmt(result.at))+' · PAST SEVEN DAYS'}</p>`+
     (result.quakesError?`<p>${esc(result.quakesError)}</p>`:quakes.length?quakes.map(item=>`<p>${esc(item.properties?.title)} · ${link(item.properties?.url,'USGS record')}</p>`).join(''):'<p>No magnitude 2.5+ event returned within 250 km. Proximity alone does not establish impact.</p>')+
-    '<div id="forecast"><p>Checking the NWS kickoff forecast window…</p></div>';
+    '<div id="forecast"><p>Checking the NWS hourly forecast window…</p></div>';
   loadForecast(game,requestSerial);
   }finally{if(conditionsPendingFor?.serial===requestSerial)conditionsPendingFor=null;if(selected===id&&requestSerial===conditionsRequestSerial&&button){button.disabled=false;button.textContent='Check public conditions now'}}
 }
 async function loadForecast(game,requestSerial){
   if(selected!==game.id||requestSerial!==conditionsRequestSerial)return;
-  const target=$('forecast'),venue=game.venue,kickoff=Date.parse(game.kickoff),hours=(kickoff-Date.now())/3600000;
-  if(game.timeTbd||hours<0||hours>168){
+  const target=$('forecast'),venue=game.venue,kickoff=Date.parse(game.kickoff),hours=(kickoff-Date.now())/3600000,active=game.status==='in progress in source'&&hours<=0&&hours>=-9;
+  if(game.timeTbd||!active&&(hours<0||hours>168)){
     briefForecast=null;renderBrief(game);
-    target.innerHTML=game.timeTbd?'<p class="feed-state">KICKOFF FORECAST · TIME TBD</p><p>Forecast matching starts when a kickoff time is published.</p>':'<p class="feed-state">KICKOFF FORECAST · OUTSIDE WINDOW</p><p>NWS hourly forecasts cover approximately seven days ahead.</p>';
+    target.innerHTML=game.timeTbd?'<p class="feed-state">KICKOFF FORECAST · TIME TBD</p><p>Forecast matching starts when a kickoff time is published.</p>':'<p class="feed-state">HOURLY FORECAST · OUTSIDE WINDOW</p><p>The listed kickoff is outside the supported forecast interval. Check NWS directly for current conditions.</p>';
     return;
   }
   try{
     const point=await json('https://api.weather.gov/points/'+venue.lat+','+venue.lon),url=point.properties?.forecastHourly;
     if(!url||new URL(url).origin!=='https://api.weather.gov')throw Error('NWS hourly link unavailable');
-    const forecast=await json(url),period=forecast.properties?.periods?.find(item=>Date.parse(item.startTime)<=kickoff&&kickoff<Date.parse(item.endTime));
+    const targetAt=active?Date.now():kickoff;
+    const forecast=await json(url),period=forecast.properties?.periods?.find(item=>Date.parse(item.startTime)<=targetAt&&targetAt<Date.parse(item.endTime));
     if(selected!==game.id||requestSerial!==conditionsRequestSerial)return;
     briefForecast={state:'ok',checkedAt:Date.now(),kickoff:game.kickoff,sourceUrl:url,period};
-    const selectedForecast=selectKickoffForecast(game,briefForecast);
-    if(selectedForecast.state!=='current forecast')briefForecast={state:'failed',kickoff:game.kickoff};
+    const selectedForecast=active?selectEventHourForecast(game,briefForecast):selectKickoffForecast(game,briefForecast);
+    if(!['current forecast','current event-hour forecast'].includes(selectedForecast.state))briefForecast={state:'failed',kickoff:game.kickoff};
     renderBrief(game);
-    target.innerHTML=selectedForecast.state==='current forecast'?`<p class="feed-state">KICKOFF FORECAST · NWS HOURLY</p><p>${esc(selectedForecast.period.shortForecast)} · ${selectedForecast.period.temperature==null?'Temperature not supplied':esc(selectedForecast.period.temperature)+'°'+esc(selectedForecast.period.temperatureUnit||'')} · Wind ${esc(selectedForecast.period.windSpeed||'not supplied')} ${esc(selectedForecast.period.windDirection||'')} · Precipitation ${selectedForecast.period.precipitationPercent==null?'not supplied':esc(selectedForecast.period.precipitationPercent)+'%'}</p><p>${link(url,'NWS forecast')} · Forecast may change; check again close to kickoff.</p>`:'<p>NWS supplied no valid hourly period covering kickoff.</p>';
+    target.innerHTML=['current forecast','current event-hour forecast'].includes(selectedForecast.state)?`<p class="feed-state">${active?'EVENT-HOUR':'KICKOFF'} FORECAST · NWS HOURLY</p><p>${esc(selectedForecast.period.shortForecast)} · ${selectedForecast.period.temperature==null?'Temperature not supplied':esc(selectedForecast.period.temperature)+'°'+esc(selectedForecast.period.temperatureUnit||'')} · Wind ${esc(selectedForecast.period.windSpeed||'not supplied')} ${esc(selectedForecast.period.windDirection||'')} · Precipitation ${selectedForecast.period.precipitationPercent==null?'not supplied':esc(selectedForecast.period.precipitationPercent)+'%'}</p><p>${link(url,'NWS forecast')} · Forecast may change; this is not an observed condition.</p>`:`<p>NWS supplied no valid hourly period covering the ${active?'current event hour':'listed kickoff'}.</p>`;
   }catch(error){
-    if(selected===game.id&&requestSerial===conditionsRequestSerial){briefForecast={state:'failed',kickoff:game.kickoff};renderBrief(game);target.innerHTML=`<p class="feed-state">KICKOFF FORECAST · UNAVAILABLE</p><p>${esc(error.message)}</p>`}
+    if(selected===game.id&&requestSerial===conditionsRequestSerial){briefForecast={state:'failed',kickoff:game.kickoff};renderBrief(game);target.innerHTML=`<p class="feed-state">HOURLY FORECAST · UNAVAILABLE</p><p>${esc(error.message)}</p>`}
   }
 }
 async function refreshPublishedSnapshots(){

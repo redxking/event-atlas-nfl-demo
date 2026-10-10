@@ -39,6 +39,16 @@ test('current kickoff forecast enters source status without becoming a threat cu
   assert.ok(!picture.gaps.some(item=>item.includes('hourly kickoff forecast')));
 });
 
+test('live game labels the current hourly forecast separately from the kickoff forecast',()=>{
+  const liveNow=Date.parse('2026-10-11T21:15:00Z');
+  const liveGame={...game,status:'in progress in source'};
+  const forecast={state:'ok',checkedAt:liveNow,kickoff:game.kickoff,sourceUrl:'https://api.weather.gov/gridpoints/FWD/82,107/forecast/hourly',period:{startTime:'2026-10-11T21:00:00Z',endTime:'2026-10-11T22:00:00Z',shortForecast:'Light Rain',temperature:69,temperatureUnit:'F'}};
+  const picture=buildNflEventPicture(liveGame,{...inputs,forecast},liveNow);
+  assert.equal(picture.forecastContext.state,'current event-hour forecast');
+  assert.equal(picture.sources.find(item=>item.name==='NWS event-hour forecast').sourceUrl,forecast.sourceUrl);
+  assert.ok(!picture.gaps.some(item=>item.includes('current event-hour forecast')));
+});
+
 test('stale observations and unknown kickoff do not create time-aligned cues',()=>{
   const stale=buildNflEventPicture(game,{...inputs,roads:{...inputs.roads,builtAt:'2026-10-08T00:00:00Z'},conditions:{...inputs.conditions,at:now-3600000}},now);
   assert.equal(stale.cues.length,0);

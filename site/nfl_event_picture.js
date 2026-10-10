@@ -3,7 +3,7 @@ import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
 import {selectNflNews} from './nfl_news_context.js';
 import {selectSeptaForGame} from './septa_b_alerts.js';
-import {selectKickoffForecast} from './nws_forecast.js';
+import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
 
@@ -27,7 +27,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const tfrAtListedKickoff=tfrMatches.filter(item=>tfrAtKickoff(game,item)==='listed_kickoff_within_notam_window').length;
   const road=selectRoadContext(game,roads,now);
   const weather=conditions?.alertsError||!Array.isArray(conditions?.alerts?.features)?null:selectWeatherContext(game,conditions.alerts.features,conditions.at,now);
-  const kickoffForecast=selectKickoffForecast(game,forecast,now);
+  const activeGame=game.status==='in progress in source';
+  const kickoffForecast=activeGame?selectEventHourForecast(game,forecast,now):selectKickoffForecast(game,forecast,now);
   const convectiveOutlook=selectSpcForGame(game,spc,now);
   const excessiveRainOutlook=selectWpcRainForGame(game,wpcRain,now);
   const policeConnected=['3687','3673','3933','3812','3628'].includes(venueId);
@@ -57,7 +58,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('FAA SEAMS',!faa?'no linked record':faaFresh?'current snapshot':'stale snapshot',airspace?.builtAt,`Airspace record last edited ${faa?.sourceUpdatedAt||'not supplied'}; current NOTAM not verified.`,airspace?.sourceItemUrl),
     row('FAA TFR list',!tfrFresh?'stale or unavailable':tfrAtListedKickoff?`${tfrAtListedKickoff} at listed kickoff; review` :tfrMatches.length?`${tfrMatches.length} spatial review candidate${tfrMatches.length===1?'':'s'}`:'no spatial match in snapshot',tfr?.builtAt,'Single explicit UTC windows are parsed from FAA NOTAM detail; recurring, permanent, and multi-area schedules need direct review. A time match does not link a notice to the NFL event or detect a drone.',tfr?.sourcePageUrl||'https://tfr.faa.gov/tfr3/'),
     row('NWS point alerts',conditions?.alertsError?'source failed':!conditions?'not yet checked':weather?.state==='stale'?'stale':weather?.state==='kickoff_unavailable'?'checked; time screen unavailable':'checked',conditions?.at?new Date(conditions.at).toISOString():null,'Point query; verify alert footprint.',Number.isFinite(game.venue.lat)&&Number.isFinite(game.venue.lon)?`https://api.weather.gov/alerts/active?point=${game.venue.lat},${game.venue.lon}`:null),
-    row('NWS kickoff forecast',kickoffForecast.state,kickoffForecast.checkedAt,'Hourly grid forecast for the venue candidate point and listed kickoff. Forecast uncertainty and updates require direct NWS review.',kickoffForecast.sourceUrl),
+    row(activeGame?'NWS event-hour forecast':'NWS kickoff forecast',kickoffForecast.state,kickoffForecast.checkedAt,activeGame?'Hourly grid forecast for the current event hour at the venue candidate point. Forecast, not observed conditions or a threat finding.':'Hourly grid forecast for the venue candidate point and listed kickoff. Forecast uncertainty and updates require direct NWS review.',kickoffForecast.sourceUrl),
     row('NOAA SPC convective outlook',convectiveOutlook.state,convectiveOutlook.match?.issuedAt||spc?.builtAt,convectiveOutlook.match?`Day ${convectiveOutlook.match.day} ${convectiveOutlook.match.category} categorical regional forecast at the candidate point and listed kickoff. Not a warning, observed condition, or venue impact.`:'Day 1–3 categorical forecast polygons; absence of a point match is not an all-clear.',convectiveOutlook.sourceUrl),
     row('NOAA WPC excessive-rainfall outlook',excessiveRainOutlook.state,excessiveRainOutlook.match?.issuedAt||wpcRain?.builtAt,excessiveRainOutlook.match?`Day ${excessiveRainOutlook.match.day} ${excessiveRainOutlook.match.category} regional flash-flood forecast at the candidate point and listed kickoff. Not a warning, observed flood, or venue impact.`:'Day 1–3 excessive-rainfall forecast polygons; absence of a point match is not an all-clear.',excessiveRainOutlook.sourceUrl),
     row('USGS earthquakes',conditions?.quakesError?'source failed':!conditions?'not yet checked':usgsFresh?'checked':'stale or unavailable',usgsFresh?new Date(conditions.at).toISOString():null,'Magnitude 2.5+ weekly feed; proximity does not establish event impact.','https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson'),
@@ -111,7 +112,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
   if(venueId==='3810'&&roadDirect?.state==='failed')gaps.push('Direct Tennessee DOT SmartWay check failed; the scheduled road snapshot may be stale.');
   if(!weather||weather.state!=='screened')gaps.push('NWS alert event-time screening is unavailable or incomplete.');
-  if(kickoffForecast.state==='unavailable or stale')gaps.push('NWS hourly kickoff forecast is unavailable or older than 30 minutes.');
+  if(kickoffForecast.state==='unavailable or stale')gaps.push(activeGame?'NWS current event-hour forecast is unavailable or older than 30 minutes.':'NWS hourly kickoff forecast is unavailable or older than 30 minutes.');
   if(convectiveOutlook.state==='stale or unavailable')gaps.push('NOAA SPC Day 1–3 categorical outlook snapshot is unavailable or older than 12 hours.');
   if(excessiveRainOutlook.state==='stale or unavailable')gaps.push('NOAA WPC Day 1–3 excessive-rainfall outlook snapshot is unavailable or older than 12 hours.');
   if(!faa||!faaFresh)gaps.push('FAA SEAMS event snapshot is absent or stale.');

@@ -37,6 +37,10 @@ test('changed kickoff forecast is logged only across comparable current checks',
   const changes=diffEventPicture(before,after,null,null,game,game);
   assert.equal(changes.find(item=>item.kind==='forecast_changed')?.sourceUrl,base.sourceUrl);
   assert.ok(!diffEventPicture(before,{...after,forecastContext:{...after.forecastContext,state:'unavailable or stale'}},null,null,game,game).some(item=>item.kind==='forecast_changed'));
+  const activeGame={...game,status:'in progress in source'};
+  const liveBefore={...before,forecastContext:{...base,state:'current event-hour forecast'}};
+  const liveAfter={...after,forecastContext:{...after.forecastContext,state:'current event-hour forecast'}};
+  assert.equal(diffEventPicture(liveBefore,liveAfter,null,null,activeGame,activeGame).find(item=>item.kind==='forecast_changed')?.title,'NWS event-hour forecast changed');
 });
 
 test('new NOAA outlook cues require two current comparable publisher snapshots',()=>{
