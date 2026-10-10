@@ -1,3 +1,4 @@
+import {attachMovementTracking} from './movement_map.js';
 let map,groundLayer,airLayer,venueLayer,controls,eventId,resizeObserver;
 const textNode=text=>{const node=document.createElement('div');node.textContent=text;return node;};
 const validRing=ring=>Array.isArray(ring)&&ring.length>=4&&ring.every(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);
@@ -26,5 +27,6 @@ export function renderEventGeographicMap(game,ground,airspace){
  const frame=()=>{if(validRing(record?.ring))map.fitBounds(record.ring.map(([lon,lat])=>[lat,lon]),{padding:[24,24]});else map.setView([venue.lat,venue.lon],15);};
  document.getElementById('map-show-stadium').onclick=()=>map.setView([venue.lat,venue.lon],16);
  document.getElementById('map-show-airspace').onclick=frame;
+ attachMovementTracking(map,controls,game,record?.ring);
  if(eventId!==game.id){map.setView([venue.lat,venue.lon],15);eventId=game.id;}
 }
