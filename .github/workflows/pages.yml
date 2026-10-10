@@ -46,6 +46,7 @@ jobs:
       - run: npm run sync:falcons-guide
       - run: npm run sync:saints-guide
       - run: npm run sync:norta-alerts
+      - run: npm run sync:nola-calls
       - run: npm run sync:marta-rail
       - run: npm run sync:marta-alert-preview
       - run: npm run sync:georgia-traffic
