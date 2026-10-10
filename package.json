@@ -36,6 +36,7 @@
     "sync:calfire": "node scripts/sync_calfire_active.mjs",
     "sync:chargers-themes": "node scripts/sync_chargers_themes.mjs",
     "sync:metro-sofi": "node scripts/sync_metro_sofi_plan.mjs",
+    "sync:metro-i105": "node scripts/sync_metro_i105_notice.mjs",
     "sync:sofi-events": "python3 scripts/sync_sofi_event_pages.py",
     "sync:inglewood-alerts": "python3 scripts/sync_inglewood_alerts.py",
     "sync:rams-bills": "python3 scripts/sync_rams_bills_gameday.py",

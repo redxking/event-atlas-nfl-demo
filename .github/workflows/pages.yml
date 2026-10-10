@@ -87,6 +87,7 @@ jobs:
       - run: npm run sync:calfire
       - run: npm run sync:chargers-themes
       - run: npm run sync:metro-sofi
+      - run: npm run sync:metro-i105
       - run: npm run sync:sofi-events
       - run: npm run sync:inglewood-alerts
       - run: npm run sync:rams-bills
