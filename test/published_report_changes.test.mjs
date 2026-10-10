@@ -94,3 +94,33 @@ test('repeated coverage flaps cannot evict a substantive city revision from boun
   assert.ok(history.includes(substantive));
   assert.equal(history.find(item=>item.title==='NOPD calls: checked → stale')?.observedAt,status.find(item=>item.title==='NOPD calls: checked → stale').observedAt);
 });
+
+test('newer road snapshots publish relationship reclassification without claiming resolution',()=>{
+  const roadUrl='https://example.gov/road-records';
+  const roadRow=asOf=>({name:'Road conditions',state:'time screened',asOf,sourceUrl:roadUrl});
+  const record=relationship=>({relationship,ruleId:relationship==='excluded_link'?'ROAD_WINDOW_DISJOINT':'ROAD_RADIUS_WINDOW',recordId:'road-42',claim:'Road event at Example Street',sourceUrl:roadUrl});
+  const make=(relationship,asOf)=>({picture:{eventId:game.id,sources:[roadRow(asOf)],cues:[],forecastContext:{state:'unavailable or stale'}},relationshipLedger:{schema:'event-atlas.nfl-relationship-ledger.v1',items:[record(relationship)]}});
+  const first=buildPublishedReportState(make('excluded_link','2026-10-10T00:00:00Z'),game,null,null,at-3600000);
+  const next=buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z'),game,null,first,at);
+  const change=next.changes.find(item=>item.kind==='road_event_relationship_reclassified');
+  assert.equal(next.schema,'event-atlas.published-report-state.v8');
+  assert.equal(change.sourceUrl,roadUrl);
+  assert.match(change.detail,/excluded link to time place candidate/);
+  assert.match(change.detail,/not evidence of a road reopening/);
+  const repeated=buildPublishedReportState(make('time_place_candidate','2026-10-10T02:00:00Z'),game,null,next,at+3600000);
+  assert.equal(repeated.newChangeCount,0);
+  const excluded=buildPublishedReportState(make('excluded_link','2026-10-10T03:00:00Z'),game,null,repeated,at+2*3600000);
+  assert.match(excluded.changes.find(item=>item.kind==='road_event_relationship_reclassified')?.detail||'',/time place candidate to excluded link/);
+});
+
+test('road relationship changes require a comparable schedule and newer successful source check',()=>{
+  const roadUrl='https://example.gov/road-records';
+  const make=(relationship,asOf,state='time screened')=>({picture:{eventId:game.id,sources:[{name:'Road conditions',state,asOf,sourceUrl:roadUrl}],cues:[],forecastContext:{state:'unavailable or stale'}},relationshipLedger:{schema:'event-atlas.nfl-relationship-ledger.v1',items:[{relationship,ruleId:relationship==='excluded_link'?'ROAD_WINDOW_DISJOINT':'ROAD_RADIUS_WINDOW',recordId:'road-42',claim:'Example road',sourceUrl:roadUrl}]}});
+  const first=buildPublishedReportState(make('excluded_link','2026-10-10T00:00:00Z'),game,null,null,at-3600000);
+  assert.equal(buildPublishedReportState(make('time_place_candidate','2026-10-10T00:00:00Z'),game,null,first,at).changes.filter(item=>item.kind==='road_event_relationship_reclassified').length,0);
+  assert.equal(buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z','source failed'),game,null,first,at).changes.filter(item=>item.kind==='road_event_relationship_reclassified').length,0);
+  assert.equal(buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z'),{...game,kickoff:'2026-10-11T21:00:00Z'},null,first,at).changes.filter(item=>item.kind==='road_event_relationship_reclassified').length,0);
+  const legacy={...first,schema:'event-atlas.published-report-state.v7'};
+  assert.equal(buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z'),game,null,legacy,at).comparison,'previous published run');
+  assert.equal(buildPublishedReportState(make('time_place_candidate','2026-10-10T01:00:00Z'),game,null,legacy,at).changes.filter(item=>item.kind==='road_event_relationship_reclassified').length,0);
+});
