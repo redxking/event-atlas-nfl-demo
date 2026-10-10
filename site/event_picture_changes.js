@@ -21,6 +21,14 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const changed=['eventStartsLocal','parkingLotsOpenLocal','doorsOpenLocal','detailKickoffLocal'].filter(key=>oldSofi[key]!==newSofi[key]);
     if(changed.length)changes.push({kind:'venue_event_page_revised',observedAt,title:'SoFi exact-game venue timing changed',detail:`The official venue page changed: ${changed.join(', ')}. Reconcile with the club and stadium before using these published times. This is not an observed opening, crowd condition, incident, or threat.`,sourceUrl:newSofi.sourceUrl});
   }
+  const oldInglewood=before.inglewoodAlertsContext,newInglewood=after.inglewoodAlertsContext;
+  if(!eventWindowChanged&&oldInglewood?.state==='current_city_listing'&&newInglewood?.state==='current_city_listing'&&Number.isFinite(Date.parse(oldInglewood.asOf))&&Date.parse(newInglewood.asOf)>Date.parse(oldInglewood.asOf)){
+    const oldTraffic=new Map((oldInglewood.categories?.traffic?.entries||[]).map(item=>[item.id,item]));
+    for(const item of (newInglewood.categories?.traffic?.entries||[]).slice(0,8)){
+      const prior=oldTraffic.get(item.id);
+      if(!prior||prior.title!==item.title||prior.description!==item.description)changes.push({kind:prior?'city_notice_changed':'new_city_notice',observedAt,title:`Inglewood traffic listing: ${item.title}`.slice(0,300),detail:'A city traffic-alert listing appeared or its displayed text changed between checks. Match date, place, and current status with the city before judging event relevance. This is not a verified stadium impact or threat.',sourceUrl:item.sourceUrl});
+    }
+  }
   if(eventWindowChanged)changes.push({kind:'schedule_changed',observedAt,title:'Published game time or status changed',detail:'Review the new schedule and repeat event-window screening. The change is not an incident finding.',sourceUrl:currentGame?.sourceUrl||null});
   if(!eventWindowChanged&&previousGame?.gameState&&currentGame?.gameState&&Number.isFinite(Date.parse(previousGame.sourceRetrievedAt))&&Date.parse(currentGame.sourceRetrievedAt)>Date.parse(previousGame.sourceRetrievedAt)&&JSON.stringify(previousGame.gameState)!==JSON.stringify(currentGame.gameState))changes.push({kind:'game_state_changed',observedAt,title:'Publisher game score or period changed',detail:'The publisher scoreboard differs from the prior retrieved snapshot. Confirm the latest game state with the source; this does not establish crowd movement, venue impact, or a threat.',sourceUrl:currentGame.sourceUrl||null});
   for(const [name,next] of newRows){
