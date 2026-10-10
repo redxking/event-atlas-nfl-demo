@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildSharedRegionalRecords} from '../lib/shared_regional_records.mjs';
+import {buildSharedRegionalRecords,retainSharedRegionalRevisions} from '../lib/shared_regional_records.mjs';
 
 const now=Date.parse('2026-10-10T15:30:00Z');
 const record={sourceId:'ci41345415',sourceUrl:'https://earthquake.usgs.gov/earthquakes/eventpage/ci41345415',title:'M 3.2 - near Signal Hill, CA',magnitude:3.16,occurredAt:'2026-10-09T07:44:17Z',updatedAt:'2026-10-10T14:08:17Z',distanceKm:23.3,point:[-118.1845,33.7875]};
@@ -38,4 +38,20 @@ test('one publisher correction records separate before and after values for both
   assert.equal(group.revisions[0].previous.sourceUpdatedAt,old.updatedAt);
   assert.equal(group.revisions[0].current.sourceUpdatedAt,record.updatedAt);
   assert.equal(buildSharedRegionalRecords(reports,current,now,prior.map(item=>({...item,picture:{usgsContext:{...item.picture.usgsContext,state:'stale_or_unavailable'}}})))[0].revisions.length,0);
+});
+
+test('shared correction history survives an unchanged hourly build with its original observation time',()=>{
+  const old={...record,magnitude:3,updatedAt:'2026-10-10T12:00:00Z'};
+  const current=[state('nfl:1',[record]),state('nfl:2',[record]),state('nfl:3',[])];
+  const prior=['nfl:1','nfl:2'].map(eventId=>({...state(eventId,[old],'2026-10-10T13:00:00Z'),schema:'event-atlas.published-report-state.v8'}));
+  const corrected=buildSharedRegionalRecords(reports,current,now,prior);
+  const previousFeed={schema:'event-atlas.published-change-feed.v1',status:'unreviewed_public_source_changes',builtAt:new Date(now).toISOString(),sharedRegionalRecords:corrected};
+  const next=buildSharedRegionalRecords(reports,current,now+3600000);
+  assert.equal(next[0].revisions.length,0);
+  const retained=retainSharedRegionalRevisions(next,previousFeed,now+3600000);
+  assert.equal(retained[0].revisions.length,2);
+  assert.ok(retained[0].revisions.every(item=>item.systemObservedAt===new Date(now).toISOString()&&item.provenance==='retained_prior_published_feed'));
+  assert.equal(retainSharedRegionalRevisions(corrected,previousFeed,now+3600000)[0].revisions.length,2);
+  assert.equal(retainSharedRegionalRevisions(next,{...previousFeed,builtAt:'2026-09-20T00:00:00Z'},now+3600000)[0].revisions.length,0);
+  assert.equal(retainSharedRegionalRevisions(next,{...previousFeed,sharedRegionalRecords:[{...corrected[0],sourceId:'different'}]},now+3600000)[0].revisions.length,0);
 });

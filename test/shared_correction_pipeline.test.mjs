@@ -21,4 +21,7 @@ test('one corrected USGS record reaches two event histories and the shared view 
   assert.equal(feed.items.filter(item=>item.kind==='usgs_earthquake_revised').length,2);
   assert.deepEqual(feed.sharedRegionalRecords[0].revisions.map(item=>item.eventId),['nfl:1','nfl:2']);
   assert.equal(feed.sharedRegionalRecords[0].excludedSample.eventId,'nfl:3');
+  const later=buildPublishedChangeFeed(reports,next,Date.parse('2026-10-10T16:30:00Z'),[],feed);
+  assert.equal(later.sharedRegionalRecords[0].revisions.length,2);
+  assert.ok(later.sharedRegionalRecords[0].revisions.every(item=>item.systemObservedAt==='2026-10-10T15:30:00.000Z'&&item.provenance==='retained_prior_published_feed'));
 });

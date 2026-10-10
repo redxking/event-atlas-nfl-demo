@@ -95,6 +95,16 @@ async function previousReportState(id){
     return raw.length<=150000?JSON.parse(raw):null;
   }catch{return null}
 }
+async function previousChangeFeed(){
+  try{return JSON.parse(await fs.readFile(path.join(outDir,'changes.json'),'utf8'))}catch{}
+  try{
+    const response=await fetch(`https://redxking.github.io/event-atlas-nfl-demo/reports/changes.json?check=${now}`,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000),cache:'no-store'});
+    if(!response.ok)return null;
+    const raw=await response.text();
+    return raw.length<=500000?JSON.parse(raw):null;
+  }catch{return null}
+}
+const priorChangeFeed=await previousChangeFeed();
 const entries=[],changeStates=[],previousStates=[];
 for(const game of games){
   if(!/^nfl:\d+$/.test(game.id))throw Error('Unexpected NFL game ID');
@@ -126,7 +136,7 @@ for(const game of games){
 }
 const index={status:'ok',builtAt:new Date().toISOString(),basis:'Hourly public-source compilations for every upcoming U.S. NFL game. Games within seven days, active games, and source-completed games within 24 hours of listed kickoff receive point alert, nearby station observation, event-hour forecast, and exact-game publisher checks. More distant games are planning snapshots without those live event checks. Each report is unreviewed; direct browser checks may be newer. A station reading is not a stadium measurement or a kickoff forecast. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
-const changeFeed=buildPublishedChangeFeed(entries,changeStates,Date.now(),previousStates);
+const changeFeed=buildPublishedChangeFeed(entries,changeStates,Date.now(),previousStates,priorChangeFeed);
 await fs.writeFile(path.join(outDir,'changes.json'),JSON.stringify(changeFeed)+'\n','utf8');
 await fs.writeFile(path.join(outDir,'changes.xml'),renderPublishedChangeAtom(changeFeed),'utf8');
 console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);
