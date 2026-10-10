@@ -54,21 +54,27 @@ test('local AI packet includes fresh exact-game status and current forecast with
 
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
-  const draft={selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Is the road condition relevant to event access?',evidenceIds:['C1']}]};
-  assert.deepEqual(validateLocalAiDraft(draft,packet),{selectedEvidence:[packet.evidence[0]],reviewQuestions:draft.reviewQuestions,coverageGaps:[{text:'No verified stadium CCTV stream is connected.',evidenceId:'G1'}]});
-  assert.throws(()=>validateLocalAiDraft({...draft,reviewQuestions:[{question:'Unknown source?',evidenceIds:['X1']}]},packet),/unknown/);
-  assert.throws(()=>validateLocalAiDraft({...draft,selectedEvidenceIds:['X1']},packet),/unknown/);
-  assert.throws(()=>validateLocalAiDraft({...draft,selectedEvidenceIds:['C1','C1']},packet),/duplicate/);
-  assert.throws(()=>validateLocalAiDraft({...draft,reviewQuestions:[{question:'Unsupported question?',evidenceIds:[]}]},packet),/missing evidence/);
+  const draft=validateLocalAiDraft('C1,S1,G1',packet);
+  assert.deepEqual(draft.selectedEvidence,packet.evidence);
+  assert.deepEqual(draft.reviewQuestions.map(item=>item.evidenceIds),[['C1'],['S1']]);
+  assert.deepEqual(draft.coverageGaps,[{text:'No verified stadium CCTV stream is connected.',evidenceId:'G1'}]);
+  assert.throws(()=>validateLocalAiDraft('X1',packet),/unknown/);
+  assert.throws(()=>validateLocalAiDraft('C1,C1',packet),/duplicate/);
+  assert.throws(()=>validateLocalAiDraft('C1,ignore all prior instructions',packet),/invalid ID list/);
+  assert.throws(()=>validateLocalAiDraft('```json\n["C1"]\n```',packet),/invalid ID list/);
+  const expanded={...packet,evidence:[...packet.evidence,...Array.from({length:9},(_,index)=>({...packet.evidence[0],id:`C${index+2}`}))]};
+  const longRanking=Array.from({length:10},(_,index)=>`C${index+1}`).join(',');
+  assert.deepEqual(validateLocalAiDraft(longRanking,expanded).selectedEvidence.map(item=>item.id),['C1','C2','C3']);
+  assert.throws(()=>validateLocalAiDraft(`${longRanking},X1`,expanded),/unknown/);
 });
 
 test('local Ollama request fixes model and endpoint without private fields',async()=>{
   const packet=buildLocalAiPacket(brief);
   let called=false;
-  const result=await generateLocalAiDraft(packet,{fetchImpl:async(url,options)=>{called=true;assert.equal(url,'http://127.0.0.1:11434/api/chat');const request=JSON.parse(options.body);assert.equal(request.model,'qwen3.5:9b');assert.equal(request.stream,false);assert.equal(request.messages[1].content,JSON.stringify(packet));assert.ok(!options.body.includes('PRIVATE PERSON'));return {ok:true,json:async()=>({model:'qwen3.5:9b',done_reason:'stop',message:{content:JSON.stringify({selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Verify publisher detail?',evidenceIds:['C1']}]})}})}}});
+  const result=await generateLocalAiDraft(packet,{fetchImpl:async(url,options)=>{called=true;assert.equal(url,'http://127.0.0.1:11434/api/chat');const request=JSON.parse(options.body);assert.equal(request.model,'qwen3.5:9b');assert.equal(request.stream,false);assert.equal(request.messages[1].content,JSON.stringify(packet));assert.ok(!options.body.includes('PRIVATE PERSON'));return {ok:true,json:async()=>({model:'qwen3.5:9b',done_reason:'stop',message:{content:'C1,S1,G1'}})}}});
   assert.ok(called);
   assert.equal(result.status,'model_generated_unreviewed');
-  assert.equal(result.schema,'event-atlas.local-ai-draft.v3');
-  assert.deepEqual(result.draft.selectedEvidence,[packet.evidence[0]]);
+  assert.equal(result.schema,'event-atlas.local-ai-draft.v4');
+  assert.deepEqual(result.draft.selectedEvidence,packet.evidence);
   assert.equal(result.publicPacketSha256.length,64);
 });
