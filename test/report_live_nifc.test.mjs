@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {directNifcEligible,nifcDirectQueryUrl,summarizeDirectNifc} from '../site/report_live_nifc.js';
+import {directNifcEligible,nifcDirectQueryUrl,summarizeDirectNifc,compareDirectNifcToReport} from '../site/report_live_nifc.js';
 import {renderPublicReportHtml} from '../scripts/render_public_report_html.mjs';
 
 const now=Date.parse('2026-10-10T16:00:00Z');
@@ -32,6 +32,19 @@ test('direct NIFC refuses incomplete or stale checks rather than reporting zero 
 
 test('published report includes the direct NIFC panel and module',()=>{
   const html=renderPublicReportHtml('# Report',{title:'Report',generatedAt:new Date(now).toISOString(),markdownPath:'nfl-42.md',liveContext:{monitoringMode:context.monitoringMode,lat:context.lat,lon:context.lon,kickoff:context.kickoff,status:context.status}});
-  assert.ok(html.includes('report_live_nifc.js?v=20261010-2'));
+  assert.ok(html.includes('report_live_nifc.js?v=20261010-4'));
   assert.ok(html.includes('id="direct-nifc"'));
+});
+
+test('direct NIFC comparison distinguishes publisher revisions from displayed-sample turnover',()=>{
+  const earlier=now-3600000,old=summarizeDirectNifc(context,{features:[{...feature,attributes:{...feature.attributes,IncidentSize:5,ModifiedOnDateTime_dt:earlier}}, {...feature,attributes:{...feature.attributes,OBJECTID:43}}]},earlier,earlier);
+  const current=summarizeDirectNifc(context,{features:[feature,{...feature,attributes:{...feature.attributes,OBJECTID:44}}]},now,now);
+  const state={schema:'event-atlas.published-report-state.v8',eventId:'nfl:42',generatedAt:new Date(earlier).toISOString(),picture:{wildfireContext:{...old,sourceUrl:'https://data-nifc.opendata.arcgis.com/maps/nifc::current-wildland-fire-incident-locations'}}};
+  const expected={eventId:'nfl:42',generatedAt:state.generatedAt};
+  const comparison=compareDirectNifcToReport(state,current,expected);
+  assert.deepEqual(comparison.changes.map(item=>item.kind),['publisher_revision','newly_displayed','no_longer_displayed']);
+  assert.deepEqual(comparison.changes[0].changedFields,['acres']);
+  assert.throws(()=>compareDirectNifcToReport(state,current,{...expected,eventId:'nfl:43'}),/unavailable/);
+  assert.throws(()=>compareDirectNifcToReport({...state,picture:{wildfireContext:{...state.picture.wildfireContext,state:'stale_or_unavailable'}}},current,expected),/unavailable/);
+  assert.deepEqual(compareDirectNifcToReport({...state,picture:{wildfireContext:{...state.picture.wildfireContext,events:current.events}}},current,expected).changes,[]);
 });

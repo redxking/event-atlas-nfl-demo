@@ -36,6 +36,23 @@ export function summarizeDirectNifc(context,raw,checkedAt,now=checkedAt){
   return {...result,queriedFeatureCount:raw.features.length};
 }
 
+export function compareDirectNifcToReport(state,direct,{eventId,generatedAt}){
+  const prior=state?.picture?.wildfireContext;
+  if(!['event-atlas.published-report-state.v7','event-atlas.published-report-state.v8'].includes(state?.schema)||state.eventId!==eventId||state.generatedAt!==generatedAt||prior?.state!=='current_snapshot'||prior.sourceUrl!==nifcSource||!Number.isFinite(Date.parse(prior.asOf))||!Array.isArray(prior.events)||prior.events.length>5||direct?.state!=='current_snapshot'||!Number.isFinite(Date.parse(direct.asOf))||Date.parse(direct.asOf)<=Date.parse(prior.asOf)||Date.parse(direct.asOf)-Date.parse(prior.asOf)>12*HOUR||!Array.isArray(direct.events)||direct.events.length>5)throw Error('Published NIFC comparison unavailable');
+  const valid=item=>Number.isInteger(item?.id)&&item.id>0&&item.sourceUrl===`${nifcLayer}/${item.id}`&&Number.isFinite(item.distanceKm)&&item.distanceKm>=0&&item.distanceKm<=150&&Number.isFinite(Date.parse(item.updatedAt));
+  if(!prior.events.every(valid)||!direct.events.every(valid)||new Set(prior.events.map(item=>item.id)).size!==prior.events.length||new Set(direct.events.map(item=>item.id)).size!==direct.events.length)throw Error('Invalid NIFC comparison record');
+  const before=new Map(prior.events.map(item=>[item.id,item])),after=new Map(direct.events.map(item=>[item.id,item])),changes=[];
+  for(const item of direct.events){
+    const old=before.get(item.id);
+    if(!old){changes.push({kind:'newly_displayed',record:item,previous:null,changedFields:[]});continue}
+    if(Date.parse(item.updatedAt)<=Date.parse(old.updatedAt))continue;
+    const changedFields=['name','acres','containedPercent','point'].filter(field=>field==='point'?item.lat!==old.lat||item.lon!==old.lon:item[field]!==old[field]);
+    if(changedFields.length)changes.push({kind:'publisher_revision',record:item,previous:old,changedFields});
+  }
+  for(const item of prior.events)if(!after.has(item.id))changes.push({kind:'no_longer_displayed',record:item,previous:item,changedFields:[]});
+  return {publishedAt:prior.asOf,directAt:direct.asOf,changes};
+}
+
 if(typeof document!=='undefined'){
   const main=document.querySelector('main[data-report-path][data-monitoring-mode]');
   const panel=document.querySelector('#direct-nifc');
@@ -64,6 +81,29 @@ if(typeof document!=='undefined'){
             const row=add('p',`${item.name} · ${item.distanceKm} km · source updated ${item.updatedAt} · reported acres ${item.acres??'unreported'} · reported containment ${item.containedPercent==null?'unreported':item.containedPercent+'%'}. `);
             link(item.sourceUrl,'NIFC record ↗',row);
           }
+          try{
+            const path=main.dataset.reportPath;
+            if(!/^reports\/nfl-\d+\.html$/.test(path))throw Error('Invalid report path');
+            const baselineUrl=new URL(path.slice('reports/'.length).replace(/\.html$/,'.state.json'),location.href);
+            const baselineResponse=await fetch(baselineUrl,{cache:'no-store',signal:AbortSignal.timeout(10000),headers:{Accept:'application/json'}});
+            if(!baselineResponse.ok||Number(baselineResponse.headers.get('content-length'))>300000)throw Error('Published state unavailable');
+            const baselineBody=await baselineResponse.text();
+            if(baselineBody.length>300000)throw Error('Published state oversized');
+            const comparison=compareDirectNifcToReport(JSON.parse(baselineBody),result,{eventId:main.dataset.gameId,generatedAt:main.dataset.generatedAt});
+            add('p',`Compared with this report’s published NIFC sample from ${comparison.publishedAt}. These are differences in a capped display, not independent incident confirmations.`);
+            if(!comparison.changes.length)add('p','No material difference in the displayed five-record sample. This does not prove the publisher made no other changes or that conditions are safe.');
+            for(const change of comparison.changes){
+              const item=change.record;
+              let description;
+              if(change.kind==='newly_displayed')description=`Newly displayed in the direct five-record sample: ${item.name}; source updated ${item.updatedAt}. This does not establish a new incident.`;
+              else if(change.kind==='no_longer_displayed')description=`No longer displayed in the direct five-record sample: ${item.name}. This does not establish containment or resolution.`;
+              else{
+                const old=change.previous,fields=change.changedFields.map(field=>field==='name'?`name ${old.name} → ${item.name}`:field==='acres'?`reported acres ${old.acres??'unreported'} → ${item.acres??'unreported'}`:field==='containedPercent'?`reported containment ${old.containedPercent==null?'unreported':old.containedPercent+'%'} → ${item.containedPercent==null?'unreported':item.containedPercent+'%'}`:`source point and venue distance ${old.distanceKm} → ${item.distanceKm} km`).join('; ');
+                description=`Publisher fields revised since the report sample: ${item.name}; ${fields}. Source updated ${old.updatedAt} → ${item.updatedAt}.`;
+              }
+              const row=add('p',description+' ');link(item.sourceUrl,'NIFC record ↗',row);
+            }
+          }catch{add('p','Comparison with this page’s published NIFC snapshot is unavailable; use the dated direct records above and verify source changes with NIFC.');}
           add('p','A point is not a fire perimeter, smoke observation, route disruption, stadium impact, or threat finding. No nearby point is not an all-clear. This browser check may be newer than the hourly report and is not saved in its Markdown.');
         }catch{
           panel.replaceChildren();add('p','Direct NIFC check unavailable or incomplete. The dated report below may be older; verify the current incident service.');
