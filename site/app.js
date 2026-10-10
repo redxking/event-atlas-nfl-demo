@@ -21,7 +21,7 @@ import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './mbta_foxboro_al
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './mbta_foxboro_predictions.js';
 import {publicRoadVideoAgency} from './camera_video.js?v=20261010-5';
-import {fl511EmbedUrl,fl511EmbedToolUrl} from './fl511_embed.js?v=20261010-1';
+import {fl511EmbedUrl,fl511EmbedToolUrl} from './fl511_embed.js?v=20261010-2';
 import {failedSourcesForVenue} from './venue_source_scope.js?v=20261010-1';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {fetchNwsStationObservation} from './nws_observation.js?v=20261010-1';
@@ -358,7 +358,7 @@ async function playCameraVideo(button,game){
 function appendFloridaPublisherMap(target,game){
   const url=fl511EmbedUrl(game);
   if(!url)return;
-  target.insertAdjacentHTML('beforeend',`<div class="camera-row"><strong>Florida 511 official roadway map</strong><p>Open the publisher’s map centered on the unreviewed Hard Rock Stadium point, with public traffic-camera, closure, and incident layers selected. Camera views are roadway views; availability, capture time, direction, and visibility of the stadium are unverified. Event Atlas does not copy or analyze Florida 511 imagery or incident data.</p><button type="button" class="camera-video-toggle fl511-map-toggle">Open official map</button><div class="publisher-road-map" hidden><iframe title="Florida 511 official roadway map near Hard Rock Stadium" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen" allowfullscreen></iframe></div><small>${link(fl511EmbedToolUrl,'Florida 511 publisher embed tool')} · ${link('https://fl511.com/','Open Florida 511 directly')}</small></div>`);
+  target.insertAdjacentHTML('beforeend',`<div class="camera-row"><strong>Florida 511 official roadway map</strong><p>Open the publisher’s map centered on the unreviewed ${esc(game.venue.name)} point, with public traffic-camera, closure, and incident layers selected. Camera views are roadway views; availability, capture time, direction, and visibility of the stadium are unverified. Event Atlas does not copy or analyze Florida 511 imagery or incident data.</p><button type="button" class="camera-video-toggle fl511-map-toggle">Open official map</button><div class="publisher-road-map" hidden><iframe title="Florida 511 official roadway map near ${esc(game.venue.name)}" loading="lazy" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" allow="fullscreen" allowfullscreen></iframe></div><small>${link(fl511EmbedToolUrl,'Florida 511 publisher embed tool')} · ${link('https://fl511.com/','Open Florida 511 directly')}</small></div>`);
   const button=target.querySelector('.fl511-map-toggle'),container=target.querySelector('.publisher-road-map'),frame=container?.querySelector('iframe');
   button.onclick=()=>{if(container.hidden){container.hidden=false;frame.src=url;button.textContent='Close official map'}else{frame.removeAttribute('src');container.hidden=true;button.textContent='Open official map'}};
 }
