@@ -53,3 +53,6 @@
 /* Quiet cartography keeps operational symbols distinct from base-map colors. */
 #venue-map .leaflet-tile-pane,#event-geographic-map .leaflet-tile-pane{filter:saturate(.22)}
 .read-threat-report:hover:not(:disabled),.event-view-tabs button[aria-selected="true"]:hover{background:var(--action-hover)}
+
+/* Typed examples are disclosed in the source workflow, never in real findings. */
+.demo-feed-catalog{margin-top:24px;border-top:1px solid var(--line);padding-top:12px}.catalog-domain,.catalog-correlations{margin:12px 0;padding:0 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface-1)}.catalog-record{border-top:1px solid var(--line);padding:0 4px 12px}.catalog-record h5,.catalog-assessment h5{font-size:14px;margin:16px 0 8px}.catalog-record dl{display:grid;grid-template-columns:minmax(110px,1fr) minmax(0,2fr);gap:8px 16px;margin:16px 0}.catalog-record dt{color:var(--muted)}.catalog-record dd{margin:0;overflow-wrap:anywhere}.catalog-assessment{padding:12px 0;border-top:1px solid var(--line)}.catalog-assessment .event-map-actions{flex-wrap:wrap}.catalog-record>summary:focus-visible{outline-offset:2px}@media(max-width:500px){.catalog-record dl{grid-template-columns:1fr;gap:4px}.catalog-record dd{margin-bottom:10px}}

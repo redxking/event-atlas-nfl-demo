@@ -1,3 +1,4 @@
+import {appendDemoFeedCatalog} from './demo_feed_catalog.js?v=catalog-1';
 // Authored demonstration fixtures. No collector or model generated these observations.
 export function demoOperationalFeeds(game){
  const kickoff=Date.parse(game?.kickoff);if(!game?.id||!Number.isFinite(kickoff))return null;
@@ -53,5 +54,5 @@ export function appendDemoOperationalFeeds(target,game){
  };
  next.onclick=()=>{pause();step=Math.min(step+1,data.records.length);paint();};reset.onclick=()=>{pause();step=0;paint();};all.onclick=()=>{pause();step=data.records.length;paint();};
  play.onclick=()=>{if(playing){pause();paint();return;}pause();if(step>=data.records.length)step=0;playing=true;play.textContent='Pause replay';step=Math.min(step+1,data.records.length);paint();replayTimer=setInterval(()=>{if(!section.isConnected||section.closest('[hidden]')||!section.open){pause();paint();return;}if(document.hidden)return;step=Math.min(step+1,data.records.length);if(step===data.records.length)pause();paint();},3000);};
- target.append(section);paint();
+ appendDemoFeedCatalog(section,game);target.append(section);paint();
 }
