@@ -116,6 +116,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of prior.claims)if(!newById.has(item.id))changes.push({kind:spec.label==='MARTA'?'operator_schedule_unmatched':'club_passage_unmatched',observedAt,title:`${spec.label} passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:`The bounded extractor no longer matches this ${spec.label} page passage. It may have changed or disappeared; this does not prove the plan was cancelled or an activity ended. Review the current publisher page.`,sourceUrl:spec.url});
   }
+  const priorGeorgia=before.georgiaTrafficContext,nextGeorgia=after.georgiaTrafficContext;
+  if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorGeorgia?.state==='current_retrieval_time_basis_unverified'&&nextGeorgia?.state==='current_retrieval_time_basis_unverified'&&priorGeorgia.sourcePageUrl==='https://incidentreport.dot.ga.gov/'&&nextGeorgia.sourcePageUrl===priorGeorgia.sourcePageUrl&&Number.isFinite(Date.parse(priorGeorgia.asOf))&&Date.parse(nextGeorgia.asOf)>Date.parse(priorGeorgia.asOf)&&Array.isArray(priorGeorgia.records)&&Array.isArray(nextGeorgia.records)&&priorGeorgia.records.length<=10&&nextGeorgia.records.length<=10){
+    const oldById=new Map(priorGeorgia.records.map(item=>[item.id,item]));
+    for(const item of nextGeorgia.records){
+      if(!/^gdot-\d+$/.test(item?.id||'')||item.sourceUrl!==priorGeorgia.sourcePageUrl)continue;
+      const old=oldById.get(item.id);
+      if(!old||JSON.stringify([old.detail,old.publisherStatus,old.publisherDisplayedUpdated])!==JSON.stringify([item.detail,item.publisherStatus,item.publisherDisplayedUpdated]))changes.push({kind:'county_road_table_changed',observedAt,title:`Georgia DOT Fulton table row ${item.id} ${old?'changed':'appeared'}`,detail:'A Fulton County row appeared or changed in Georgia DOT’s public table between two retrievals. The table uses publisher-displayed wall times with unverified zone and no venue geometry; verify the record and route before assessing event relevance.',sourceUrl:item.sourceUrl});
+    }
+  }
   const priorMarta=before.martaAlertContext,nextMarta=after.martaAlertContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorMarta?.state==='current_preview'&&nextMarta?.state==='current_preview'&&priorMarta.alertPageUrl==='https://itsmarta.com/ride/alerts'&&nextMarta.alertPageUrl===priorMarta.alertPageUrl&&Number.isFinite(Date.parse(priorMarta.asOf))&&Date.parse(nextMarta.asOf)>Date.parse(priorMarta.asOf)&&Array.isArray(priorMarta.alerts)&&Array.isArray(nextMarta.alerts)&&priorMarta.alerts.length<=5&&nextMarta.alerts.length<=5){
     const oldById=new Map(priorMarta.alerts.map(item=>[item.id,item]));
