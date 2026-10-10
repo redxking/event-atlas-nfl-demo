@@ -1,0 +1,24 @@
+import {humanText} from './attention_summary.js';
+const https=value=>{try{const url=new URL(value);return url.protocol==='https:'?url.href:null;}catch{return null;}};
+const text=(value,max)=>humanText(String(value??'').slice(0,max));
+export function changeInterpretation(kind){
+ if(kind==='source_status_changed')return {category:'Coverage change',meaning:'Coverage or freshness changed. This is not a change in threat severity.',next:'Check the publisher and restore usable coverage before interpreting a missing finding.'};
+ if(/unmatched|unlisted|no_longer|removed/.test(kind))return {category:'Record no longer matched',meaning:'A record stopped appearing in this bounded comparison. Withdrawal, resolution and safety are not established.',next:'Check the original publisher and the event relationship before closing a concern.'};
+ if(/forecast/.test(kind))return {category:'Forecast revision',meaning:'Forecast values changed. This is not an observed hazard or confirmed event impact.',next:'Review the current forecast, event time and approved weather thresholds.'};
+ if(/schedule_discrepancy/.test(kind))return {category:'Schedule verification',meaning:'Source checks disagree about the event schedule; a publisher change is not established.',next:'Confirm kickoff and venue with the event publisher before using time comparisons.'};
+ if(/schedule|game_state|direct_game_state/.test(kind))return {category:'Event schedule or state change',meaning:'The publisher’s event plan or game state changed; dependent time comparisons need review.',next:'Confirm the current game identity, kickoff and venue, then recheck affected source relationships.'};
+ if(/reclassified/.test(kind))return {category:'Event relationship changed',meaning:'The recorded relationship to this event changed; the source condition itself may be unchanged.',next:'Review the old and new relationship basis and any decision that relied on the previous link.'};
+ if(/plan|timetable|rail|road|corridor/.test(kind))return {category:'Access or operating-plan change',meaning:'A published access record or operating plan changed. Current execution and route impact remain unverified.',next:'Confirm the operator record and the relevant event dependency before changing operations.'};
+ if(/pm25|smoke|earthquake/.test(kind))return {category:'Environmental source change',meaning:'An environmental record or source match changed. Venue exposure and operational effect need separate verification.',next:'Check the record time, geometry and event exposure with the appropriate environmental lead.'};
+ return {category:'Source content change',meaning:'Source content or a screening cue changed. It is a verification lead, not a confirmed incident or threat.',next:'Compare the linked source and event evidence, including alternative explanations, before revising a decision.'};
+}
+export function selectScopeChanges(games,feed,now=Date.now()){
+ const result={state:'unavailable',builtAt:null,items:[],note:'Source-change history is unavailable. This does not establish that sources or event conditions were unchanged.'};
+ const built=Date.parse(feed?.builtAt);if(feed?.schema!=='event-atlas.published-change-feed.v1'||feed.status!=='unreviewed_public_source_changes'||!Array.isArray(feed.items)||feed.items.length>100||!Number.isFinite(built))return result;
+ result.builtAt=feed.builtAt;if(built>now+60000||now-built>12*3600000)return {...result,state:'stale',note:'Source-change history is old or has an invalid publication clock. It cannot establish the latest changes; check current publisher records.'};
+ const byId=new Map(games.map(game=>[game.id,game])),seen=new Set();
+ for(const item of feed.items){const game=byId.get(item?.eventId),at=Date.parse(item?.observedAt),sourceUrl=https(item?.sourceUrl);if(!game||item.status!=='unreviewed_source_change'||!Number.isFinite(at)||at>now+60000||now-at>14*86400000||!sourceUrl||typeof item.kind!=='string'||!item.kind||!item.title)continue;
+  const key=JSON.stringify([game.id,item.kind,item.title,item.detail,item.observedAt,sourceUrl]);if(seen.has(key))continue;seen.add(key);result.items.push({eventId:game.id,eventTitle:game.title,venue:game.venue.name,kind:item.kind,title:text(item.title,300),detail:text(item.detail,1500),observedAt:item.observedAt,sourceUrl,reportUrl:https(item.reportUrl),...changeInterpretation(item.kind)});
+ }
+ result.items.sort((a,b)=>Date.parse(b.observedAt)-Date.parse(a.observedAt));return {...result,state:'available',note:result.items.length?'Recorded changes are linked only to the selected events. History is retained for up to 14 days and may no longer describe the latest state. Compare it with current source records. Repeated reporting is not independent corroboration; history does not add to threat counts.':'No recorded change for these events appears in the current bounded history. This is not proof that sources or conditions were unchanged.'};
+}
