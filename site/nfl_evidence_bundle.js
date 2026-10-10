@@ -1,3 +1,4 @@
+import {selectDenverEventPlan} from './denver_event_plan.js';
 import {selectSofiContext} from './sofi_context.js';
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-98';
 import {buildVenueZoneRegistry} from './zone_registry.js';
@@ -18,6 +19,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
   const news=selectNflNews(game,inputs.news,now);
   const bundle={
     ...selectSofiContext(game,inputs,now),
+    denverEventPlan:selectDenverEventPlan(game,inputs.denverEventPlan,now),
     schema:'event-atlas.public-evidence-bundle.v1',
     status:'unreviewed_public_source_export',
     generatedAt:new Date(now).toISOString(),

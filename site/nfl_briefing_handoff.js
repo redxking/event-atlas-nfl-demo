@@ -1,4 +1,5 @@
 import {selectSofiEventPage} from './sofi_event_pages.js';
+import {selectDenverEventPlan} from './denver_event_plan.js';
 const https=value=>{try{const url=new URL(value);return url.protocol==='https:'?url.href:null}catch{return null}};
 const validTime=value=>Number.isFinite(Date.parse(value));
 
@@ -15,6 +16,8 @@ export function buildNflBriefingHandoff(bundle){
     selected.push({kind,title:String(title||'').slice(0,240),action:String(action||'').slice(0,500),sourceUrl:url,sourceAt:validTime(sourceAt)?new Date(sourceAt).toISOString():null});
   };
   if(!planning){
+    const denver=selectDenverEventPlan({...bundle.event,venue:bundle.venue},{...bundle.denverEventPlan,schema:'event-atlas.denver-event-plan.v1',status:bundle.denverEventPlan?.state==='current_venue_plan'?'ok':'failed',gameId:bundle.event?.id},now);
+    if(denver.state==='current_venue_plan'&&(denver.doorTimingConflict||denver.kickoffConflict))add('venue timing conflict',`Denver venue lists gates ${denver.gatesOpenLocal}, doors ${denver.doorsLocal} and event start ${denver.eventStartsLocal}`,'Confirm the exact-game gate and kickoff times with the stadium. Rescreen time-dependent access plans after confirmation.',denver.sourceUrl,denver.checkedAt);
     const venue=bundle.sofiVenueEvent;
     const event=bundle.event;
     const sofiGames={
