@@ -26,6 +26,8 @@ jobs:
       - run: npm run sync:sports
       - run: npm run build:site
       - run: npm run sync:cameras
+        env:
+          LA511_API_KEY: ${{ secrets.LA511_API_KEY }}
       - run: npm run sync:news
       - run: npm run sync:game-articles
       - run: npm run sync:roads
