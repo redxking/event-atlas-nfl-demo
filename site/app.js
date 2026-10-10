@@ -278,13 +278,19 @@ function renderVenueMap(rows){
     const venue=games[0].venue,upcoming=games.filter(game=>Date.parse(game.kickoff)>=Date.now());
     const popup=document.createElement('div');popup.className='event-map-popup';
     const heading=document.createElement('h3');heading.textContent=venue.name;popup.append(heading);
-    const label=document.createElement('p');label.textContent=upcoming.length?'Upcoming games':'Past games';popup.append(label);
-    for(const game of (upcoming.length?upcoming:games.slice().reverse())){
-      const button=document.createElement('button');button.type='button';button.textContent=game.title+' — '+gameTime(game);
-      button.addEventListener('click',()=>{selectGame(game.id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});});popup.append(button);
-    }
+    const choices=upcoming.length?upcoming:games.slice().reverse();let position=0;
+    const counter=document.createElement('p'),card=document.createElement('div'),title=document.createElement('strong'),time=document.createElement('p');
+    card.className='map-game-card';card.setAttribute('aria-live','polite');card.append(title,time);
+    const navigation=document.createElement('div');navigation.className='map-game-navigation';
+    const previous=document.createElement('button'),next=document.createElement('button'),open=document.createElement('button');
+    for(const button of [previous,next,open])button.type='button';
+    previous.textContent='← Previous';next.textContent='Next →';open.textContent='Open game briefing';open.className='map-game-open';
+    const show=()=>{const game=choices[position];counter.textContent=(upcoming.length?'Upcoming game ':'Past game ')+(position+1)+' of '+choices.length;title.textContent=game.title;time.textContent=gameTime(game);previous.disabled=position===0;next.disabled=position===choices.length-1;};
+    previous.onclick=()=>{if(position>0){position--;show();}};next.onclick=()=>{if(position<choices.length-1){position++;show();}};
+    open.onclick=()=>{selectGame(choices[position].id);$('briefing').scrollIntoView({behavior:'smooth',block:'start'});const heading=$('detail').querySelector('h3');heading.tabIndex=-1;heading.focus({preventScroll:true});};
+    navigation.append(previous,next);popup.append(counter,card,navigation,open);show();
     const tooltip=document.createElement('span');tooltip.textContent=venue.name+' · '+upcoming.length+' upcoming games';
-    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:340,maxHeight:280}).addTo(overviewMarkers);
+    L.marker([venue.lat,venue.lon],{title:venue.name,alt:venue.name,icon:L.divIcon({className:'event-location-marker',html:'',iconSize:[18,18],iconAnchor:[9,9]})}).bindTooltip(tooltip).bindPopup(popup,{maxWidth:300,minWidth:220}).addTo(overviewMarkers);
   }
 }
 function renderGround(game){
