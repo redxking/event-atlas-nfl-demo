@@ -44,6 +44,7 @@
     "sync:patriots-preview": "python3 scripts/sync_patriots_game_preview.py",
     "sync:jets-guide": "python3 scripts/sync_jets_gameday_guide.py",
     "sync:seahawks-guide": "python3 scripts/sync_seahawks_gameday.py",
+    "sync:titans-guide": "python3 scripts/sync_titans_gameday.py",
     "sync:sound-transit-seahawks": "python3 scripts/sync_sound_transit_seahawks.py",
     "sync:sound-transit-alerts": "node scripts/sync_sound_transit_alerts.mjs",
     "sync:seattle-fire": "node scripts/sync_seattle_fire_aggregate.mjs"

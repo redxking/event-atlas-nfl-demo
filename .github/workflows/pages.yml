@@ -42,6 +42,7 @@ jobs:
       - run: npm run sync:patriots-preview
       - run: npm run sync:jets-guide
       - run: npm run sync:seahawks-guide
+      - run: npm run sync:titans-guide
       - run: npm run sync:sound-transit-seahawks
       - run: npm run sync:sound-transit-alerts
       - run: npm run sync:seattle-fire
