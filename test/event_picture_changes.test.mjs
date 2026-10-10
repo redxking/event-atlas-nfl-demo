@@ -7,6 +7,18 @@ const game={kickoff:'2026-10-11T17:00:00Z',status:'scheduled',timeTbd:false,sour
 const weatherCue={type:'weather alert',title:'NWS warning',basis:'Published window overlaps event',sourceUrl:'https://weather.example/alert',sourceAt:'2026-10-11T16:00:00Z'};
 const picture=(state,cues=[])=>({eventId:'nfl:test',sources:[source('NWS point alerts',state)],cues});
 
+test('Nashville OEM release additions require newer successful checks',()=>{
+  const url='https://www.nashville.gov/departments/emergency-management/news/stadium-advisory';
+  const base={state:'current_newsroom_check',sourceUrl:'https://www.nashville.gov/departments/emergency-management/news',asOf:'2026-10-10T05:00:00Z',recent:[]};
+  const before={...picture('checked'),nashvilleOemNewsContext:base};
+  const after={...picture('checked'),nashvilleOemNewsContext:{...base,asOf:'2026-10-10T06:00:00Z',recent:[{title:'City advisory',publishedAt:'2026-10-10T05:30:00Z',url}]}};
+  const titans={...game,venue:{id:'3810'}};
+  const changes=diffEventPicture(before,after,null,null,titans,titans);
+  assert.equal(changes.find(item=>item.kind==='city_release_published')?.sourceUrl,url);
+  assert.match(changes.find(item=>item.kind==='city_release_published')?.detail,/not a live alert/);
+  assert.equal(diffEventPicture({...before,nashvilleOemNewsContext:{...base,state:'stale_or_unavailable'}},after,null,null,titans,titans).some(item=>item.kind==='city_release_published'),false);
+});
+
 test('new source cue is linked only across comparable current checks',()=>{
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,game);
   assert.equal(changes.length,1);

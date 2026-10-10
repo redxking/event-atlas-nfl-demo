@@ -157,6 +157,16 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     for(const item of oldActive.entries)if(!next.has(item.id))changes.push({kind:'city_index_item_unlisted',observedAt,title:`NOLA Ready index no longer lists: ${item.title}`,detail:'The newer city index no longer lists this item. This does not prove the event or incident ended; verify its page and the issuing authority.',sourceUrl:item.url});
   }
   const oldUpdates=before.nolaReadyUpdatesContext,newUpdates=after.nolaReadyUpdatesContext;
+  const oldOem=before.nashvilleOemNewsContext,newOem=after.nashvilleOemNewsContext;
+  const validOem=item=>typeof item?.title==='string'&&item.title.length>=3&&item.title.length<=180&&Number.isFinite(Date.parse(item.publishedAt))&&/^https:\/\/www\.nashville\.gov\/departments\/emergency-management\/news\/[a-z0-9-]+$/.test(item.url||'');
+  if(!eventWindowChanged&&currentGame?.venue?.id==='3810'&&oldOem?.state==='current_newsroom_check'&&newOem?.state==='current_newsroom_check'&&oldOem.sourceUrl==='https://www.nashville.gov/departments/emergency-management/news'&&newOem.sourceUrl===oldOem.sourceUrl&&Number.isFinite(Date.parse(oldOem.asOf))&&Date.parse(newOem.asOf)>Date.parse(oldOem.asOf)&&Array.isArray(oldOem.recent)&&Array.isArray(newOem.recent)&&oldOem.recent.length<=20&&newOem.recent.length<=20&&oldOem.recent.every(validOem)&&newOem.recent.every(validOem)){
+    const prior=new Map(oldOem.recent.map(item=>[item.url,item]));
+    for(const item of newOem.recent){
+      const old=prior.get(item.url);
+      if(!old)changes.push({kind:'city_release_published',observedAt,title:`Nashville OEM release: ${item.title}`,detail:`OEM newsroom lists this release as published ${item.publishedAt}. Verify the page, current condition, location, and Titans-event relevance; a release is not a live alert or threat finding.`,sourceUrl:item.url});
+      else if(old.title!==item.title||old.publishedAt!==item.publishedAt)changes.push({kind:'city_release_revised',observedAt,title:`Nashville OEM release revised: ${item.title}`,detail:'The newsroom title or publication time changed. Verify the publisher page and current scope before operational use.',sourceUrl:item.url});
+    }
+  }
   const updatesUrl='https://ready.nola.gov/incident/?rss=NOLA-Ready-Updates';
   const validUpdate=item=>typeof item?.title==='string'&&item.title.length>=3&&item.title.length<=180&&Number.isFinite(Date.parse(item.publishedAt))&&/^https:\/\/ready\.nola\.gov\/incident\/[^/?#]+\/[^/?#]+\/$/.test(item.url||'');
   if(!eventWindowChanged&&currentGame?.venue?.id==='3493'&&oldUpdates?.state==='current_updates'&&newUpdates?.state==='current_updates'&&oldUpdates.sourceUrl===updatesUrl&&newUpdates.sourceUrl===updatesUrl&&Number.isFinite(Date.parse(oldUpdates.asOf))&&Date.parse(newUpdates.asOf)>Date.parse(oldUpdates.asOf)&&Array.isArray(oldUpdates.entries)&&Array.isArray(newUpdates.entries)&&oldUpdates.entries.length<=20&&newUpdates.entries.length<=20&&oldUpdates.entries.every(validUpdate)&&newUpdates.entries.every(validUpdate)){
