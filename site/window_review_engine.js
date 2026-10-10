@@ -4,11 +4,11 @@ export const reviewDecisions=['needs_verification','exercise_follow_up','dismiss
 function binding(brief,candidate){
  const records=new Map(brief.observations.map(r=>[r.evidenceId,r]));
  const ids=[...candidate.evidenceIds,...candidate.contraryEvidenceIds].sort();
- return JSON.stringify(ids.map(id=>{
+ return JSON.stringify({area:brief.monitoringArea||null,evidence:ids.map(id=>{
   const record=records.get(id);if(!record)throw Error('Missing review evidence');
   const source=brief.sources.find(s=>s.id===record.sourceId);if(!source)throw Error('Missing evidence source');
   return {id,revision:record.revision,claim:record.claim,sourceState:source.state};
- }));
+ })});
 }
 export function recordExerciseReview(brief,candidateId,decision,history=[]){
  if(brief?.dataMode!==mode||!reviewDecisions.includes(decision)||!Array.isArray(history))throw Error('Invalid exercise review');

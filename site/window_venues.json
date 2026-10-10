@@ -1,0 +1,191 @@
+{
+  "schema": "event-atlas.window-venues.v1",
+  "basis": "Unreviewed venue point candidates. No authoritative perimeter or operational monitoring area.",
+  "venues": [
+    {
+      "id": "5534",
+      "name": "Tottenham Hotspur Stadium",
+      "lat": 51.60444444444445,
+      "lon": -0.06638888888888889,
+      "coordinateStatus": "Wikidata coordinate candidate; unreviewed",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q55074091"
+    },
+    {
+      "id": "3948",
+      "name": "Hard Rock Stadium",
+      "lat": 25.958055555,
+      "lon": -80.238888888,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q864339"
+    },
+    {
+      "id": "3839",
+      "name": "MetLife Stadium",
+      "lat": 40.813611111,
+      "lon": -74.074444444,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q10862290"
+    },
+    {
+      "id": "3810",
+      "name": "Nissan Stadium",
+      "lat": 36.166388888,
+      "lon": -86.771388888,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1142992"
+    },
+    {
+      "id": "3752",
+      "name": "Acrisure Stadium",
+      "lat": 40.446666666,
+      "lon": -80.015833333,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1067148"
+    },
+    {
+      "id": "3738",
+      "name": "Gillette Stadium",
+      "lat": 42.090944444,
+      "lon": -71.264344444,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q373355"
+    },
+    {
+      "id": "3493",
+      "name": "Caesars Superdome",
+      "lat": 29.950833333,
+      "lon": -90.081111111,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q756452"
+    },
+    {
+      "id": "3719",
+      "name": "Northwest Stadium",
+      "lat": 38.907777777,
+      "lon": -76.864444444,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q583085"
+    },
+    {
+      "id": "3798",
+      "name": "Lambeau Field",
+      "lat": 44.501388888,
+      "lon": -88.062222222,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q860790"
+    },
+    {
+      "id": "7065",
+      "name": "SoFi Stadium",
+      "lat": 33.95341395128205,
+      "lon": -118.33902576538462,
+      "coordinateStatus": "OpenStreetMap way 860635712 geometry-derived point candidate; Wikidata point conflict; unreviewed",
+      "sourceUrl": "https://www.wikidata.org/entity/Q19520501"
+    },
+    {
+      "id": "3970",
+      "name": "State Farm Stadium",
+      "lat": 33.5275,
+      "lon": -112.2625,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q756433"
+    },
+    {
+      "id": "3673",
+      "name": "Lumen Field",
+      "lat": 47.595277777,
+      "lon": -122.331666666,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q612736"
+    },
+    {
+      "id": "5348",
+      "name": "Mercedes-Benz Stadium",
+      "lat": 33.755277777,
+      "lon": -84.400833333,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q7007552"
+    },
+    {
+      "id": "3937",
+      "name": "Empower Field at Mile High",
+      "lat": 39.743888888,
+      "lon": -105.02,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1046135"
+    },
+    {
+      "id": "2455",
+      "name": "Wembley Stadium",
+      "lat": 51.55555555555555,
+      "lon": -0.27944444444444444,
+      "coordinateStatus": "Wikidata coordinate candidate; unreviewed",
+      "sourceUrl": "https://www.wikidata.org/wiki/Q128468"
+    },
+    {
+      "id": "3679",
+      "name": "Huntington Bank Field",
+      "lat": 41.506111111,
+      "lon": -81.699444444,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1100756"
+    },
+    {
+      "id": "3806",
+      "name": "Lincoln Financial Field",
+      "lat": 39.90089,
+      "lon": -75.16776,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1052370"
+    },
+    {
+      "id": "3886",
+      "name": "Raymond James Stadium",
+      "lat": 27.975833333,
+      "lon": -82.503333333,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1141343"
+    },
+    {
+      "id": "3812",
+      "name": "Lucas Oil Stadium",
+      "lat": 39.760056,
+      "lon": -86.163806,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q867160"
+    },
+    {
+      "id": "6501",
+      "name": "Allegiant Stadium",
+      "lat": 36.090777777,
+      "lon": -115.183,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q27768421"
+    },
+    {
+      "id": "3622",
+      "name": "Arrowhead Stadium",
+      "lat": 39.048888888,
+      "lon": -94.483888888,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q544553"
+    },
+    {
+      "id": "4738",
+      "name": "Levi's Stadium",
+      "lat": 37.4034,
+      "lon": -121.97,
+      "coordinateStatus": "Wikidata name-match candidate",
+      "sourceUrl": "https://www.wikidata.org/entity/Q7419343"
+    },
+    {
+      "id": "3933",
+      "name": "Soldier Field",
+      "lat": 41.8625,
+      "lon": -87.616666666667,
+      "coordinateStatus": "Wikidata coordinate candidate; venue identity checked against official Soldier Field address; point unreviewed",
+      "sourceUrl": "https://www.wikidata.org/entity/Q1132413"
+    }
+  ],
+  "assembledAt": "2026-10-10T18:02:29.952Z"
+}
