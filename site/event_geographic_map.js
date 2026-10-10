@@ -19,7 +19,7 @@ export function renderEventGeographicMap(game,ground,airspace){
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map).on('tileerror',()=>{document.getElementById('event-map-tile-status').textContent='Street map unavailable. Boundary overlays remain visible; retry when connectivity returns.';});
   groundLayer=L.layerGroup().addTo(map);airLayer=L.layerGroup().addTo(map);venueLayer=L.layerGroup().addTo(map);
   concernLayer=L.layerGroup().addTo(map);
-  controls=L.control.layers(null,game.eventType&&game.eventType!=='nfl'?{'Event location':venueLayer}:{'Stadium outline':groundLayer,'FAA airspace':airLayer,'Stadium location':venueLayer},{collapsed:false}).addTo(map);
+  controls=L.control.layers(null,game.eventType&&game.eventType!=='nfl'?{'Event location':venueLayer}:{'Stadium outline':groundLayer,'FAA airspace':airLayer,'Stadium location':venueLayer},{collapsed:window.matchMedia('(max-width:600px)').matches}).addTo(map);
   controls.addOverlay(concernLayer,'Source concerns');
   L.control.scale({imperial:true,metric:true}).addTo(map);
   resizeObserver=new ResizeObserver(()=>map.invalidateSize());resizeObserver.observe(target);eventId=null;
