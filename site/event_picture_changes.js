@@ -38,6 +38,12 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       else if(Math.abs(next.pm25UgM3-first.pm25UgM3)>=5)changes.push({kind:'pm25_observation_changed',observedAt,title:'Nearby EPA PM2.5 station reading changed',detail:`Station ${next.stationId}, ${next.distanceKm} km from the candidate venue point, changed from ${first.pm25UgM3} to ${next.pm25UgM3} µg/m³ between ${first.observedAt} and ${next.observedAt}. The 5 µg/m³ display threshold is a product review filter, not a health threshold. Confirm with the local air-quality authority; this does not attribute smoke or establish stadium impact.`,sourceUrl:next.sourceUrl});
     }
   }
+  const oldSmoke=before.smokeContext,newSmoke=after.smokeContext;
+  if(!eventWindowChanged&&oldSmoke?.state==='recent_daily_analysis'&&newSmoke?.state==='recent_daily_analysis'&&Number.isFinite(Date.parse(oldSmoke.asOf))&&Date.parse(newSmoke.asOf)>Date.parse(oldSmoke.asOf)&&Array.isArray(oldSmoke.polygons)&&Array.isArray(newSmoke.polygons)){
+    const key=item=>JSON.stringify([item.sourceUrl,item.polygonIndex,item.density,item.startAt,item.endAt]);
+    const prior=new Set(oldSmoke.polygons.map(key));
+    for(const item of newSmoke.polygons.slice(0,3))if(!prior.has(key(item))&&Number.isInteger(item?.polygonIndex)&&['light','medium','heavy'].includes(item.density)&&item.sourceUrl===newSmoke.sourceUrl&&/^https:\/\/satepsanone\.nesdis\.noaa\.gov\/pub\/FIRE\/web\/HMS\/Smoke_Polygons\/KML\/\d{4}\/\d{2}\/hms_smoke\d{8}\.kml$/.test(item.sourceUrl||''))changes.push({kind:'new_satellite_smoke_match',observedAt,title:`NOAA HMS ${item.density} smoke polygon point match`,detail:`Newly displayed in a dated NOAA satellite analysis at the candidate venue point; polygon window ${item.startAt} to ${item.endAt}. This is not a ground-level concentration, current smoke forecast, source-fire attribution, exposure, venue impact, or threat finding. Verify with NOAA and the local air-quality authority.`,sourceUrl:item.sourceUrl});
+  }
   if(!eventWindowChanged)for(const spec of cueSources){
     if(!spec.states.includes(oldRows.get(spec.name)?.state)||!spec.states.includes(newRows.get(spec.name)?.state))continue;
     const matches=cue=>cue.type===spec.type&&(!spec.host||cueHost(cue)===spec.host);

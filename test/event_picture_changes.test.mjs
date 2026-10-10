@@ -70,6 +70,18 @@ test('EPA PM2.5 change feed uses dated same-station values and a review threshol
   assert.equal(diffEventPicture(before,moved,null,null,game,game).find(item=>item.kind==='pm25_station_changed')?.sourceUrl,sourceUrl);
 });
 
+test('NOAA smoke point matches require two newer daily analyses',()=>{
+  const sourceUrl='https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/KML/2026/10/hms_smoke20261009.kml';
+  const polygon={polygonIndex:3,density:'light',startAt:'2026-10-09T16:00:00Z',endAt:'2026-10-09T20:00:00Z',sourceUrl};
+  const before={...picture('checked'),smokeContext:{state:'recent_daily_analysis',asOf:'2026-10-10T01:00:00Z',sourceUrl,polygons:[]}};
+  const after={...picture('checked'),smokeContext:{state:'recent_daily_analysis',asOf:'2026-10-10T02:00:00Z',sourceUrl,polygons:[polygon]}};
+  const change=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='new_satellite_smoke_match');
+  assert.equal(change?.sourceUrl,sourceUrl);
+  assert.match(change.detail,/not a ground-level concentration/);
+  assert.equal(diffEventPicture({...before,smokeContext:{...before.smokeContext,state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='new_satellite_smoke_match'),false);
+  assert.equal(diffEventPicture(after,{...after,smokeContext:{...after.smokeContext,asOf:'2026-10-10T03:00:00Z'}},null,null,game,game).some(item=>item.kind==='new_satellite_smoke_match'),false);
+});
+
 test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
   const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
   const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});

@@ -35,7 +35,8 @@
     "sync:voting": "node scripts/sync_all_voting.mjs",
     "operator:create": "node scripts/create_local_operator.mjs",
     "operator:revoke": "node scripts/revoke_local_operator.mjs",
-    "sync:airnow": "node scripts/sync_airnow_pm25.mjs"
+    "sync:airnow": "node scripts/sync_airnow_pm25.mjs",
+    "sync:hms-smoke": "python3 scripts/sync_noaa_hms_smoke.py"
   },
   "dependencies": {
     "gtfs-realtime-bindings": "1.1.1"

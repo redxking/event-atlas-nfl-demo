@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-49';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-50';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 
@@ -22,7 +22,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     event:pick(game,['id','title','week','kickoff','timeTbd','status','gameState','sourceUrl','sourceRetrievedAt']),
     venue:pick(game.venue,['id','name','address','lat','lon','coordinateStatus','venueCandidateUrl']),
     picture,
-    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,news:news.asOf,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,nwsObservation:picture.observationContext?.observedAt||null,forecast:picture.forecastContext.checkedAt,spc:inputs.spc?.builtAt||null,wpcRain:inputs.wpcRain?.builtAt||null,eonet:inputs.eonet?.builtAt||null,nifc:inputs.nifc?.builtAt||null,airnow:inputs.airnow?.builtAt||null,usgs:picture.usgsContext.asOf,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,cmpdOpenTraffic:inputs.cmpdTraffic?.checkedAt?new Date(inputs.cmpdTraffic.checkedAt).toISOString():null,mbtaFoxboro:inputs.transit?.checkedAt?new Date(inputs.transit.checkedAt).toISOString():null,mbtaFoxboroSchedule:inputs.transitSchedule?.checkedAt?new Date(inputs.transitSchedule.checkedAt).toISOString():null,mbtaFoxboroPredictions:inputs.transitPredictions?.checkedAt?new Date(inputs.transitPredictions.checkedAt).toISOString():null,septaBLine:inputs.septa?.sourceAt||null,njTransitRail:inputs.njTransitRail?.sourceAt||null,nj511:inputs.nj511?.sourceAt||null,ntas:inputs.ntas?.retrievedAt||null},
+    sourceSnapshots:{schedule:inputs.schedule?.builtAt||null,ground:inputs.ground?.builtAt||null,airspace:inputs.airspace?.builtAt||null,tfr:inputs.tfr?.builtAt||null,cameras:inputs.cameras?.builtAt||null,roads:inputs.roads?.builtAt||null,news:news.asOf,weather:inputs.conditions?.at?new Date(inputs.conditions.at).toISOString():null,nwsObservation:picture.observationContext?.observedAt||null,forecast:picture.forecastContext.checkedAt,spc:inputs.spc?.builtAt||null,wpcRain:inputs.wpcRain?.builtAt||null,eonet:inputs.eonet?.builtAt||null,nifc:inputs.nifc?.builtAt||null,airnow:inputs.airnow?.builtAt||null,hmsSmoke:inputs.hmsSmoke?.builtAt||null,usgs:picture.usgsContext.asOf,police:inputs.police?.checkedAt?new Date(inputs.police.checkedAt).toISOString():null,cmpdOpenTraffic:inputs.cmpdTraffic?.checkedAt?new Date(inputs.cmpdTraffic.checkedAt).toISOString():null,mbtaFoxboro:inputs.transit?.checkedAt?new Date(inputs.transit.checkedAt).toISOString():null,mbtaFoxboroSchedule:inputs.transitSchedule?.checkedAt?new Date(inputs.transitSchedule.checkedAt).toISOString():null,mbtaFoxboroPredictions:inputs.transitPredictions?.checkedAt?new Date(inputs.transitPredictions.checkedAt).toISOString():null,septaBLine:inputs.septa?.sourceAt||null,njTransitRail:inputs.njTransitRail?.sourceAt||null,nj511:inputs.nj511?.sourceAt||null,ntas:inputs.ntas?.retrievedAt||null},
     geography:{
       zoneRegistry:buildVenueZoneRegistry(game,inputs),
       ground:ground?{status:'unreviewed_osm_candidate',sourceUrl:ground.sourceUrl,sourceVersion:ground.sourceVersion,sourceEditedAt:ground.sourceEditedAt,identityMethod:ground.identityMethod,outerRings:ground.outerRings||[ground.ring]}:null,
@@ -41,6 +41,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       naturalEvents:picture.naturalEventsContext,
       wildfires:picture.wildfireContext,
       airQuality:picture.airQualityContext,
+      satelliteSmoke:picture.smokeContext,
       earthquakes:picture.usgsContext.state==='current_snapshot'?picture.usgsContext.events:null,
       nationalAdvisory:{state:ntasCurrent?'current national snapshot':'stale or unavailable',sourceUrl:inputs.ntas?.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml',active:ntasCurrent?inputs.ntas.active.map(item=>pick(item,['type','start','end','locations','sectors','summary','url'])):null},
       roads:Array.isArray(roads)?roads.map(item=>pick(item,['id','agency','kind','name','detail','lat','lon','distanceKm','startAt','endAt','sourceRecordDate','sourceUrl'])):null,

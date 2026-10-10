@@ -91,6 +91,19 @@ test('local AI packet admits only a current source-linked EPA PM2.5 station row'
   assert.equal(buildLocalAiPacket(withAir,{now:at+13*3600000}).evidence.some(item=>item.id==='M1'),false);
 });
 
+test('local AI packet treats NOAA smoke polygon as dated satellite context only',()=>{
+  const at=Date.parse('2026-10-10T02:00:00Z');
+  const sourceUrl='https://satepsanone.nesdis.noaa.gov/pub/FIRE/web/HMS/Smoke_Polygons/KML/2026/10/hms_smoke20261009.kml';
+  const polygon={polygonIndex:3,density:'light',startAt:'2026-10-09T16:00:00Z',endAt:'2026-10-09T20:00:00Z',sourceUrl,privateNote:'PRIVATE SMOKE NOTE'};
+  const smokeContext={state:'recent_daily_analysis',asOf:'2026-10-10T01:00:00Z',sourceUrl,polygons:[polygon,{...polygon,sourceUrl:'https://unapproved.example/smoke.kml'}]};
+  const withSmoke={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,smokeContext}}}};
+  const packet=buildLocalAiPacket(withSmoke,{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='H1')?.sourceUrl,sourceUrl);
+  assert.equal(packet.evidence.find(item=>item.id==='H2'),undefined);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE SMOKE NOTE'));
+  assert.match(validateLocalAiDraft('H1',packet).reviewQuestions[0].question,/newer NOAA smoke analysis/);
+});
+
 test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
   const at=Date.parse('2026-10-10T02:00:00Z');
   const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};
