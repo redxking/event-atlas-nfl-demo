@@ -1,6 +1,6 @@
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js';
 import {stopPublicEventMonitor} from './public_event_monitor.js';
-import {getAdditionalSummary} from './event_catalog.js';
+import {getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
 import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=event-monitoring-1';
 import {stopMovementTracking} from './movement_map.js?v=multi-events-1';
 import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=multi-events-1';

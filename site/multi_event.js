@@ -2,8 +2,8 @@ import {monitorPublicEvent} from './public_event_monitor.js';
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js';
 import {createThreatReportButton} from './scope_threat_report.js?v=multi-events-1';
 import {renderEventGeographicMap} from './event_geographic_map.js?v=multi-events-1';
-export {eventTypeLabel,exampleSummary} from './event_catalog.js';
-import {eventTypeLabel} from './event_catalog.js';
+export {eventTypeLabel,exampleSummary} from './event_catalog.js?v=event-monitoring-1';
+import {eventTypeLabel} from './event_catalog.js?v=event-monitoring-1';
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 export function renderAdditionalEvent(target,game,summaries,onUpdate){
  target.replaceChildren();target.append(node('span',eventTypeLabel(game)),node('h3',game.title));target.append(createThreatReportButton(()=>({title:game.title,level:'event',games:[game],summaries})));

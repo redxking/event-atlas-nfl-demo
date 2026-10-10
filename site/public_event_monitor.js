@@ -1,5 +1,5 @@
 import {publicEventAlertsSummary} from './public_event_alerts.js';
-import {setAdditionalSummary,getAdditionalSummary} from './event_catalog.js';
+import {setAdditionalSummary,getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
 let active;
 export function stopPublicEventMonitor(){active?.stop();active=null;}
 window.addEventListener('workspaceviewchange',()=>{if(document.body.dataset.workspaceView!=='event')stopPublicEventMonitor();});
