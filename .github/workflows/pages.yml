@@ -65,6 +65,7 @@ jobs:
       - run: npm run sync:njtransit-rail
       - run: npm run sync:nj511
       - run: npm run sync:ntas
+      - run: npm run sync:space-weather
       - run: npm run sync:eonet
       - run: npm run sync:nifc
       - run: npm run sync:airnow

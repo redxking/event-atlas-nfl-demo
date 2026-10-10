@@ -1,0 +1,41 @@
+{
+  "source": "NOAA Space Weather Prediction Center",
+  "sourceUrl": "https://services.swpc.noaa.gov/products/noaa-scales.json",
+  "scaleExplanationUrl": "https://www.swpc.noaa.gov/noaa-scales-explanation",
+  "retrievedAt": "2026-10-10T10:31:26.164Z",
+  "status": "ok",
+  "observed": {
+    "at": "2026-10-10T10:29:00Z",
+    "scales": {
+      "G": 0,
+      "R": 0,
+      "S": 0
+    }
+  },
+  "outlook": [
+    {
+      "at": "2026-10-10T10:29:00Z",
+      "scales": {
+        "G": 1,
+        "R": null,
+        "S": null
+      }
+    },
+    {
+      "at": "2026-10-11T00:00:00Z",
+      "scales": {
+        "G": 1,
+        "R": null,
+        "S": null
+      }
+    },
+    {
+      "at": "2026-10-12T00:00:00Z",
+      "scales": {
+        "G": 2,
+        "R": null,
+        "S": null
+      }
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-82';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-83';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
 
@@ -72,6 +72,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
       jetsTravelPlanningComparison:picture.jetsTravelContext,
       clubAviationComparison:picture.clubAviationContext,
       earthquakes:picture.usgsContext.state==='current_snapshot'?picture.usgsContext.events:null,
+      nationalSpaceWeather:picture.spaceWeatherContext,
       nationalAdvisory:{state:ntasCurrent?'current national snapshot':'stale or unavailable',sourceUrl:inputs.ntas?.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml',active:ntasCurrent?inputs.ntas.active.map(item=>pick(item,['type','start','end','locations','sectors','summary','url'])):null},
       roads:Array.isArray(roads)?roads.map(item=>pick(item,['id','agency','kind','name','detail','lat','lon','distanceKm','startAt','endAt','sourceRecordDate','sourceUrl'])):null,
       cameras:Array.isArray(cameras)?cameras.map(item=>pick(item,['id','agency','name','lat','lon','distanceKm','inService','operationalStatus','statusAsOf','metadataDate','sourceUrl','viewerUrl','stillUrl','videoUrl'])):null,
