@@ -164,6 +164,18 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
       else if(old.title!==item.title||old.publishedAt!==item.publishedAt)changes.push({kind:'city_update_revised',observedAt,title:`NOLA Ready update revised: ${item.title}`,detail:'City RSS title or publication time changed. Verify the publisher page and current scope; this does not establish an incident or threat.',sourceUrl:item.url});
     }
   }
+  const oldFlorida=before.fl511MiamiContext,newFlorida=after.fl511MiamiContext;
+  const floridaUrl='https://www.fl511.com/list/events/traffic';
+  const validFlorida=item=>Number.isInteger(item?.id)&&item.id>0&&item.sourceUrl===floridaUrl&&typeof item.roadway==='string'&&item.roadway.length<=120&&typeof item.description==='string'&&item.description.length<=350;
+  if(!eventWindowChanged&&currentGame?.venue?.id==='3948'&&oldFlorida?.state==='current_county_list'&&newFlorida?.state==='current_county_list'&&oldFlorida.sourceUrl===floridaUrl&&newFlorida.sourceUrl===floridaUrl&&Number.isFinite(Date.parse(oldFlorida.asOf))&&Date.parse(newFlorida.asOf)>Date.parse(oldFlorida.asOf)&&Array.isArray(oldFlorida.records)&&Array.isArray(newFlorida.records)&&oldFlorida.records.length<=50&&newFlorida.records.length<=50&&oldFlorida.records.every(validFlorida)&&newFlorida.records.every(validFlorida)){
+    const prior=new Map(oldFlorida.records.map(item=>[item.id,item])),next=new Map(newFlorida.records.map(item=>[item.id,item]));
+    for(const item of newFlorida.records){
+      const old=prior.get(item.id);
+      if(!old)changes.push({kind:'fl511_county_road_added',observedAt,title:`FL511 Miami-Dade listing: ${item.roadway}`,detail:`Florida 511 lists ${item.type} on ${item.roadway}, displayed update ${item.lastUpdatedText}. Verify the current record, geography, route and event timing; county scope alone does not establish stadium impact.`,sourceUrl:floridaUrl});
+      else if(old.description!==item.description||old.lastUpdatedText!==item.lastUpdatedText)changes.push({kind:'fl511_county_road_updated',observedAt,title:`FL511 Miami-Dade listing updated: ${item.roadway}`,detail:'The publisher description or displayed update time changed. Confirm current status and location with Florida 511 before any event inference.',sourceUrl:floridaUrl});
+    }
+    for(const item of oldFlorida.records)if(!next.has(item.id))changes.push({kind:'fl511_county_road_unlisted',observedAt,title:`FL511 Miami-Dade listing no longer shown: ${item.roadway}`,detail:'The newer county list no longer includes this record. It may have cleared or changed scope; the list alone does not establish resolution or event impact.',sourceUrl:floridaUrl});
+  }
   const priorGeorgia=before.georgiaTrafficContext,nextGeorgia=after.georgiaTrafficContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorGeorgia?.state==='current_retrieval_time_basis_unverified'&&nextGeorgia?.state==='current_retrieval_time_basis_unverified'&&priorGeorgia.sourcePageUrl==='https://incidentreport.dot.ga.gov/'&&nextGeorgia.sourcePageUrl===priorGeorgia.sourcePageUrl&&Number.isFinite(Date.parse(priorGeorgia.asOf))&&Date.parse(nextGeorgia.asOf)>Date.parse(priorGeorgia.asOf)&&Array.isArray(priorGeorgia.records)&&Array.isArray(nextGeorgia.records)&&priorGeorgia.records.length<=10&&nextGeorgia.records.length<=10){
     const oldById=new Map(priorGeorgia.records.map(item=>[item.id,item]));

@@ -50,6 +50,7 @@
     "sync:nola-ready-event": "python3 scripts/sync_nola_ready_event.py",
     "sync:nola-ready-active": "python3 scripts/sync_nola_ready_active.py",
     "sync:nola-ready-updates": "python3 scripts/sync_nola_ready_updates.py",
+    "sync:fl511-miami": "node scripts/sync_fl511_miami.mjs",
     "sync:nola-ready-regional": "python3 scripts/sync_nola_ready_regional.py",
     "sync:norta-alerts": "python3 scripts/sync_norta_alerts.py",
     "sync:nola-calls": "node scripts/sync_nola_public_calls.mjs",
