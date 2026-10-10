@@ -18,3 +18,5 @@ await fs.writeFile(path.join(root,'site/nfl.json'),JSON.stringify(out));
 const exercise=validateExerciseCatalog(JSON.parse(await fs.readFile(path.join(root,'data/demo_scenarios.json'),'utf8')));
 await fs.writeFile(path.join(root,'site/exercise_scenarios.json'),JSON.stringify(exercise)+'\n');
 console.log(`Built public NFL snapshot: ${games.length} games, ${new Set(games.map(game=>game.venue.id)).size} venues`);
+
+await import('./build_event_examples.mjs');

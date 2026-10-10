@@ -1,0 +1,319 @@
+{
+  "builtAt": "2026-10-10T21:02:20.776Z",
+  "coverage": "Curated examples from existing public snapshots; not comprehensive event or voting-location coverage.",
+  "events": [
+    {
+      "id": "nyc-parks:2158498",
+      "eventType": "concert",
+      "title": "Charlotte Mayerson's Overlook Concerts",
+      "kickoff": "2026-10-11T14:00:00.000-04:00",
+      "endsAt": "2026-10-11T15:30:00.000-04:00",
+      "status": "Published schedule",
+      "sourceUrl": "https://www.nycgovparks.org/events/2026/10/11/charlotte-mayersons-overlook-concerts",
+      "sourceDataset": "https://data.cityofnewyork.us/City-Government/NYC-Parks-Public-Events-Upcoming-14-Days/w3wp-dpdi",
+      "sourceRetrievedAt": "2026-10-09T16:04:44.818Z",
+      "description": "Riverside Park Conservancy and our generous supporters present the Fall 2026 edition of Charlotte Mayerson’s Overlook Concert series, featuring talent from Brownstone Brass, The Manhattan School of Music’s Center for Career Readiness & Community Impact, and French Cookin’ Blues Band. October 4: Brownstone Brass Quintet - Classic brass quintet repertoire, original arrangements and compositions, new music and more.October 11: A Jazz Ensemble from the Manhattan School of Music – A glorious sound floats over the park as these student musicians play traditional and contemporary music.October 18: French Cookin’ Blues – This Blues Hall of Fame band plays authentic Blues from around the country for a special New York sound.",
+      "organizer": "NYC Parks",
+      "venue": {
+        "id": "place:aac844fd22713cdc",
+        "name": "Riverside Park",
+        "address": "116th Street Overlook (in Riverside Park), New York, NY, USA",
+        "lat": 40.80929946899414,
+        "lon": -73.96690368652344,
+        "coordinateStatus": "Publisher location"
+      },
+      "scenarios": [
+        {
+          "priority": "medium",
+          "title": "Blocked audience exit",
+          "observation": "A fictional steward report describes a temporary vendor queue across an audience exit.",
+          "uncertainty": "The remaining exit capacity and duration have not been verified.",
+          "decision": "Have the event supervisor verify the route and relocate the queue if it obstructs the approved exit.",
+          "owner": "Event safety supervisor",
+          "escalate": "The obstruction persists or safe exit capacity is reduced.",
+          "close": "The exit is verified clear."
+        }
+      ]
+    },
+    {
+      "id": "nyc-parks:2153686",
+      "eventType": "concert",
+      "title": "Jazz in the Park at Ralph Ellison",
+      "kickoff": "2026-10-11T14:00:00.000-04:00",
+      "endsAt": "2026-10-11T17:00:00.000-04:00",
+      "status": "Published schedule",
+      "sourceUrl": "https://www.nycgovparks.org/events/2026/10/11/jazz-in-the-park-at-ralph-ellison",
+      "sourceDataset": "https://data.cityofnewyork.us/City-Government/NYC-Parks-Public-Events-Upcoming-14-Days/w3wp-dpdi",
+      "sourceRetrievedAt": "2026-10-09T16:04:44.824Z",
+      "description": "Berta Indeed presents “Let the Music Play”, community jazz concerts featuring an array of local musicians and vocalists.",
+      "organizer": "NYC Parks",
+      "venue": {
+        "id": "place:a92c22d6edae1a82",
+        "name": "Ralph Ellison Plaza",
+        "address": "Ralph Ellison Plaza, New York, NY, USA",
+        "lat": 40.8303481,
+        "lon": -73.9499595,
+        "coordinateStatus": "Publisher location"
+      },
+      "scenarios": [
+        {
+          "priority": "medium",
+          "title": "Blocked audience exit",
+          "observation": "A fictional steward report describes a temporary vendor queue across an audience exit.",
+          "uncertainty": "The remaining exit capacity and duration have not been verified.",
+          "decision": "Have the event supervisor verify the route and relocate the queue if it obstructs the approved exit.",
+          "owner": "Event safety supervisor",
+          "escalate": "The obstruction persists or safe exit capacity is reduced.",
+          "close": "The exit is verified clear."
+        }
+      ]
+    },
+    {
+      "id": "nyc-parks:2190781",
+      "eventType": "concert",
+      "title": "Midtown Music in Greeley Square Park",
+      "kickoff": "2026-10-14T14:30:00.000-04:00",
+      "endsAt": "2026-10-14T17:30:00.000-04:00",
+      "status": "Published schedule",
+      "sourceUrl": "https://www.nycgovparks.org/events/2026/10/14/midtown-music-in-greeley-square-park",
+      "sourceDataset": "https://data.cityofnewyork.us/City-Government/NYC-Parks-Public-Events-Upcoming-14-Days/w3wp-dpdi",
+      "sourceRetrievedAt": "2026-10-09T16:04:45.581Z",
+      "description": "Featuring a multitude of musical moods ranging from pop-up performances for passers-by to festival shows curated by cultural partners, Midtown Music has something for every ear. Hear NYC’s finest singer-songwriters workshop their newest material, catch up-and-coming Indie or Americana acts, relax to some jazz or party with a brass band. Check out our website for additional Friday and Saturday shows!",
+      "organizer": "NYC Parks",
+      "venue": {
+        "id": "place:81514ed407b7d41a",
+        "name": "Greeley Square Park",
+        "address": "Greeley Square Park, New York, NY, USA",
+        "lat": 40.748642685667,
+        "lon": -73.988085303512,
+        "coordinateStatus": "Publisher location"
+      },
+      "scenarios": [
+        {
+          "priority": "medium",
+          "title": "Blocked audience exit",
+          "observation": "A fictional steward report describes a temporary vendor queue across an audience exit.",
+          "uncertainty": "The remaining exit capacity and duration have not been verified.",
+          "decision": "Have the event supervisor verify the route and relocate the queue if it obstructs the approved exit.",
+          "owner": "Event safety supervisor",
+          "escalate": "The obstruction persists or safe exit capacity is reduced.",
+          "close": "The exit is verified clear."
+        }
+      ]
+    },
+    {
+      "id": "nyc-parks:2255018",
+      "eventType": "festival",
+      "title": "Rockaway Fall Festival",
+      "kickoff": "2026-10-12T12:00:00.000-04:00",
+      "endsAt": "2026-10-12T16:00:00.000-04:00",
+      "status": "Published schedule",
+      "sourceUrl": "https://www.nycgovparks.org/events/2026/10/12/rockaway-fall-festival",
+      "sourceDataset": "https://data.cityofnewyork.us/City-Government/NYC-Parks-Public-Events-Upcoming-14-Days/w3wp-dpdi",
+      "sourceRetrievedAt": "2026-10-09T16:04:44.899Z",
+      "description": "Bring your family and friends for a fun filled day at the Rockaway Fall Festival. There will be a pumpkin maze, pumpkin patch, Mechanical rides, light refreshments, giveaways, arts & crafts, games and music.",
+      "organizer": "NYC Parks",
+      "venue": {
+        "id": "place:06da6c2d9e3548ec",
+        "name": "Rockaway Beach and Boardwalk",
+        "address": "Beach 17 O'Donohue Park (in Rockaway Beach and Boardwalk), New York, NY, USA",
+        "lat": 40.592552514809,
+        "lon": -73.754145622254,
+        "coordinateStatus": "Publisher location"
+      },
+      "scenarios": [
+        {
+          "priority": "low",
+          "title": "Separated child at a family event",
+          "observation": "A fictional visitor reports a child separated from their group.",
+          "uncertainty": "The child’s location and identity are unverified.",
+          "decision": "Activate the event’s reunification procedure without publicly broadcasting identifying details.",
+          "owner": "Guest-services lead",
+          "escalate": "A corroborated immediate safety concern or a prolonged unresolved separation.",
+          "close": "Authorized reunification is confirmed."
+        }
+      ]
+    },
+    {
+      "id": "nyc-parks:2230956",
+      "eventType": "festival",
+      "title": "Boo Bash in the Bronx",
+      "kickoff": "2026-10-10T12:00:00.000-04:00",
+      "endsAt": "2026-10-10T16:00:00.000-04:00",
+      "status": "Published schedule",
+      "sourceUrl": "https://www.nycgovparks.org/events/2026/10/10/boo-bash-in-the-bronx",
+      "sourceDataset": "https://data.cityofnewyork.us/City-Government/NYC-Parks-Public-Events-Upcoming-14-Days/w3wp-dpdi",
+      "sourceRetrievedAt": "2026-10-09T16:04:44.476Z",
+      "description": "Join NYC Parks and Council Member Pierina Sanchez at St. James Park for the ultimate fall celebration! Don your best costume and join us for a jam-packed day of seasonal fun. Activities will include carnival games, creative crafts, face painting, and more. This event is free and open to the public.",
+      "organizer": "NYC Parks",
+      "venue": {
+        "id": "place:b34badadcbe783f0",
+        "name": "St. James Park",
+        "address": "St. James Park, New York, NY, USA",
+        "lat": 40.865001284266,
+        "lon": -73.897793292999,
+        "coordinateStatus": "Publisher location"
+      },
+      "scenarios": [
+        {
+          "priority": "low",
+          "title": "Separated child at a family event",
+          "observation": "A fictional visitor reports a child separated from their group.",
+          "uncertainty": "The child’s location and identity are unverified.",
+          "decision": "Activate the event’s reunification procedure without publicly broadcasting identifying details.",
+          "owner": "Guest-services lead",
+          "escalate": "A corroborated immediate safety concern or a prolonged unresolved separation.",
+          "close": "Authorized reunification is confirmed."
+        }
+      ]
+    },
+    {
+      "id": "voting:dc-early:91",
+      "eventType": "voting",
+      "title": "Early voting — STEAD RECREATION CENTER",
+      "kickoff": "2026-10-26T08:30:00-04:00",
+      "endsAt": "2026-11-01T19:00:00-05:00",
+      "status": "Published site record",
+      "sourceUrl": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/10/query?where=OBJECTID%3D91&outFields=*&returnGeometry=true&f=geojson",
+      "sourceDataset": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/10",
+      "sourceRetrievedAt": "2026-10-09T17:44:33.318Z",
+      "description": "Published voting location. Confirm current hours, accessibility and voter eligibility with the election authority.",
+      "organizer": "District of Columbia Board of Elections",
+      "datesOpen": "October 26, 2026 to November 1, 2026",
+      "hours": "8:30 AM to 7:00 PM",
+      "votingSpace": "Multi-Purpose Room",
+      "accessibility": "Not supplied",
+      "venue": {
+        "id": "dc-early:91",
+        "name": "STEAD RECREATION CENTER",
+        "address": "1625 P Street, NW, Washington, DC, USA",
+        "lat": 38.91003242679478,
+        "lon": -77.03762303945996,
+        "coordinateStatus": "Official GIS location"
+      },
+      "scenarios": [
+        {
+          "priority": "medium",
+          "title": "Accessible entrance obstruction",
+          "observation": "A fictional site manager reports a delivery blocking the accessible entrance.",
+          "uncertainty": "Whether another approved accessible entrance is available is unknown.",
+          "decision": "Have the site manager verify accessible entry and coordinate removal of the obstruction.",
+          "owner": "Voting-site manager",
+          "escalate": "Accessible voter entry cannot be maintained.",
+          "close": "Approved accessible entry is verified restored."
+        }
+      ]
+    },
+    {
+      "id": "voting:dc-early:92",
+      "eventType": "voting",
+      "title": "Early voting — FORT STANTON RECREATION CENTER",
+      "kickoff": "2026-10-26T08:30:00-04:00",
+      "endsAt": "2026-11-01T19:00:00-05:00",
+      "status": "Published site record",
+      "sourceUrl": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/10/query?where=OBJECTID%3D92&outFields=*&returnGeometry=true&f=geojson",
+      "sourceDataset": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/10",
+      "sourceRetrievedAt": "2026-10-09T17:44:33.318Z",
+      "description": "Published voting location. Confirm current hours, accessibility and voter eligibility with the election authority.",
+      "organizer": "District of Columbia Board of Elections",
+      "datesOpen": "October 26, 2026 to November 1, 2026",
+      "hours": "8:30 AM to 7:00 PM",
+      "votingSpace": "Gymnasium",
+      "accessibility": "Not supplied",
+      "venue": {
+        "id": "dc-early:92",
+        "name": "FORT STANTON RECREATION CENTER",
+        "address": "1812 Erie Street, SE, Washington, DC, USA",
+        "lat": 38.85760729304152,
+        "lon": -76.97873329573854,
+        "coordinateStatus": "Official GIS location"
+      },
+      "scenarios": [
+        {
+          "priority": "medium",
+          "title": "Accessible entrance obstruction",
+          "observation": "A fictional site manager reports a delivery blocking the accessible entrance.",
+          "uncertainty": "Whether another approved accessible entrance is available is unknown.",
+          "decision": "Have the site manager verify accessible entry and coordinate removal of the obstruction.",
+          "owner": "Voting-site manager",
+          "escalate": "Accessible voter entry cannot be maintained.",
+          "close": "Approved accessible entry is verified restored."
+        }
+      ]
+    },
+    {
+      "id": "voting:dc-election-day:49",
+      "eventType": "voting",
+      "title": "Election Day voting — LASALLE-BACKUS EDUCATION CAMPUS",
+      "kickoff": "2026-11-03T07:00:00-05:00",
+      "endsAt": "2026-11-03T20:00:00-05:00",
+      "status": "Published site record",
+      "sourceUrl": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/9/query?where=OBJECTID%3D49&outFields=*&returnGeometry=true&f=geojson",
+      "sourceDataset": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/9",
+      "sourceRetrievedAt": "2026-10-09T17:44:33.318Z",
+      "description": "Published voting location. Confirm current hours, accessibility and voter eligibility with the election authority.",
+      "organizer": "District of Columbia Board of Elections",
+      "datesOpen": "Tuesday, November 3, 2026",
+      "hours": "7:00 AM to 8:00 PM",
+      "votingSpace": "Auditorium",
+      "accessibility": "Not supplied",
+      "venue": {
+        "id": "dc-election-day:49",
+        "name": "LASALLE-BACKUS EDUCATION CAMPUS",
+        "address": "501 Riggs Road, NE, Washington, DC, USA",
+        "lat": 38.95997960935013,
+        "lon": -76.99988483141722,
+        "coordinateStatus": "Official GIS location"
+      },
+      "scenarios": [
+        {
+          "priority": "high",
+          "title": "Reported threat toward election workers",
+          "observation": "A fictional reporting desk receives a direct threat naming the voting site and its workers.",
+          "uncertainty": "Sender identity, capability, location and credibility remain unverified; no voter is implicated.",
+          "decision": "Have the designated election-security lead promptly assess the report, preserve evidence and consider proportionate worker protection under the site response plan.",
+          "owner": "Election-security lead",
+          "escalate": "Corroboration establishes capability, site access or immediate danger.",
+          "close": "A responsible reviewer documents a supported resolution."
+        }
+      ]
+    },
+    {
+      "id": "voting:dc-election-day:51",
+      "eventType": "voting",
+      "title": "Election Day voting — POWELL ELEMENTARY SCHOOL",
+      "kickoff": "2026-11-03T07:00:00-05:00",
+      "endsAt": "2026-11-03T20:00:00-05:00",
+      "status": "Published site record",
+      "sourceUrl": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/9/query?where=OBJECTID%3D51&outFields=*&returnGeometry=true&f=geojson",
+      "sourceDataset": "https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Government_Operations/MapServer/9",
+      "sourceRetrievedAt": "2026-10-09T17:44:33.318Z",
+      "description": "Published voting location. Confirm current hours, accessibility and voter eligibility with the election authority.",
+      "organizer": "District of Columbia Board of Elections",
+      "datesOpen": "Tuesday, November 3, 2026",
+      "hours": "7:00 AM to 8:00 PM",
+      "votingSpace": "Multi-Purpose Room",
+      "accessibility": "Vote Center Not-Accessible",
+      "venue": {
+        "id": "dc-election-day:51",
+        "name": "POWELL ELEMENTARY SCHOOL",
+        "address": "1350 Upshur Street, NW, Washington, DC, USA",
+        "lat": 38.94166521270239,
+        "lon": -77.03158447058023,
+        "coordinateStatus": "Official GIS location"
+      },
+      "scenarios": [
+        {
+          "priority": "high",
+          "title": "Reported threat toward election workers",
+          "observation": "A fictional reporting desk receives a direct threat naming the voting site and its workers.",
+          "uncertainty": "Sender identity, capability, location and credibility remain unverified; no voter is implicated.",
+          "decision": "Have the designated election-security lead promptly assess the report, preserve evidence and consider proportionate worker protection under the site response plan.",
+          "owner": "Election-security lead",
+          "escalate": "Corroboration establishes capability, site access or immediate danger.",
+          "close": "A responsible reviewer documents a supported resolution."
+        }
+      ]
+    }
+  ]
+}

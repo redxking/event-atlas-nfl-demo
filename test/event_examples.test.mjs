@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {scopeGames,regionOf} from '../site/geographic_explorer.js';
+import {exampleSummary} from '../site/event_catalog.js';
+import {buildScopeThreatReport} from '../site/scope_threat_report.js';
+const events=JSON.parse(fs.readFileSync(new URL('../site/event_examples.json',import.meta.url))).events;
+test('catalogue includes concerts, festivals and published voting schedules with source links',()=>{assert.deepEqual(new Set(events.map(e=>e.eventType)),new Set(['concert','festival','voting']));assert.equal(new Set(events.map(e=>e.id)).size,events.length);for(const event of events){assert.ok(event.sourceUrl.startsWith('https://'));assert.ok(Number.isFinite(event.venue.lat));assert.ok(Number.isFinite(Date.parse(event.kickoff)));assert.ok(Date.parse(event.endsAt)>Date.parse(event.kickoff));assert.ok(regionOf(event));assert.ok(event.scenarios.length);assert.ok(event.scenarios.every(s=>/fictional/i.test(s.observation)));}});
+test('category and interval filtering show voting sessions across the daylight saving transition',()=>{const scope={start:'2026-11-01',end:'2026-11-01',eventType:'voting'};const selected=scopeGames(events,scope);assert.equal(selected.length,2);assert.ok(selected.every(e=>e.id.includes('dc-early')));assert.equal(scopeGames(events,{start:'2026-11-03',end:'2026-11-03',eventType:'voting'}).length,2);assert.equal(scopeGames(events,{start:'2026-10-10',end:'2026-10-23',eventType:'concert'}).length,3);});
+test('fictional incidents do not become real threat counts or completed monitoring',()=>{const concert=events.find(e=>e.eventType==='concert');const summary=exampleSummary(concert);assert.equal(summary.items.length,0);const report=buildScopeThreatReport({title:concert.title,level:'event',games:[concert],summaries:new Map([[concert.id,summary]])});assert.equal(report.findings.length,0);assert.equal(report.eventRollup.length,0);assert.match(report.sections[3].paragraphs[0],/1 is awaiting screening/);});

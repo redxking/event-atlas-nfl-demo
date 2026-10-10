@@ -23,7 +23,7 @@ export function showWorkspaceView(view,{record=true}={}){
   section.hidden=!visible;
  }
  const games=document.querySelector('.game-column'),brief=document.getElementById('briefing');if(games)games.hidden=view!=='events';if(brief)brief.hidden=view!=='event';
- const names={overview:'NFL event overview',events:'Find an event',event:'Event briefing'};
+ const names={overview:'Event overview',events:'Find an event',event:'Event briefing'};
  document.querySelector('.hero h1').textContent=names[view];
  document.querySelector('.hero .intro').textContent=view==='overview'?'Explore national, regional and local event summaries. Select an event to open its briefing.':view==='event'?'Review the selected event’s map, concerns, people and supporting sources.':'Use the navigation to return to the overview or open an event.';
  document.querySelectorAll('[data-workspace-view]').forEach(button=>button.setAttribute('aria-current',button.dataset.workspaceView===view?'page':'false'));
