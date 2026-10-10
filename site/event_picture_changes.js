@@ -117,6 +117,18 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of prior.claims)if(!newById.has(item.id))changes.push({kind:spec.label==='MARTA'?'operator_schedule_unmatched':'club_passage_unmatched',observedAt,title:`${spec.label} passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:`The bounded extractor no longer matches this ${spec.label} page passage. It may have changed or disappeared; this does not prove the plan was cancelled or an activity ended. Review the current publisher page.`,sourceUrl:spec.url});
   }
+  const oldCityEvent=before.nolaReadyEventContext,newCityEvent=after.nolaReadyEventContext;
+  const cityUrl='https://ready.nola.gov/incident/crescent-city-blues-bbq-festival-2026/crescent-city-blues-bbq-festival-2026/';
+  const validCityClaim=item=>['sunday_window','cbd_location','traffic_advisory','camp_closure'].includes(item?.id)&&item.sourceUrl===cityUrl&&/^[a-f0-9]{64}$/.test(item.sourceTextSha256||'');
+  if(!eventWindowChanged&&after.eventId==='nfl:401872987'&&['current_city_notice','partial_city_notice'].includes(oldCityEvent?.state)&&['current_city_notice','partial_city_notice'].includes(newCityEvent?.state)&&oldCityEvent.sourceUrl===cityUrl&&newCityEvent.sourceUrl===cityUrl&&Number.isFinite(Date.parse(oldCityEvent.asOf))&&Date.parse(newCityEvent.asOf)>Date.parse(oldCityEvent.asOf)&&Array.isArray(oldCityEvent.claims)&&Array.isArray(newCityEvent.claims)&&oldCityEvent.claims.length<=4&&newCityEvent.claims.length<=4&&oldCityEvent.claims.every(validCityClaim)&&newCityEvent.claims.every(validCityClaim)){
+    const oldClaims=new Map(oldCityEvent.claims.map(item=>[item.id,item]));
+    const newClaims=new Map(newCityEvent.claims.map(item=>[item.id,item]));
+    for(const item of newCityEvent.claims){
+      const prior=oldClaims.get(item.id);
+      if(!prior||prior.sourceTextSha256!==item.sourceTextSha256)changes.push({kind:prior?'city_event_notice_revised':'city_event_notice_matched',observedAt,title:`NOLA Ready festival ${item.id.replaceAll('_',' ')}`,detail:'The official city page changed or added a bounded event passage between checks. Verify current festival and street plans with the city; this does not prove a stadium route impact, incident, or threat.',sourceUrl:cityUrl});
+    }
+    for(const item of oldCityEvent.claims)if(!newClaims.has(item.id))changes.push({kind:'city_event_notice_unmatched',observedAt,title:`NOLA Ready festival passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:'The bounded extractor no longer matches this city passage. Verify the city page; this does not establish that an event or closure ended.',sourceUrl:cityUrl});
+  }
   const priorGeorgia=before.georgiaTrafficContext,nextGeorgia=after.georgiaTrafficContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorGeorgia?.state==='current_retrieval_time_basis_unverified'&&nextGeorgia?.state==='current_retrieval_time_basis_unverified'&&priorGeorgia.sourcePageUrl==='https://incidentreport.dot.ga.gov/'&&nextGeorgia.sourcePageUrl===priorGeorgia.sourcePageUrl&&Number.isFinite(Date.parse(priorGeorgia.asOf))&&Date.parse(nextGeorgia.asOf)>Date.parse(priorGeorgia.asOf)&&Array.isArray(priorGeorgia.records)&&Array.isArray(nextGeorgia.records)&&priorGeorgia.records.length<=10&&nextGeorgia.records.length<=10){
     const oldById=new Map(priorGeorgia.records.map(item=>[item.id,item]));
