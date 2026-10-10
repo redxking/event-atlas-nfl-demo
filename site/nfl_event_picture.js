@@ -4,7 +4,7 @@ import {tfrAtKickoff} from './tfr_notam.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 import {selectNflGameArticle} from './nfl_game_article.js';
 import {selectSeptaForGame} from './septa_b_alerts.js';
-import {selectNjTransitRailForGame} from './njtransit_event_rail.js';
+import {selectNjTransitRailForGame} from './njtransit_event_rail.js?v=20261010-2';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
@@ -86,7 +86,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('MBTA Foxboro station schedule',venueId!=='3738'?'outside source area':transitSchedule?.state==='failed'?'source failed':!transitScheduleFresh?'not current':transitSchedule.state==='partial'?'partial source data':'station schedule checked',transitScheduleFresh?new Date(transitSchedule.checkedAt).toISOString():null,'Published station service plan for the game date. No train position, capacity or guaranteed event access is inferred.',venueId==='3738'?transitSchedule?.sourceUrl||'https://api-v3.mbta.com/schedules':null),
     row('MBTA Foxboro current predictions',venueId!=='3738'?'outside source area':transitPredictions?.state==='failed'?'source failed':!transitPredictionsFresh?'not current':transitPredictions.state==='partial'?'partial source data':'current predictions checked',transitPredictionsFresh?new Date(transitPredictions.checkedAt).toISOString():null,'Station predictions are estimates for current service. No result does not establish cancelled future service or train position.',venueId==='3738'?transitPredictions?.sourceUrl||'https://api-v3.mbta.com/predictions':null),
     row('SEPTA B Line service alerts',venueId!=='3806'?'outside source area':septaContext.state,septaContext?.sourceAt||null,'Route-wide notices may affect travel to NRG Station; only stop-specific selectors identify the station. Neither establishes stadium impact.',septaContext?.sourceUrl||null),
-    row('NJ TRANSIT event rail advisories',venueId!=='3839'?'outside source area':njTransitRailContext.state,njTransitRailContext?.sourceAt||null,'Exact MetLife game advisory is publisher service planning, not a disruption, verified train operation, or threat.',njTransitRailContext?.sourceUrl||null)
+    row('NJ TRANSIT event rail advisories',venueId!=='3839'?'outside source area':njTransitRailContext.state,njTransitRailContext?.sourceAt||null,'Exact-game service plans and separately labeled regional schedule notices are publisher planning context, not a disruption, verified train operation, or threat.',njTransitRailContext?.sourceUrl||null)
   ];
   const cues=[];
   if(weather?.state==='screened')for(const entry of weather.alerts.filter(item=>item.candidate)){

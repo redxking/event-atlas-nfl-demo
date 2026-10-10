@@ -4,9 +4,9 @@ import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {venueMarkers} from './venue_map.js?v=20261009-1';
 import {summarizeArlingtonCalls,seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261009-2';
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-38';
-import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-32';
-import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-10';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-39';
+import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-33';
+import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-11';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
@@ -23,11 +23,11 @@ import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
 import {selectSeptaForGame,septaAlertsPage} from './septa_b_alerts.js';
-import {selectNjTransitRailForGame,njTransitRailPage} from './njtransit_event_rail.js';
+import {selectNjTransitRailForGame,njTransitRailPage} from './njtransit_event_rail.js?v=20261010-2';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 import {shouldAdoptPublishedSnapshot} from './published_snapshot_refresh.js';
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-7';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-8';
 import {fetchSelectedGame} from './espn_game_summary.js?v=20261010-2';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);
@@ -434,7 +434,7 @@ function renderTransit(game){
   target.innerHTML=`<p class="feed-state">SEPTA B LINE · ${esc(context.state.toUpperCase())}${context.sourceAt?' · SOURCE '+esc(fmt(context.sourceAt)):''}</p><p>${context.state==='current snapshot'||context.state==='partial'?`${esc(context.matchingCount)} B Line or NRG stop alert${context.matchingCount===1?'':'s'} in the publisher snapshot; ${context.screenable?esc(context.overlapCount)+' overlap the illustrative event window.':'game-time screening unavailable.'}`:'The published alert snapshot is unavailable or stale; no service conclusion can be inferred.'} ${link(septaAlertsPage,'SEPTA alerts')}</p>${context.alerts.filter(item=>item.eventWindowOverlap).slice(0,8).map(item=>`<div class="camera-row"><strong>${esc(item.header)}</strong><span>${esc(item.scope)} · ${esc(item.effect||'effect not supplied')} · event-window overlap</span>${link(item.sourceUrl,'SEPTA alerts')}</div>`).join('')}<p>Route-wide notices do not establish an NRG Station issue. These are service notices, not verified stadium impacts or threats.</p>`;
     return;
   }
-  if(game.venue.id==='3839'){const context=selectNjTransitRailForGame(game,njTransitRailSnapshot);target.innerHTML=`<p class="feed-state">NJ TRANSIT RAIL · ${esc(context.state.toUpperCase())}</p>${context.advisories.map(item=>`<div class="camera-row"><strong>${esc(item.title)}</strong>${link(item.url,'NJ TRANSIT advisory')}</div>`).join('')}<p>${context.advisories.length?'Publisher event rail-service planning; confirm the linked notice before travel.':'No exact-game advisory is available in the current snapshot.'} This does not verify train operation, disruption, stadium access impact, or a threat. ${link(njTransitRailPage,'NJ TRANSIT status')}</p>`;return}
+  if(game.venue.id==='3839'){const context=selectNjTransitRailForGame(game,njTransitRailSnapshot);target.innerHTML=`<p class="feed-state">NJ TRANSIT RAIL · ${esc(context.state.toUpperCase())}</p>${context.advisories.map(item=>`<div class="camera-row"><strong>${esc(item.title)}</strong>${link(item.url,'NJ TRANSIT advisory')}</div>`).join('')}${(context.regionalAdvisories||[]).map(item=>`<div class="camera-row"><strong>Regional schedule advisory</strong><span>${esc(item.title)}</span>${link(item.url,'NJ TRANSIT notice')}</div>`).join('')}<p>${context.advisories.length?'Publisher event rail-service planning; confirm the linked notice before travel.':'No exact-game advisory is available in the current snapshot.'} Regional notices apply to the wider rail network and need trip-specific confirmation. This does not verify train operation, disruption, stadium access impact, or a threat. ${link(njTransitRailPage,'NJ TRANSIT status')}</p>`;return}
   if(game.venue.id!=='3738'){target.innerHTML='<p>No station-specific transit alert connector is configured for this venue.</p>';return}
   target.innerHTML='<div id="transit-alerts"><p>Checking MBTA Foxboro station alerts…</p></div><div id="transit-schedule"><p>Checking game-date station schedule…</p></div><div id="transit-predictions"><p>Checking current station predictions…</p></div>';
   refreshMbtaAlerts(game);refreshMbtaSchedules(game);refreshMbtaPredictions(game);

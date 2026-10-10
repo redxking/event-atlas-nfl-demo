@@ -48,9 +48,11 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
   }
   const oldRail=before.njTransitRailContext,newRail=after.njTransitRailContext;
-  if(oldRail?.state==='event-specific advisory listed'&&newRail?.state==='event-specific advisory listed'&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
+  if(['event-specific advisory listed','regional rail advisory listed'].includes(oldRail?.state)&&['event-specific advisory listed','regional rail advisory listed'].includes(newRail?.state)&&oldRail.gameDate===newRail.gameDate&&Array.isArray(oldRail.advisories)&&Array.isArray(newRail.advisories)){
     const oldUrls=new Set(oldRail.advisories.map(item=>item.url));
     for(const item of newRail.advisories.slice(0,4))if(!oldUrls.has(item.url))changes.push({kind:'new_event_rail_advisory',observedAt,title:item.title,detail:'NJ TRANSIT added an advisory naming this MetLife game. Verify the publisher details; the listing does not establish disruption, train operation, venue impact, or a threat.',sourceUrl:item.url});
+    const oldRegional=new Set((oldRail.regionalAdvisories||[]).map(item=>item.url));
+    for(const item of (newRail.regionalAdvisories||[]).slice(0,4))if(!oldRegional.has(item.url))changes.push({kind:'new_regional_rail_advisory',observedAt,title:item.title.slice(0,280),detail:'NJ TRANSIT added a region-wide schedule notice for the game date. Verify any effect on a specific trip; the listing does not establish stadium access impact or a threat.',sourceUrl:item.url});
   }
   return changes.slice(0,12);
 }

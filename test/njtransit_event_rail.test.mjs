@@ -18,6 +18,19 @@ test('wrong team, date or venue never matches another game',()=>{
     assert.equal(selectNjTransitRailForGame(game,snapshot,now).advisories.length,0);
   }
 });
+test('systemwide rail schedule notice is separately labeled for its exact local date',()=>{
+  const title='On Sunday, October 11, 2026, all NJ TRANSIT rail service will operate on a weekend schedule';
+  const snapshot=summarizeNjTransitRailFeed(xml(title),[game],now);
+  const selected=selectNjTransitRailForGame(game,snapshot,now);
+  assert.equal(selected.state,'regional rail advisory listed');
+  assert.equal(selected.advisories.length,0);
+  assert.equal(selected.regionalAdvisories.length,1);
+});
+test('a no-year regional notice from another publication year is not matched',()=>{
+  const priorYear=xml('On Sunday, October 11, all NJ TRANSIT rail service will operate on a weekend schedule').replace('Oct 07, 2026','Oct 07, 2025');
+  const selected=selectNjTransitRailForGame(game,summarizeNjTransitRailFeed(priorYear,[game],now),now);
+  assert.equal(selected.regionalAdvisories.length,0);
+});
 test('stale feed cannot provide a current advisory',()=>{
   assert.throws(()=>summarizeNjTransitRailFeed(xml('MetLife Stadium for Jets vs. Browns – Sunday, October 11, 2026'),[game],now+3*3600000));
 });
