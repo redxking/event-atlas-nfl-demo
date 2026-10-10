@@ -1,3 +1,4 @@
+import {renderDemoPeople} from './demo_people.js';
 import {createGeographicExplorer} from './geographic_explorer.js';
 import {renderEventGeographicMap} from './event_geographic_map.js';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js';
@@ -670,6 +671,9 @@ function renderPeopleProtection(picture){
   const people=picture.announcedPeople||[];
   const unique=[...new Map(people.map(person=>[person.name+'|'+person.announcedRole+'|'+person.sourceUrl,person])).values()];
   target.innerHTML=`<h4>People & protection</h4><details><summary>VIPs & announced participants · ${new Set(unique.map(person=>person.name)).size} names</summary><p>People named in published announcements for this game. Announced participation does not confirm arrival or protective status.</p>${unique.length?unique.map(person=>`<article class="brief-cue"><strong>${esc(person.name)}</strong><p>${esc(person.announcedRole)}</p><small>Attendance: Announced — not confirmed</small><p>${link(person.sourceUrl,'View announcement')} · ${esc(person.publisher)} · checked ${esc(fmt(person.sourceCheckedAt))}</p></article>`).join(''):'<p>No named participants are available from the connected announcements for this game.</p>'}</details><details><summary>Person-specific safety concerns</summary><p>No reviewed person-specific alerts are connected to this public workspace.</p><p>An operational alert should explain the reported behavior, connection to this game or a protected person, source and time, identity uncertainty, responsible reviewer, and when the alert expires. Such records belong in a restricted agency workspace.</p></details>`;
+  const game=snapshot.games.find(game=>game.id===picture.eventId);
+  if(game){const demos=document.createElement('section');target.append(demos);renderDemoPeople(demos,game);}
+
 }
 function renderAttention(game,picture){
   const summary=attentionSummary(picture);
