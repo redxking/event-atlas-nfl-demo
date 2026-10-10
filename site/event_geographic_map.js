@@ -1,3 +1,4 @@
+import {attachDemoTracking} from './demo_tracking.js';
 import {humanText} from './attention_summary.js';
 import {locatedConcerns} from './concern_location.js';
 import {findingDecision} from './finding_decision.js';
@@ -32,7 +33,7 @@ export function renderEventGeographicMap(game,ground,airspace){
  const frame=()=>{if(validRing(record?.ring))map.fitBounds(record.ring.map(([lon,lat])=>[lat,lon]),{padding:[24,24]});else map.setView([venue.lat,venue.lon],15);};
  document.getElementById('map-show-stadium').onclick=()=>map.setView([venue.lat,venue.lon],16);
  document.getElementById('map-show-airspace').onclick=frame;
- if(!game.eventType||game.eventType==='nfl')attachMovementTracking(map,controls,game,record?.ring);
+ if(!game.eventType||game.eventType==='nfl'){attachMovementTracking(map,controls,game,record?.ring);attachDemoTracking(map,controls,game);}
  if(concernGameId!==game.id){concerns=[];concernGameId=game.id;}
  drawConcerns(game);
  if(eventId!==game.id){map.setView([venue.lat,venue.lon],15);eventId=game.id;}
