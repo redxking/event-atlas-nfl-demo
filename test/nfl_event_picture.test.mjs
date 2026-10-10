@@ -56,6 +56,19 @@ test('AZ511 date-matched Phoenix notice enters review without claiming a road im
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
 });
 
+test('Houston TranStar RSS enters Reliant briefing as corridor context only',()=>{
+  const houstonGame={...game,venue:{id:'3891',lat:29.6847,lon:-95.4108}};
+  const url='https://traffic.houstontranstar.org/data/rss/incidents_rss.xml';
+  const houstonTranstarRss={schema:'event-atlas.houston-transtar-rss.v1',status:'partial',checkedAt:'2026-10-09T17:55:00Z',feeds:{incidents:{status:'ok',sourceAt:'2026-10-09T17:50:00Z',totalListed:1,corridorListed:1,sourceUrl:url,entries:[{id:'1854994_Verified',title:'IH-610 South Loop Eastbound Before Scott St - Stall',description:'Status: Verified at 12:45 PM',sourceAt:'2026-10-09T17:50:00Z',sourceTextSha256:'a'.repeat(64),sourceUrl:url}]},lane_closures:{status:'failed',sourceAt:null,totalListed:null,corridorListed:null,entries:[],sourceUrl:'https://traffic.houstontranstar.org/data/rss/laneclosures_rss.xml'}}};
+  const picture=buildNflEventPicture(houstonGame,{schedule:inputs.schedule,houstonTranstarRss},now);
+  assert.equal(picture.houstonTranstarContext.state,'partial_corridor_text_sample');
+  assert.equal(picture.houstonTranstarContext.entries.length,1);
+  assert.equal(picture.cues.length,0);
+  assert.equal(picture.cueCounts.road,0);
+  assert.ok(picture.gaps.some(item=>item.includes('TranStar incident or closure RSS coverage')));
+  assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
+});
+
 test('Philadelphia citywide notices are cited as city context without event impact or threat cue',()=>{
   const phillyGame={...game,venue:{id:'3806',lat:39.90089,lon:-75.16776}};
   const context={state:'retrieved',checkedAt:now,totalReturned:1,invalidCount:0,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1',alerts:[{title:'City notice',detail:'Citywide information',url:'https://www.phila.gov/notice'}]};

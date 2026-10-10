@@ -7,6 +7,18 @@ const game={kickoff:'2026-10-11T17:00:00Z',status:'scheduled',timeTbd:false,sour
 const weatherCue={type:'weather alert',title:'NWS warning',basis:'Published window overlaps event',sourceUrl:'https://weather.example/alert',sourceAt:'2026-10-11T16:00:00Z'};
 const picture=(state,cues=[])=>({eventId:'nfl:test',sources:[source('NWS point alerts',state)],cues});
 
+test('new Houston corridor RSS item is observed only across newer complete feed checks',()=>{
+  const url='https://traffic.houstontranstar.org/data/rss/incidents_rss.xml';
+  const item={id:'1854994_Verified',title:'IH-610 South Loop Eastbound Before Scott St - Stall',sourceTextSha256:'a'.repeat(64),sourceUrl:url};
+  const context=(at,entries,state='current_corridor_text_sample')=>({state,feeds:[{kind:'incidents',state:'current_corridor_text_sample',asOf:at,entries}]});
+  const before={...picture('checked'),houstonTranstarContext:context('2026-10-24T12:00:00Z',[])};
+  const after={...picture('checked'),houstonTranstarContext:context('2026-10-24T13:00:00Z',[item])};
+  const change=diffEventPicture(before,after,null,null,game,game).find(row=>row.kind==='houston_corridor_rss_changed');
+  assert.equal(change?.sourceUrl,url);
+  assert.match(change.detail,/no item coordinates or verified stadium route/);
+  assert.equal(diffEventPicture({...before,houstonTranstarContext:context('2026-10-24T12:00:00Z',[],'stale_or_unavailable')},after,null,null,game,game).some(row=>row.kind==='houston_corridor_rss_changed'),false);
+});
+
 test('newer AZ511 regional advisory text creates a review change only across current checks',()=>{
   const url='https://az511.gov/List/Alerts';
   const before={eventId:'nfl:401872991',sources:[{name:'AZ511 public regional alerts',state:'current_date_matched_regional_notice',sourceUrl:url}],cues:[{type:'regional road advisory',sourceId:'az511:aaaa',title:'Phoenix freeway advisory',basis:'Regional corridor notice',sourceUrl:url,sourceAt:'2026-10-08T20:45:00Z'}]};

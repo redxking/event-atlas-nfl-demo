@@ -22,6 +22,15 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const prior=oldRows.get(name);
     if(prior&&prior.state!==next.state)changes.push({kind:'source_status_changed',observedAt,title:`${name}: ${prior.state} → ${next.state}`,detail:'Source coverage or screening status changed; verify the linked publisher before acting.',sourceUrl:next.sourceUrl||prior.sourceUrl||null});
   }
+  const oldHouston=before.houstonTranstarContext,newHouston=after.houstonTranstarContext;
+  if(!eventWindowChanged&&['current_corridor_text_sample','partial_corridor_text_sample'].includes(oldHouston?.state)&&['current_corridor_text_sample','partial_corridor_text_sample'].includes(newHouston?.state)){
+    for(const nextFeed of newHouston.feeds||[]){
+      const priorFeed=(oldHouston.feeds||[]).find(feed=>feed.kind===nextFeed.kind);
+      if(priorFeed?.state!=='current_corridor_text_sample'||nextFeed.state!=='current_corridor_text_sample'||!Number.isFinite(Date.parse(priorFeed.asOf))||Date.parse(nextFeed.asOf)<=Date.parse(priorFeed.asOf))continue;
+      const prior=new Map(priorFeed.entries.map(item=>[item.id,item.sourceTextSha256]));
+      for(const item of nextFeed.entries.slice(0,10))if(prior.get(item.id)!==item.sourceTextSha256&&/^https:\/\/traffic\.houstontranstar\.org\/data\/rss\/(?:incidents|laneclosures)_rss\.xml$/.test(item.sourceUrl||''))changes.push({kind:'houston_corridor_rss_changed',observedAt,title:`Houston TranStar corridor item: ${item.title}`.slice(0,300),detail:'Newly displayed or revised in the bounded official RSS corridor text sample. The feed supplies no item coordinates or verified stadium route. Check its current status and event relevance; this is not a confirmed venue impact or threat.',sourceUrl:item.sourceUrl});
+    }
+  }
   const oldFire=before.wildfireContext,newFire=after.wildfireContext;
   if(!eventWindowChanged&&oldFire?.state==='current_snapshot'&&newFire?.state==='current_snapshot'&&Number.isFinite(Date.parse(oldFire.asOf))&&Date.parse(newFire.asOf)>Date.parse(oldFire.asOf)&&Array.isArray(oldFire.events)&&Array.isArray(newFire.events)){
     const priorById=new Map(oldFire.events.map(item=>[item.id,item]));
