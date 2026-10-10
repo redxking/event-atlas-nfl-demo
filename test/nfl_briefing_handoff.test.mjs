@@ -35,3 +35,26 @@ test('old retained changes are not presented as new source changes',()=>{
   old.publishedChanges.newItems[0].observedAt='2026-10-09T16:30:00Z';
   assert.ok(!buildNflBriefingHandoff(old).items.some(item=>item.kind==='new source change'));
 });
+
+const sofiReport=()=>({...structuredClone(report),event:{id:'nfl:401872989',kickoff:'2026-10-11T20:05:00Z'},venue:{id:'7065'},sofiVenueEvent:{state:'current_venue_event_page',asOf:at,sourceUrl:'https://www.sofistadium.com/events/detail/chargers-broncos-2026',eventStartsLocal:'1:05 PM',detailKickoffLocal:'1:35 PM',parkingLotsOpenLocal:'9:00 AM',doorsOpenLocal:'11:00 AM',detailKickoffConflictsWithSidebar:true,sourceTextSha256:'a'.repeat(64)}});
+
+test('fresh exact-game venue timing conflict leads the handoff',()=>{
+  const result=buildNflBriefingHandoff(sofiReport());
+  assert.equal(result.items[0].kind,'venue timing conflict');
+  assert.match(result.items[0].title,/1:05 PM.*1:35 PM/);
+  assert.match(result.items[0].action,/Confirm the official kickoff/);
+  assert.equal(result.items[0].sourceAt,new Date(at).toISOString());
+});
+
+test('venue conflict excludes stale, inconsistent, wrong-game and planning records',()=>{
+  const variants=[
+    value=>value.sofiVenueEvent.asOf='2026-10-09T01:00:00Z',
+    value=>value.sofiVenueEvent.detailKickoffLocal='1:05 PM',
+    value=>value.sofiVenueEvent.sourceUrl='https://www.sofistadium.com/events/detail/rams-bills-2026',
+    value=>value.venue.id='other',
+    value=>value.event.kickoff='2026-10-12T20:05:00Z',
+    value=>value.event.timeTbd=true,
+    value=>value.reportMonitoringMode='season_planning'
+  ];
+  for(const mutate of variants){const value=sofiReport();mutate(value);assert.ok(!buildNflBriefingHandoff(value).items.some(item=>item.kind==='venue timing conflict'))}
+});
