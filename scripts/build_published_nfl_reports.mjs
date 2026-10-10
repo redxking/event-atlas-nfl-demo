@@ -7,6 +7,7 @@ import {buildNflPublicReport} from '../site/nfl_public_report.js';
 import {buildPublishedReportState} from '../site/published_report_changes.js';
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from '../site/mbta_foxboro_alerts.js';
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from '../site/mbta_foxboro_schedules.js';
+import {fetchSelectedGame} from '../site/espn_game_summary.js';
 import {renderPublicReportHtml} from './render_public_report_html.mjs';
 
 const site=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../site');
@@ -97,9 +98,10 @@ for(const game of games){
   const monitoringMode=publishedNflReportMode(game,now);
   if(monitoringMode==='near_term_monitoring'&&!venueChecks.has(game.venue.id))venueChecks.set(game.venue.id,await checkVenue(game.venue));
   const conditions=monitoringMode==='near_term_monitoring'?venueChecks.get(game.venue.id):null;
-  const forecast=monitoringMode==='near_term_monitoring'?await forecastFor(game):null;
-  const mbta=monitoringMode==='near_term_monitoring'?await publishedMbta(game):{transit:null,transitSchedule:null};
-  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
+  const [forecast,mbta,directGame]=monitoringMode==='near_term_monitoring'
+    ?await Promise.all([forecastFor(game),publishedMbta(game),fetchSelectedGame(game)])
+    :[null,{transit:null,transitSchedule:null},null];
+  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){
@@ -113,8 +115,8 @@ for(const game of games){
   const htmlName=`${id}.html`;
   await fs.writeFile(path.join(outDir,htmlName),renderPublicReportHtml(body,{title:`NFL public-source review: ${game.title}`,generatedAt:bundle.generatedAt,markdownPath:filename}),'utf8');
   if(changeState)await fs.writeFile(path.join(outDir,`${id}.state.json`),JSON.stringify(changeState)+'\n','utf8');
-  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,monitoringMode,nwsAlerts:conditions?conditions.alertsError?'unavailable':'checked':'not checked outside near-term window',nwsForecast:monitoringMode==='near_term_monitoring'?bundle.picture.forecastContext.state:'not checked outside near-term window',mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState?.newChangeCount??null});
+  entries.push({eventId:game.id,title:game.title,kickoff:game.kickoff,venueName:game.venue.name,path:`reports/${htmlName}`,markdownPath:`reports/${filename}`,generatedAt:bundle.generatedAt,monitoringMode,nwsAlerts:conditions?conditions.alertsError?'unavailable':'checked':'not checked outside near-term window',nwsForecast:monitoringMode==='near_term_monitoring'?bundle.picture.forecastContext.state:'not checked outside near-term window',directGame:directGame?.state||'not checked outside near-term window',mbtaAlerts:mbta.transit?.state||'outside source area',mbtaSchedule:mbta.transitSchedule?.state||'outside source area',newPublishedChanges:changeState?.newChangeCount??null});
 }
-const index={status:'ok',builtAt:new Date().toISOString(),basis:'Hourly public-source compilations for every upcoming U.S. NFL game. Games within seven days, active games, and source-completed games within 24 hours of listed kickoff receive point alert and event-hour forecast checks. More distant games are planning snapshots without those live event checks. Each report is unreviewed; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
+const index={status:'ok',builtAt:new Date().toISOString(),basis:'Hourly public-source compilations for every upcoming U.S. NFL game. Games within seven days, active games, and source-completed games within 24 hours of listed kickoff receive point alert, event-hour forecast, and exact-game publisher checks. More distant games are planning snapshots without those live event checks. Each report is unreviewed; direct browser checks may be newer. Source failures and missing operational data are shown as gaps.',reports:entries};
 await fs.writeFile(path.join(outDir,'index.json'),JSON.stringify(index)+'\n','utf8');
 console.log(`Published NFL reports: ${entries.length}; NWS alert checks ${[...venueChecks.values()].filter(item=>!item.alertsError).length}/${venueChecks.size}`);

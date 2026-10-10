@@ -40,3 +40,15 @@ test('stale or mismatched prior state cannot be treated as a comparison',()=>{
   const mismatched={...baseline,eventId:'nfl:other'};
   assert.equal(buildPublishedReportState(bundle('checked',[cue]),game,null,mismatched,at-14*86400000).newChangeCount,0);
 });
+
+test('published runs record changes in an identity-checked direct game result',()=>{
+  const checkedAt='2026-10-10T01:00:00Z';
+  const direct={state:'checked',checkedAt,sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=123',sourceStatus:'Scheduled',gameState:null,reportedAttendance:null,article:null,scheduleDiffers:false};
+  const initial=bundle('checked');
+  initial.picture.directGame=direct;
+  const baseline=buildPublishedReportState(initial,game,null,null,at-3600000);
+  const changed=bundle('checked');
+  changed.picture.directGame={...direct,checkedAt:'2026-10-10T02:00:00Z',sourceStatus:'In Progress',gameState:{phase:'in progress',home:{name:'Home',score:7},away:{name:'Away',score:0}}};
+  const next=buildPublishedReportState(changed,game,null,baseline,at);
+  assert.equal(next.changes.find(item=>item.kind==='direct_game_state_changed')?.sourceUrl,direct.sourceUrl);
+});
