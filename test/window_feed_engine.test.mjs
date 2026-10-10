@@ -8,12 +8,12 @@ test('frozen window covers each game exactly once',()=>assert.deepEqual(games.ma
 for(const game of games)test(`${game.id}: ingestion, correlation, contrary evidence and failure recovery`,()=>{
  const feed=createGameFeed(game),initial=replayGameFeed(feed,0),before=replayGameFeed(feed,10),full=replayGameFeed(feed);
  assert.equal(initial.observations.length,0);assert.equal(before.candidates.length,0);
- assert.equal(full.observations.length,20);assert.equal(full.sources.length,feedCatalog.length);assert.equal(full.duplicatesExcluded,1);
- assert.equal(full.candidates.length,5);assert.equal(full.candidates.find(c=>c.id.endsWith(':C-03')).contraryEvidenceIds.length,1);
+ assert.equal(full.observations.length,27);assert.equal(full.sources.length,feedCatalog.length);assert.equal(full.duplicatesExcluded,1);
+ assert.equal(full.candidates.length,8);assert.equal(full.candidates.find(c=>c.id.endsWith(':C-03')).contraryEvidenceIds.length,1);
  assert.equal(replayGameFeed(feed,22).sources[9].state,'unavailable');assert.equal(full.sources[9].state,'simulated_connected');
  assert.equal(full.observations.find(r=>r.recordId==='S-13').revision,2);
  assert.equal(full.observations.find(r=>r.recordId==='S-16').revision,2);
- assert.equal(full.history.filter(r=>r.operation==='correct').length,2);
+ assert.equal(full.history.filter(r=>r.operation==='correct').length,3);
  assert(full.observations.every(r=>r.evidenceId.startsWith(`${game.id}:exercise:`)));
  assert(replayGameFeed(feed,feed.deliveries.length,new Date(Date.parse(full.clock)+31*60000).toISOString()).sources.every(s=>s.state==='stale'));
  const ids=new Set(full.observations.map(r=>r.evidenceId));assert(full.candidates.every(c=>[...c.evidenceIds,...c.contraryEvidenceIds].every(id=>ids.has(id))));

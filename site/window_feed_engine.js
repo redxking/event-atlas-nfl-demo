@@ -1,6 +1,7 @@
 import {buildExerciseBrief,exerciseDomains} from './demo_exercise.js';
+import {supplementalFeeds,supplementalCandidates,validateSupplementalPayload} from './window_supplemental_feeds.js';
 export const MODE='synthetic_exercise';
-export const feedCatalog=exerciseDomains.flatMap((domain,domainIndex)=>domain.sources.map((name,index)=>({id:`feed-${domainIndex+1}-${index+1}`,domain:domain.name,name,dataMode:MODE})));
+export const feedCatalog=exerciseDomains.flatMap((domain,domainIndex)=>domain.sources.map((name,index)=>({id:`feed-${domainIndex+1}-${index+1}`,domain:domain.name,name,dataMode:MODE}))).concat(supplementalFeeds.map(({id,domain,name})=>({id,domain,name,dataMode:MODE})));
 
 export function createGameFeed(game){
   if(!/^nfl:\d+$/.test(game?.id||'')||!Number.isFinite(Date.parse(game.kickoff)))throw Error('Valid scoped game required');
@@ -17,6 +18,10 @@ export function createGameFeed(game){
   push(12,'correct','S-13','Fictional venue team identifies the bag as an authorized delivery; initial suspicious-item description is corrected.',{supersedes:'S-13'});
   push(9,'recovery',null,'Fictional CAD adapter restored; outage coverage remains unknown.');
   push(15,'correct','S-16','Fictional service owner confirms the scheduled load test ended; measured service availability remained within its exercise baseline.',{supersedes:'S-16'});
+  supplementalFeeds.forEach((source,index)=>push(19+index,'observe',`S-${20+index}`,source.claim,{payload:structuredClone(source.payload)}));
+  push(19,'outage',null,'Synthetic camera connection lost. No current frame is available.');
+  push(19,'recovery',null,'Synthetic camera connection restored; the missing interval remains unknown.');
+  push(19,'correct','S-20','Synthetic camera delivers a new training frame after recovery. The outage interval remains unknown.',{supersedes:'S-20',payload:{...supplementalFeeds[0].payload,frame:2}});
   return {schema:'event-atlas.game-feed-replay.v1',dataMode:MODE,event:{id:game.id,title:game.title,kickoff:game.kickoff,venue:game.venue},startAt:new Date(start).toISOString(),sources:feedCatalog,deliveries};
 }
 
@@ -33,6 +38,7 @@ export function replayGameFeed(feed,count=feed?.deliveries?.length,clock=null){
     source.state='simulated_connected';
     if(item.operation==='recovery'){history.push(item);continue}
     if(item.operation==='duplicate'){if(!records.has(item.duplicateOf))throw Error('Unknown duplicate origin');duplicates++;history.push(item);continue}
+    validateSupplementalPayload(item.sourceId,item.payload);
     if(!/^([SX]-\d{2})$/.test(item.recordId||''))throw Error('Invalid exercise record ID');
     if(item.operation==='correct'&&(!records.has(item.supersedes)||item.supersedes!==item.recordId))throw Error('Missing correction origin');
     if(item.operation==='observe'&&records.has(item.recordId))throw Error('Conflicting observation ID');
@@ -42,6 +48,6 @@ export function replayGameFeed(feed,count=feed?.deliveries?.length,clock=null){
   if(!Number.isFinite(Date.parse(at))||history.some(item=>Date.parse(item.observedAt)>Date.parse(at)))throw Error('Invalid exercise clock');
   for(const source of sources.values())if(source.state==='simulated_connected'&&Date.parse(at)-Date.parse(source.lastReceivedAt)>30*60000)source.state='stale';
   const template=buildExerciseBrief(3);
-  const candidates=template.correlations.filter(item=>item.evidence.every(id=>records.has(id))).map(item=>({...item,id:`${feed.event.id}:${item.id}`,dataMode:MODE,evidenceIds:item.evidence.map(id=>records.get(id).evidenceId),contraryEvidenceIds:item.id==='C-03'&&records.has('X-01')?[records.get('X-01').evidenceId]:[],state:item.evidence.some(id=>records.get(id).revision>1)?'updated_evidence_requires_review':'unreviewed_candidate'}));
+  const candidates=[...template.correlations,...supplementalCandidates].filter(item=>item.evidence.every(id=>records.has(id))).map(item=>({...item,id:`${feed.event.id}:${item.id}`,dataMode:MODE,evidenceIds:item.evidence.map(id=>records.get(id).evidenceId),contraryEvidenceIds:item.id==='C-03'&&records.has('X-01')?[records.get('X-01').evidenceId]:[],state:item.evidence.some(id=>records.get(id).revision>1)?'updated_evidence_requires_review':'unreviewed_candidate'}));
   return {schema:'event-atlas.game-exercise-brief.v1',dataMode:MODE,event:feed.event,clock:at,version:history.length,observations:[...records.values()],history,sources:[...sources.values()],duplicatesExcluded:duplicates,candidates,assessment:{severity:'not_assessed',model:'deterministic replay; no model invoked'},limitations:['All observations are fictional; the real game is a demonstration backdrop.','Source outage, correction and record proximity do not establish a threat or an all-clear.']};
 }

@@ -8,7 +8,7 @@
     "label": "October 10 through October 23, 2026 (America/New_York)",
     "frozenAt": "2026-10-10T14:45:12.821Z"
   },
-  "updatedAt": "2026-10-10T17:58:40.483Z",
+  "updatedAt": "2026-10-10T18:01:51.087Z",
   "completion": "incomplete",
   "evidence": {
     "engine": {
@@ -41,6 +41,34 @@
         "No actual model execution",
         "Only two games directly exercised in browser"
       ]
+    },
+    "supplemental": {
+      "command": "node --test test/window_feed_engine.test.mjs test/window_review_engine.test.mjs test/window_supplemental_feeds.test.mjs",
+      "result": "91 passed; 0 failed",
+      "boundary": "Local execution, all 29 games; structured supplemental records and camera state transitions"
+    },
+    "cameraBrowser": {
+      "eventId": "nfl:401872981",
+      "environment": "Local static site, Codex in-app browser",
+      "observed": {
+        "width": 800,
+        "height": 450,
+        "readyState": 4,
+        "playbackSeconds": 5.42529,
+        "paused": false,
+        "outage": "playback stopped",
+        "recoveryWithoutFramePlayable": false,
+        "newFramePlayable": true
+      },
+      "boundary": "Procedurally generated synthetic video; no real camera connection validated"
+    },
+    "deployment": {
+      "commit": "b904dac19b17858213264fd49703d029ec98ef5f",
+      "run": 38073778314,
+      "status": "success",
+      "http": 200,
+      "url": "https://redxking.github.io/event-atlas-nfl-demo/window-demo.html",
+      "boundary": "Initial replay HTML served; later review and camera changes not yet verified deployed"
     }
   },
   "games": [
@@ -180,6 +208,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -188,10 +265,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "local_browser_download_verified",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_browser_synthetic_playback_and_failure_verified",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -333,6 +410,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -341,10 +467,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -486,6 +612,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -494,10 +669,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -639,6 +814,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -647,10 +871,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -792,6 +1016,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -800,10 +1073,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -945,6 +1218,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -953,10 +1275,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1098,6 +1420,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1106,10 +1477,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1251,6 +1622,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1259,10 +1679,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1404,6 +1824,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1412,10 +1881,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1557,6 +2026,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1565,10 +2083,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1710,6 +2228,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1718,10 +2285,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -1863,6 +2430,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -1871,10 +2487,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2016,6 +2632,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2024,10 +2689,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2169,6 +2834,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2177,10 +2891,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2322,6 +3036,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2330,10 +3093,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2475,6 +3238,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2483,10 +3295,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2628,6 +3440,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2636,10 +3497,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2781,6 +3642,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2789,10 +3699,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -2934,6 +3844,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -2942,10 +3901,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3087,6 +4046,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3095,10 +4103,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3240,6 +4248,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3248,10 +4305,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3393,6 +4450,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3401,10 +4507,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3546,6 +4652,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3554,10 +4709,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3699,6 +4854,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3707,10 +4911,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -3852,6 +5056,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -3860,10 +5113,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -4005,6 +5258,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -4013,10 +5315,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -4158,6 +5460,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -4166,10 +5517,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -4311,6 +5662,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -4319,10 +5719,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -4464,6 +5864,55 @@
           "mode": "synthetic_exercise",
           "ingestion": "local_test_pass",
           "endToEnd": "pending"
+        },
+        {
+          "id": "feed-camera",
+          "name": "Camera frames and connection health",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-airspace",
+          "name": "Airspace restriction bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-adsb",
+          "name": "ADS-B track observations",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-environment",
+          "name": "Environmental and seismic hazard bulletin",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-history",
+          "name": "Historical public-safety baseline",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-transit",
+          "name": "Transit vehicle and service updates",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
+        },
+        {
+          "id": "feed-participant",
+          "name": "Public participant-role announcement",
+          "mode": "synthetic_exercise",
+          "ingestion": "local_test_pass",
+          "endToEnd": "pending"
         }
       ],
       "workflows": {
@@ -4472,10 +5921,10 @@
         "staleness_and_outage": "local_test_pass",
         "source_linked_synthetic_export": "implemented_browser_verification_pending",
         "maps_and_editable_areas": "pending",
-        "camera_presentation": "pending",
+        "camera_presentation": "local_engine_test_pass; browser_pending",
         "analyst_review": "local_engine_test_pass; simulated_unauthenticated",
         "cross_event_relationships": "pending",
-        "public_participant_roles": "pending",
+        "public_participant_roles": "synthetic_announcement_ingestion_test_pass; real_public_source_mapping_pending",
         "actual_model_execution": "pending",
         "desktop_mobile_keyboard": "pending",
         "deployed_end_to_end": "pending"
@@ -4483,9 +5932,8 @@
     }
   ],
   "remainingSubtypeChecks": [
-    "Camera stream simulation",
-    "Separate FAA restriction and drone sensor records",
-    "Separate weather and environmental hazard records",
-    "Subtype mapping against complete user attachment"
+    "Reconcile subtype coverage with accessible public sources per game",
+    "Deployed camera and supplemental replay validation",
+    "End-to-end browser acceptance for all games"
   ]
 }
