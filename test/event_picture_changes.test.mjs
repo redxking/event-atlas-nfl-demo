@@ -59,3 +59,12 @@ test('SEPTA alert ID prevents repeat additions when only the feed timestamp chan
   assert.equal(diffEventPicture(before,added,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,1);
   assert.equal(diffEventPicture({...before,sources:[source(sourceName,'partial')]},added,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
 });
+
+test('road publisher record link upgrades do not create a new event cue',()=>{
+  const oldCue={type:'road condition',sourceId:'ladotd-511-97207',title:'LA 18 roadwork',basis:'DOTD; published window overlaps event',sourceUrl:'https://agency.example/layer',sourceAt:'2026-10-08T16:18:22Z'};
+  const before={...picture('checked',[oldCue]),sources:[source('Road conditions','time screened')]};
+  const after={...before,cues:[{...oldCue,sourceUrl:'https://agency.example/layer/query?where=EventID%3D97207'}]};
+  assert.equal(diffEventPicture(before,after,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
+  const revised={...after,cues:[{...after.cues[0],basis:'DOTD; revised published window overlaps event'}]};
+  assert.equal(diffEventPicture(before,revised,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,1);
+});

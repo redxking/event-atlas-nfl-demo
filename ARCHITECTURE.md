@@ -49,6 +49,7 @@ The scheduled reports also read the existing Indianapolis IMPD and Charlotte-Mec
 
 Each scheduled build now writes a bounded comparison state alongside the report. The next build reads that state from the previously published Pages artifact, checks event identity and age, and compares only current, comparable source samples for newly displayed NWS/road/MBTA cues, publisher team headlines, kickoff forecast changes, source-status changes and schedule changes. It retains at most 30 recent change entries in the report and manifest. A missing prior state starts a new baseline; a failed source check never becomes a negative or clearance claim. The resulting trail depends on successful hourly builds and source samples, and is not a complete publisher archive or a real-time alert subscription.
 The comparison also handles NOAA SPC and WPC forecast cues and SEPTA B Line alerts when both runs contain comparable current source snapshots. SEPTA notices use their publisher alert ID, title and effect for comparison; the feed's changing publication timestamp does not create a fresh notice by itself. This change in comparison identity resets the published state to a new baseline once.
+Roadway cues now use their stable connector record ID, title and event-window basis for comparison. Moving a citation from a generic agency layer to an event-specific query does not by itself create a new roadway cue. The comparison state was reset to v3 to discard one transition-time duplicate caused by that link upgrade.
 
 ### Local model for NFL analyst drafts
 
