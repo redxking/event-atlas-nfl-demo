@@ -17,6 +17,7 @@ import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './site/mbta
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './site/mbta_foxboro_predictions.js';
 import {fetchSelectedGame} from './site/espn_game_summary.js';
 import {selectKickoffForecast,selectEventHourForecast} from './site/nws_forecast.js';
+import {buildEonetNflSnapshot} from './site/eonet_nfl.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||4173);
 const snapshot=JSON.parse(await fs.readFile(path.join(root,'data/venues.json'),'utf8'));
@@ -25,8 +26,8 @@ const byId=new Map(venues.map(v=>[v.id,v]));
 const municipal=JSON.parse(await fs.readFile(path.join(root,'data/public_events.json'),'utf8'));
 const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
 async function readSiteSnapshot(name){try{return JSON.parse(await fs.readFile(path.join(root,'site',name),'utf8'))}catch{return null}}
-const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflNews,nflGameArticles,nflNtas,nflIndianapolis,nflCharlotte,nflDenver,nflPhillyAlerts,nflPhillyPermits,nflSepta,nflNjTransitRail]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','news.json','game_articles.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','denver_public_safety.json','philly_city_alerts.json','philly_lane_permits.json','septa_b_alerts.json','njtransit_event_rail.json'].map(readSiteSnapshot));
-const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,news:nflNews,gameArticles:nflGameArticles,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,denver:nflDenver,phillyAlerts:nflPhillyAlerts,phillyPermits:nflPhillyPermits,septa:nflSepta,njTransitRail:nflNjTransitRail};
+const [nflSchedule,nflGround,nflAirspace,nflTfr,nflCameras,nflRoads,nflSpc,nflWpcRain,nflEonet,nflNews,nflGameArticles,nflNtas,nflIndianapolis,nflCharlotte,nflDenver,nflPhillyAlerts,nflPhillyPermits,nflSepta,nflNjTransitRail]=await Promise.all(['nfl.json','ground_footprints.json','seams.json','tfr.json','cameras.json','roads.json','spc_outlooks.json','wpc_rain_outlooks.json','eonet.json','news.json','game_articles.json','ntas.json','indianapolis_public_safety.json','charlotte_public_safety.json','denver_public_safety.json','philly_city_alerts.json','philly_lane_permits.json','septa_b_alerts.json','njtransit_event_rail.json'].map(readSiteSnapshot));
+const nflSnapshots={schedule:nflSchedule,ground:nflGround,airspace:nflAirspace,tfr:nflTfr,cameras:nflCameras,roads:nflRoads,spc:nflSpc,wpcRain:nflWpcRain,eonet:nflEonet,news:nflNews,gameArticles:nflGameArticles,ntas:nflNtas,indianapolis:nflIndianapolis,charlotte:nflCharlotte,denver:nflDenver,phillyAlerts:nflPhillyAlerts,phillyPermits:nflPhillyPermits,septa:nflSepta,njTransitRail:nflNjTransitRail};
 const voting=JSON.parse(await fs.readFile(path.join(root,'data/voting_locations.json'),'utf8'));
 const votingHistory=readVotingHistory(path.join(root,'data/voting_history'));
 const votingById=new Map(voting.locations.map(v=>[v.id,v]));
@@ -137,7 +138,9 @@ async function draftCaseBrief(id,user,includeContext){
       if(!predictionResponse.stale&&predictionResponse.data)try{transitPredictions=summarizeMbtaFoxboroPredictions(predictionResponse.data,predictionResponse.at)}catch{transitPredictions={state:'failed',checkedAt:Date.now()}}
       else transitPredictions={state:'failed',checkedAt:Date.now()};
     }
-    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
+    let eonet=await readSiteSnapshot('eonet.json');
+    if(game){const check=await remote('eonet',sources.eonet.url,900000);if(!check.stale&&check.data)try{eonet=buildEonetNflSnapshot(check.data,nflSnapshots.schedule.games)}catch{eonet=null}}
+    nflContext=buildNflCaseContext(item.case.subject,event,{...nflSnapshots,eonet,septa:await readSiteSnapshot('septa_b_alerts.json'),transit,transitSchedule,transitPredictions});
   }catch{nflContext={status:'unavailable',reason:'NFL source snapshots could not be assembled.',evidence:null}}
   const trace=analystStore.recordBriefRequest(user,id);
   const brief=buildInternalCaseBrief(item,{generatedAt:trace.generatedAt,generatedBy:user.id,auditHead:trace.auditHead,publicSituation,nflContext});

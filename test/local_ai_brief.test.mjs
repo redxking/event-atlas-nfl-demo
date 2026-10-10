@@ -37,6 +37,21 @@ test('local AI packet can cite exact-game ESPN article metadata without article 
   assert.ok(!JSON.stringify(packet).includes('PRIVATE BODY'));
 });
 
+test('local AI packet admits only fresh NASA regional points with dated source links',()=>{
+  const at=Date.parse('2026-10-09T20:00:00Z');
+  const point={title:'Synthetic wildfire',distanceKm:22.2,sourceAt:'2026-10-09T18:00:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/EONET_42/geojson',privateNote:'PRIVATE LOCATION'};
+  const context={state:'current_snapshot',asOf:'2026-10-09T19:55:00Z',events:[point,{...point,sourceUrl:'https://unapproved.example/event'}]};
+  const withNatural={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,picture:{...brief.nflContext.evidence.picture,naturalEventsContext:context}}}};
+  const packet=buildLocalAiPacket(withNatural,{now:at});
+  assert.equal(packet.evidence.find(item=>item.id==='E1')?.sourceUrl,point.sourceUrl);
+  assert.match(packet.evidence.find(item=>item.id==='E1').text,/current local conditions, venue impact and threat are unverified/);
+  assert.equal(packet.evidence.find(item=>item.id==='E2'),undefined);
+  assert.ok(!JSON.stringify(packet).includes('PRIVATE LOCATION'));
+  assert.equal(buildLocalAiPacket(withNatural,{now:at+13*3600000}).evidence.some(item=>item.id==='E1'),false);
+  const draft=validateLocalAiDraft('E1',packet);
+  assert.match(draft.reviewQuestions[0].question,/NASA record/);
+});
+
 test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
   const at=Date.parse('2026-10-10T02:00:00Z');
   const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};

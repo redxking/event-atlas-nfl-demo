@@ -16,6 +16,14 @@ test('matched NFL case carries bounded sourced context without assessed threat',
   assert.ok(result.evidence.picture.gaps.some(gap=>gap.includes('police alert')));
 });
 
+test('matched NFL case carries dated NASA regional point context into its evidence bundle',()=>{
+  const point={id:'EONET_42',title:'Synthetic natural event',categories:['Wildfires'],sourceAt:'2026-10-09T18:00:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/EONET_42/geojson',lat:40.2,lon:-75,distanceKm:22.2};
+  const eonet={schema:'event-atlas.eonet-nfl.v1',status:'ok',builtAt:'2026-10-09T19:55:00Z',sourceUrl:'https://eonet.gsfc.nasa.gov/api/v3/events/geojson?status=open&limit=500',byVenue:{'synthetic-venue':[point]},interpretation:'Regional metadata only'};
+  const result=buildNflCaseContext(subject,event,{schedule:{builtAt:'2026-10-09T19:55:00Z',games:[game]},eonet},now);
+  assert.equal(result.evidence.picture.naturalEventsContext.events[0].sourceUrl,point.sourceUrl);
+  assert.equal(result.evidence.publicObservations.naturalEvents.events[0].sourceAt,point.sourceAt);
+});
+
 test('changed game and stale schedule cannot masquerade as current matched context',()=>{
   const schedule={builtAt:'2026-10-09T19:55:00Z',games:[game]};
   const mismatch=buildNflCaseContext(subject,{...event,startsAtLocal:'2026-10-11T21:00:00Z'},{schedule},now);
