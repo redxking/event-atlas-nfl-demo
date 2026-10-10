@@ -244,3 +244,12 @@ test('WPC rainfall forecast appears as a source-linked planning cue, not an asse
   assert.equal(picture.sources.find(item=>item.name==='NOAA WPC excessive-rainfall outlook').state,'published outlook at kickoff');
   assert.equal(picture.assessment.severity,'not_assessed');
 });
+
+ test('second-week road windows enter assessment while expired weather never becomes a game-day finding',()=>{
+ const later={...game,kickoff:'2026-10-21T20:00:00Z'};
+ const roads={...inputs.roads,coverageThrough:'2026-10-23T18:00:00Z',byVenue:{3687:[{...inputs.roads.byVenue[3687][0],startAt:'2026-10-21T19:00:00Z',endAt:'2026-10-21T22:00:00Z'}]}};
+ const picture=buildNflEventPicture(later,{...inputs,roads},now);
+ assert.equal(picture.reviewQueue.state,'review_candidates');
+ assert.equal(picture.reviewQueue.items.filter(c=>c.domain==='road access').length,1);
+ assert.equal(picture.reviewQueue.items.filter(c=>c.domain==='weather alert').length,0);
+ });

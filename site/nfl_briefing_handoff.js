@@ -53,6 +53,6 @@ export function buildNflBriefingHandoff(bundle){
     gapCount:Array.isArray(bundle?.picture?.gaps)?bundle.picture.gaps.length:0,
     changeComparison:changes?.comparison||'no comparable change state',
     newChangeCount:Number.isInteger(changes?.newChangeCount)?changes.newChangeCount:null,
-    note:planning?'The event is outside the seven-day monitoring window. These sources are planning context, not current event conditions.':items.length?'Ordered source checks for analyst review. Selection reflects evidence linkage and recent change, not severity, likelihood, or a threat determination.':'No linked action passed this bounded selection. Inspect source status and coverage gaps; this is not an all-clear.'
+    note:planning?'The event is outside the fourteen-day monitoring window. These sources are planning context, not current event conditions.':items.length?'Ordered source checks for analyst review. Selection reflects evidence linkage and recent change, not severity, likelihood, or a threat determination.':'No linked action passed this bounded selection. Inspect source status and coverage gaps; this is not an all-clear.'
   };
 }

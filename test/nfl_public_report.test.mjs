@@ -73,7 +73,7 @@ test('club flyover comparison keeps FAA event listing separate from flight obser
 test('season planning report does not imply live event checks',()=>{
   const planning={...structuredClone(bundle),reportMonitoringMode:'season_planning'};
   const report=buildNflPublicReport(planning);
-  assert.match(report,/Season planning snapshot; point alerts and event-hour forecasts are not checked until the event enters the seven-day window/);
+  assert.match(report,/Season planning snapshot; point alerts and event-hour forecasts are not checked until the event enters the fourteen-day window/);
   assert.ok(!report.includes('Near-term source monitoring'));
 });
 

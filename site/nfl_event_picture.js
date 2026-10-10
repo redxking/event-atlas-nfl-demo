@@ -86,7 +86,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const weather=conditions?.alertsError||!Array.isArray(conditions?.alerts?.features)?null:selectWeatherContext(game,conditions.alerts.features,conditions.at,now);
   const activeGame=game.status==='in progress in source';
   const kickoff=Date.parse(game.kickoff);
-  const queueMode=inputs.monitoringMode||(activeGame||!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now-18*HOUR&&kickoff-now<=7*24*HOUR?'near_term_monitoring':'season_planning');
+  const queueMode=inputs.monitoringMode||(activeGame||!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now-18*HOUR&&kickoff-now<=14*24*HOUR?'near_term_monitoring':'season_planning');
   const kickoffForecast=activeGame?selectEventHourForecast(game,forecast,now):selectKickoffForecast(game,forecast,now);
   const stationObservation=conditions?.observation;
   const observationFresh=stationObservation?.state==='current_station_observation'&&fresh(stationObservation.checkedAt,now,10*60000)&&fresh(stationObservation.observedAt,now,90*60000)&&/^https:\/\/api\.weather\.gov\/stations\/[A-Z0-9]{3,6}\/observations\/[^/?#]+$/.test(stationObservation.sourceUrl||'');

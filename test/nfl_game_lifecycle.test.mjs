@@ -30,3 +30,8 @@ test('published reports survive the active game and bounded postgame period',()=
   assert.equal(includePublishedNflReport(game('source status Postponed',now+2*3600000),now),false);
   assert.equal(includePublishedNflReport({...game('scheduled in source; unreviewed',now+3600000),timeTbd:true},now),false);
 });
+
+ test('two-week assessment includes later games without extending beyond the window',()=>{
+ for(const days of [8,12,14])assert.equal(publishedNflReportMode(game('scheduled in source; unreviewed',now+days*86400000),now),'near_term_monitoring');
+ assert.equal(publishedNflReportMode(game('scheduled in source; unreviewed',now+15*86400000),now),'season_planning');
+ });
