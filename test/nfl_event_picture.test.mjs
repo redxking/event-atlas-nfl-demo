@@ -21,6 +21,16 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.ok(picture.gaps.some(gap=>gap.includes('active jurisdictional police alert')));
 });
 
+test('Denver delayed crime aggregate appears as context without generating a threat cue',()=>{
+  const denverGame={...game,venue:{id:'3937',lat:39.743888888,lon:-105.02}};
+  const police={state:'retrieved',checkedAt:now,context:{nearby:4800,start:'2026-09-02',end:'2026-10-02',radiusKm:5,sourceLatestAt:now-24*3600000,sourceLagHours:24,checkedAt:now}};
+  const picture=buildNflEventPicture(denverGame,{schedule:inputs.schedule,police},now);
+  assert.equal(picture.policeContext.nearby,4800);
+  assert.equal(picture.sources.find(item=>item.name==='Local police activity').state,'delayed historical count checked');
+  assert.equal(picture.cues.some(item=>item.sourceUrl?.includes('ODC_CRIME_OFFENSES_P')),false);
+  assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
+});
+
 test('current SPC categorical forecast enters brief as an unassessed planning cue',()=>{
   const spc={status:'ok',builtAt:'2026-10-09T17:50:00Z',byVenue:{3687:[{day:3,category:'Marginal',categoryRank:3,validAt:'2026-10-11T12:00:00Z',expiresAt:'2026-10-12T12:00:00Z',issuedAt:'2026-10-09T17:30:00Z',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/MapServer/17'}]}};
   const picture=buildNflEventPicture(game,{...inputs,spc},now);
