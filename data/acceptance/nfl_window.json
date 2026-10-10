@@ -8,7 +8,7 @@
     "label": "October 10 through October 23, 2026 (America/New_York)",
     "frozenAt": "2026-10-10T14:45:12.821Z"
   },
-  "updatedAt": "2026-10-10T18:14:39.931Z",
+  "updatedAt": "2026-10-10T18:16:06.034Z",
   "completion": "incomplete",
   "evidence": {
     "engine": {
@@ -100,7 +100,7 @@
     },
     "localSuite": {
       "command": "node --test test/window*.test.mjs",
-      "result": "209 passed; 0 failed",
+      "result": "215 passed; 0 failed",
       "boundary": "Includes mocked model failure tests; actual execution evidence is recorded separately"
     },
     "browserWindow": {
@@ -131,6 +131,28 @@
         "Clock advancement hid mismatched model run"
       ],
       "boundary": "Local browser; representative game, not all-game mobile acceptance"
+    },
+    "schedule": {
+      "checkedAt": "2026-10-10T18:15:40.301Z",
+      "source": "ESPN public NFL scoreboard",
+      "reconciliation": {
+        "state": "matches_frozen_scope",
+        "entered": [],
+        "left": [],
+        "kickoffChanged": [],
+        "crosswalkMismatch": [],
+        "exceptions": [],
+        "missing": [],
+        "currentWindowCount": 29,
+        "frozenScopeCount": 29,
+        "retainedMovedGames": []
+      },
+      "boundary": "Publisher snapshot across all 272 season IDs; 29 scoped games. This does not guarantee future schedule stability."
+    },
+    "scheduleFailureTests": {
+      "command": "node --test test/window_schedule_reconciliation.test.mjs",
+      "result": "6 passed; cancelled, postponed outside window, missing, entrant, crosswalk mismatch and boundary handling",
+      "boundary": "Synthetic schedule mutation fixtures"
     }
   },
   "games": [

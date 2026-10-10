@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {scheduleState,reconcileWindowSchedule} from '../lib/window_schedule_reconciliation.mjs';
 
 const root=path.resolve(import.meta.dirname,'..');
 const scope=JSON.parse(await fs.readFile(path.join(root,'data/nfl_demo_window_scope.json'),'utf8'));
@@ -19,7 +20,7 @@ const fetched=await Promise.all(weeks.map(async week=>{
 }));
 const usById=new Map(schedule.games.map(game=>[game.id.replace(/^nfl:/,''),game]));
 const seen=new Set();
-const games=fetched.flatMap(({week,url,events})=>events.map(event=>{
+const allGames=fetched.flatMap(({week,url,events})=>events.map(event=>{
   const competition=event.competitions?.[0],venue=competition?.venue,teams=competition?.competitors||[];
   if(!/^\d+$/.test(String(event.id))||!Number.isFinite(Date.parse(event.date))||!event.name||!venue?.id||!venue.fullName||!venue.address?.country||teams.length!==2)throw Error(`Incomplete ESPN event in week ${week}`);
   if(seen.has(String(event.id)))throw Error(`Duplicate ESPN game ${event.id}`);
@@ -28,15 +29,10 @@ const games=fetched.flatMap(({week,url,events})=>events.map(event=>{
   const domestic=['USA','US','United States'].includes(country);
   const usGame=usById.get(String(event.id));
   if(domestic&&!usGame)throw Error(`U.S. game missing from public schedule: ${event.id}`);
-  return {id:`nfl:${event.id}`,week,kickoff:event.date,title:event.name,venue:{id:String(venue.id),name:venue.fullName,city:venue.address?.city||null,state:venue.address?.state||null,country},geographicScope:domestic?'us_venue_context':'international_schedule_only',coverageState:domestic?'public_us_venue_sources_vary':'us_feeds_out_of_scope',reportUrl:domestic?`reports/nfl-${event.id}.html`:null,sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,sourceDataset:url,nflWeekUrl:`https://www.nfl.com/schedules/2026/by-week/week-${week}`,usScheduleKickoff:usGame?.kickoff||null};
-})).filter(game=>Date.parse(game.kickoff)>=start&&Date.parse(game.kickoff)<end).sort((a,b)=>a.kickoff.localeCompare(b.kickoff)||a.id.localeCompare(b.id));
+  return {id:`nfl:${event.id}`,week,kickoff:event.date,title:event.name,scheduleStatus:scheduleState(event),venue:{id:String(venue.id),name:venue.fullName,city:venue.address?.city||null,state:venue.address?.state||null,country},geographicScope:domestic?'us_venue_context':'international_schedule_only',coverageState:domestic?'public_us_venue_sources_vary':'us_feeds_out_of_scope',reportUrl:domestic?`reports/nfl-${event.id}.html`:null,sourceUrl:`https://www.espn.com/nfl/game/_/gameId/${event.id}`,sourceDataset:url,nflWeekUrl:`https://www.nfl.com/schedules/2026/by-week/week-${week}`,usScheduleKickoff:usGame?.kickoff||null};
+}));
 if(seen.size!==272)throw Error(`NFL season returned ${seen.size} game IDs, expected 272`);
-const currentIds=new Set(games.map(game=>game.id));
-const frozenIds=new Set(scope.frozenGameIds);
-const entered=[...currentIds].filter(id=>!frozenIds.has(id));
-const left=[...frozenIds].filter(id=>!currentIds.has(id));
-const kickoffChanged=games.filter(game=>scope.frozenKickoffs?.[game.id]&&scope.frozenKickoffs[game.id]!==game.kickoff).map(game=>({id:game.id,frozenKickoff:scope.frozenKickoffs[game.id],currentKickoff:game.kickoff}));
-const crosswalkMismatch=games.filter(game=>game.usScheduleKickoff&&game.usScheduleKickoff!==game.kickoff).map(game=>game.id);
-const output={schema:'event-atlas.nfl-demo-window.v1',builtAt:new Date().toISOString(),scope:{startsAt:scope.startsAt,endsBefore:scope.endsBefore,timeZone:scope.timeZone,label:scope.label,frozenAt:scope.frozenAt},source:{name:'ESPN public NFL scoreboard',status:'ok',weekUrls:fetched.map(item=>item.url),nflWeekUrls:scope.officialWeekUrls},counts:{total:games.length,us:games.filter(game=>game.geographicScope==='us_venue_context').length,international:games.filter(game=>game.geographicScope==='international_schedule_only').length},reconciliation:{state:entered.length||left.length||kickoffChanged.length||crosswalkMismatch.length?'review_required':'matches_frozen_scope',entered,left,kickoffChanged,crosswalkMismatch},games};
+const {games,reconciliation}=reconcileWindowSchedule(allGames,scope);
+const output={schema:'event-atlas.nfl-demo-window.v1',builtAt:new Date().toISOString(),scope:{startsAt:scope.startsAt,endsBefore:scope.endsBefore,timeZone:scope.timeZone,label:scope.label,frozenAt:scope.frozenAt},source:{name:'ESPN public NFL scoreboard',status:'ok',weekUrls:fetched.map(item=>item.url),nflWeekUrls:scope.officialWeekUrls},counts:{total:games.length,us:games.filter(game=>game.geographicScope==='us_venue_context').length,international:games.filter(game=>game.geographicScope==='international_schedule_only').length},reconciliation,games};
 await fs.writeFile(path.join(root,'site/nfl_demo_window.json'),JSON.stringify(output)+'\n');
 console.log(`NFL demo window: ${output.counts.total} games (${output.counts.us} U.S., ${output.counts.international} international); ${output.reconciliation.state}`);
