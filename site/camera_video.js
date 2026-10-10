@@ -6,6 +6,5 @@ export function publicRoadVideoAgency(item){
   if(item?.agency==='MnDOT IRIS'&&/^mndot-C\d{1,6}$/.test(item.id||'')&&url===`https://video.dot.state.mn.us/public/${item.id.slice(6)}.stream/playlist.m3u8`)return 'MnDOT';
   if(item?.agency==='NJTA'&&/^njta-\d{1,6}$/.test(item.id||'')&&/^https:\/\/wink\.njta\.com\/\d{1,4}\/public\/hls\/[A-Za-z0-9-]+_nj\.m3u8$/.test(url))return 'NJTA';
   if(item?.agency==='TDOT SmartWay'&&item?.inService===true&&/^tdot-smartway-\d{1,6}$/.test(item.id||'')&&/^https:\/\/mcleansfs[1-9]\d*\.us-east-1\.skyvdn\.com\/rtplive\/R3_\d{3}\/playlist\.m3u8$/.test(url))return 'TDOT SmartWay';
-  if(item?.agency==='Louisiana 511'&&item?.inService===true&&/^la511-\d{1,7}-\d{1,7}$/.test(item.id||'')&&/^https:\/\/itsstreaming[a-z0-9-]*\.dotd\.la\.gov\/public\/[A-Za-z0-9_-]+\.streams?\/playlist\.m3u8$/i.test(url))return 'Louisiana 511';
   return null;
 }

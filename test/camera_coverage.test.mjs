@@ -2,6 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {selectCameraCoverage} from '../lib/camera_coverage.mjs';
 import fs from 'node:fs';
+import {publicRoadVideoAgency} from '../site/camera_video.js';
+
+test('Louisiana camera records and playback stay disabled with directory-only coverage',()=>{
+  const venue={id:'3493',address:'New Orleans, LA, USA',lat:29.9509,lon:-90.0812};
+  const camera={id:'la511-204-244',agency:'Louisiana 511',lat:29.951,lon:-90.081,videoUrl:'https://itsstreamingno.dotd.la.gov/public/example.streams/playlist.m3u8',inService:true};
+  assert.deepEqual(selectCameraCoverage([venue],[camera],[{id:'la511-public-cameras',status:'ok'}]),{});
+  assert.equal(publicRoadVideoAgency(camera),null);
+  const snapshot=JSON.parse(fs.readFileSync(new URL('../site/cameras.json',import.meta.url)));
+  assert.equal(snapshot.byVenue['3493'],undefined);
+  assert.equal(snapshot.sources.find(source=>source.id==='la511-public-cameras')?.status,'directory_only');
+  assert.equal(Object.values(snapshot.byVenue).flat().filter(item=>item.agency==='Louisiana 511').length,0);
+});
 
 test('failed camera source leaves venue uncovered instead of reporting an empty inventory',()=>{
   const venue={id:'pittsburgh',address:'Pittsburgh, PA, USA',lat:40.4467,lon:-80.0158};
@@ -64,11 +76,6 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
       assert.match(item.id,/^njta-\d{1,6}$/);
       assert.match(item.videoUrl,/^https:\/\/wink\.njta\.com\/\d{1,4}\/public\/hls\/[A-Za-z0-9-]+_nj\.m3u8$/);
       assert.equal(item.viewerUrl,'https://www.njta.gov/travel-resources/camera-list/');
-    }else if(item.agency==='Louisiana 511'){
-      assert.equal(item.inService,true);
-      assert.match(item.id,/^la511-\d{1,7}-\d{1,7}$/);
-      assert.match(item.videoUrl,/^https:\/\/itsstreaming[a-z0-9-]*\.dotd\.la\.gov\/public\/[A-Za-z0-9_-]+\.streams?\/playlist\.m3u8$/i);
-      assert.match(item.viewerUrl,/^https:\/\/511la\.org\/map\/Cctv\/\d+$/);
     }else{
       assert.equal(item.agency,'TDOT SmartWay');
       assert.equal(item.inService,true);

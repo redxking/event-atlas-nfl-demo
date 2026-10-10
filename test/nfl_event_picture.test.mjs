@@ -111,17 +111,15 @@ test('missing sources are gaps rather than zero-incident findings',()=>{
   assert.equal(picture.zoneReview.find(zone=>zone.name==='Stadium ground perimeter').state,'no mapped candidate');
 });
 
-test('Superdome brief separates nearby stream availability from a threat or stadium view',()=>{
+test('Superdome brief links only the official camera directory',()=>{
   const saints={...game,venue:{id:'3493',address:'New Orleans, LA, USA',lat:29.9509,lon:-90.0812}};
-  const camera={id:'la511-204-244',agency:'Louisiana 511',name:'US 90 at Claiborne Ramp',distanceKm:0.4,videoPlaylistStatus:'playlist_reachable_at_sync',viewerUrl:'https://511la.org/map/Cctv/244',sourceUrl:'https://511la.org/cctv'};
-  const cameras={builtAt:new Date(now).toISOString(),sources:[{id:'la511-public-cameras',status:'ok',url:'https://511la.org/cctv'},{id:'txdot-dfw-camera-assets',status:'failed'}],byVenue:{3493:[camera]}};
+  const cameras={builtAt:new Date(now).toISOString(),sources:[{id:'la511-public-cameras',status:'directory_only',url:'https://511la.org/cctv'},{id:'txdot-dfw-camera-assets',status:'failed'}],byVenue:{}};
   const picture=buildNflEventPicture(saints,{schedule:inputs.schedule,cameras},now);
-  assert.equal(picture.sources.find(item=>item.name==='Roadway cameras').state,'metadata connected');
-  assert.equal(picture.sources.find(item=>item.name==='Roadway camera stream check').state,'1/1 playlists reachable at sync');
+  assert.equal(picture.sources.find(item=>item.name==='Roadway cameras').state,'publisher directory only');
+  assert.equal(picture.sources.find(item=>item.name==='Roadway cameras').sourceUrl,'https://511la.org/cctv');
+  assert.equal(picture.sources.find(item=>item.name==='Roadway camera stream check'),undefined);
   assert.equal(picture.cues.length,0);
   assert.equal(picture.assessment.severity,'not_assessed');
-  const failed=buildNflEventPicture(saints,{schedule:inputs.schedule,cameras:{...cameras,sources:[{id:'la511-public-cameras',status:'failed',url:'https://511la.org/cctv'}],byVenue:{}}},now);
-  assert.equal(failed.sources.find(item=>item.name==='Roadway cameras').state,'source failed');
 });
 
 test('Seattle closed-call context is labeled and never becomes a threat cue',()=>{
