@@ -8,6 +8,6 @@ export function selectNflNews(game,news,now=Date.now()){
   if(news?.status!=='ok'||!allowed||!Number.isFinite(retrieved)||!Number.isFinite(built))return {state:'unavailable',publisher,sourceUrl,asOf:null,articles:[]};
   if(retrieved>now+HOUR||built>now+HOUR||now-retrieved>12*HOUR||now-built>12*HOUR)return {state:'stale',publisher,sourceUrl,asOf:news.retrievedAt,articles:[]};
   const raw=news.byGame?.[game.id];
-  const articles=Array.isArray(raw)?raw.slice(0,8).filter(item=>item&&item.publisher===publisher&&['one_team_mentioned','both_teams_mentioned'].includes(item.matchBasis)&&typeof item.url==='string'&&allowed.test(item.url)):[];
+  const articles=Array.isArray(raw)?raw.slice(0,8).filter(item=>item&&item.publisher===publisher&&['one_team_mentioned','both_teams_mentioned','both_teams_in_title','matchup_phrase_in_title'].includes(item.matchBasis)&&typeof item.url==='string'&&allowed.test(item.url)):[];
   return {state:'current_snapshot',publisher,sourceUrl,asOf:news.retrievedAt,articles};
 }

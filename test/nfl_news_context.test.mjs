@@ -12,6 +12,13 @@ test('fresh ESPN RSS team mentions enter the event context with attribution',()=
   assert.equal(result.articles[0].matchBasis,'one_team_mentioned');
 });
 
+test('title matching tiers remain labeled publisher discovery context',()=>{
+  const base={status:'ok',publisher:'ESPN',sourceUrl:'https://www.espn.com/espn/rss/nfl/news',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z'};
+  const articles=['matchup_phrase_in_title','both_teams_in_title','both_teams_mentioned'].map(matchBasis=>({...article,matchBasis}));
+  const result=selectNflNews(game,{...base,byGame:{'nfl:1':articles}},now);
+  assert.deepEqual(result.articles.map(item=>item.matchBasis),articles.map(item=>item.matchBasis));
+});
+
 test('stale, failed, or non ESPN article records are not displayed',()=>{
   const base={status:'ok',publisher:'ESPN',retrievedAt:'2026-10-09T23:45:00Z',sourceBuiltAt:'2026-10-09T23:40:00Z',byGame:{'nfl:1':[article,{...article,url:'https://example.org/nfl/story'}]}};
   assert.equal(selectNflNews(game,base,now).articles.length,1);

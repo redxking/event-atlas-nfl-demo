@@ -43,8 +43,16 @@ def match_article(game, article, now):
         return None
     if not kickoff - timedelta(days=7) <= published <= kickoff + timedelta(days=2):
         return None
-    text = article["title"] + " " + article["description"]
-    hits = [team for team in teams if re.search(r"(?<![\w])" + re.escape(team) + r"(?![\w])", text, re.I)]
+    title = article["title"]
+    text = title + " " + article["description"]
+    word = lambda team: r"(?<![\w])" + re.escape(team) + r"(?![\w])"
+    title_hits = [team for team in teams if re.search(word(team), title, re.I)]
+    if len(title_hits) == 2:
+        bridge = r".{0,100}?(?:\bvs\.?|\bat\b|@|[-–—]).{0,30}?"
+        if any(re.search(word(a) + bridge + word(b), title, re.I) for a, b in (teams, teams[::-1])):
+            return "matchup_phrase_in_title"
+        return "both_teams_in_title"
+    hits = [team for team in teams if re.search(word(team), text, re.I)]
     return "both_teams_mentioned" if len(hits) == 2 else "one_team_mentioned" if hits else None
 
 
@@ -89,8 +97,9 @@ def parse_feed(xml, games, now, source=SOURCES[0]):
             if match:
                 matches.append({**article, "matchBasis": match})
         if matches:
-            by_game[game["id"]] = sorted(matches, key=lambda item: item["publishedAt"], reverse=True)[:8]
-    return {"status": "ok", "sourceUrl": source["url"], "publisher": source["publisher"], "sourceBuiltAt": built, "retrievedAt": now.isoformat().replace("+00:00", "Z"), "articleCount": len(articles), "byGame": by_game, "interpretation": "Publisher RSS titles and available feed descriptions matched by team-name mentions. A mention does not establish relevance to this specific game, attendance, venue impact, or a threat. Open the publisher article for details."}
+            rank = {"matchup_phrase_in_title": 4, "both_teams_in_title": 3, "both_teams_mentioned": 2, "one_team_mentioned": 1}
+            by_game[game["id"]] = sorted(matches, key=lambda item: (rank[item["matchBasis"]], item["publishedAt"]), reverse=True)[:8]
+    return {"status": "ok", "sourceUrl": source["url"], "publisher": source["publisher"], "sourceBuiltAt": built, "retrievedAt": now.isoformat().replace("+00:00", "Z"), "articleCount": len(articles), "byGame": by_game, "interpretation": "Publisher RSS titles and available feed descriptions are classified by explicit matchup phrases and team-name mentions. A title phrase is a discovery cue, not verification of this event's details, attendance, venue impact, or a threat. Open the publisher article for details."}
 
 
 def fetch_feed(source=SOURCES[0]):

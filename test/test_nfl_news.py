@@ -19,7 +19,7 @@ class NflNewsTests(unittest.TestCase):
     def test_source_link_and_team_mention_are_bounded(self):
         result = NEWS.parse_feed(feed(), [GAME], NOW)
         self.assertEqual(result["status"], "ok")
-        self.assertEqual(result["byGame"]["nfl:1"][0]["matchBasis"], "both_teams_mentioned")
+        self.assertEqual(result["byGame"]["nfl:1"][0]["matchBasis"], "both_teams_in_title")
         self.assertEqual(result["articleCount"], 5)
         self.assertEqual(len(result["byGame"]["nfl:1"]), 1)
 
@@ -27,6 +27,17 @@ class NflNewsTests(unittest.TestCase):
         article = {"title": "Bears roster update", "description": "", "publishedAt": "2026-10-09T18:30:00Z"}
         self.assertEqual(NEWS.match_article(GAME, article, NOW), "one_team_mentioned")
         self.assertIsNone(NEWS.match_article({**GAME, "kickoff": "2026-12-01T17:00Z"}, article, NOW))
+
+    def test_matchup_title_and_description_tiers(self):
+        article = {"publishedAt": "2026-10-09T18:30:00Z", "description": ""}
+        self.assertEqual(NEWS.match_article(GAME, {**article, "title": "Bears RB out, QB questionable vs. Packers"}, NOW), "matchup_phrase_in_title")
+        self.assertEqual(NEWS.match_article(GAME, {**article, "title": "Bears, Packers announce roster moves"}, NOW), "both_teams_in_title")
+        self.assertEqual(NEWS.match_article(GAME, {**article, "title": "Bears roster update", "description": "Packers also play this week"}, NOW), "both_teams_mentioned")
+
+    def test_matchup_title_ranks_ahead_of_newer_team_mentions(self):
+        xml = feed("Bears RB out vs. Packers").replace(b"League notes", b"Bears roster update")
+        result = NEWS.parse_feed(xml, [GAME], NOW)
+        self.assertEqual(result["byGame"]["nfl:1"][0]["matchBasis"], "matchup_phrase_in_title")
 
     def test_cbs_fallback_keeps_headline_link_and_omits_description(self):
         source = NEWS.SOURCES[1]
