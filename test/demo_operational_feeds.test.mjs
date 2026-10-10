@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {demoOperationalFeeds} from '../site/demo_operational_feeds.js';
+import {demoOperationalFeeds,demoReplayFrame} from '../site/demo_operational_feeds.js';
 import {buildScopeThreatReport} from '../site/scope_threat_report.js';
 const scope=JSON.parse(fs.readFileSync('data/nfl_demo_window_scope.json'));
 const nfl=JSON.parse(fs.readFileSync('site/nfl.json'));
@@ -11,3 +11,10 @@ test('all 27 US window games have six typed fictional records bound to the corre
 });
 test('briefing keeps lead claims, sensor identity gaps and resolved credentials distinct',()=>{const demo=demoOperationalFeeds(games[0]);assert.match(demo.briefing.assessment,/do not independently corroborate/);assert.match(demo.briefing.resolved,/should not remain an active/);assert.match(demo.records.find(r=>r.key==='aviation').assessment,/does not prove/);assert.match(demo.records.find(r=>r.key==='cyber').fields['Example host'],/\.invalid$/);});
 test('fixtures do not populate real findings or counts',()=>{const report=buildScopeThreatReport({title:'Event',level:'event',games:[games[0]],summaries:new Map()});assert.equal(report.findings.length,0);assert.equal(report.decisions.length,0);assert.equal(demoOperationalFeeds({id:'bad',kickoff:'invalid'}),null);});
+
+ test('replay briefing only uses received records and completion restores six categories',()=>{
+ const data=demoOperationalFeeds(games[0]);const start=demoReplayFrame(data,0);assert.equal(start.records.length,0);assert.equal(start.high,0);assert.match(start.assessment,/not an assessment of the actual event/);
+ const first=demoReplayFrame(data,1);assert.equal(first.high,1);assert.equal(first.medium,0);assert.equal(first.resolved,0);assert.doesNotMatch(first.decisions.join(' '),/cyber|airspace|document claim/i);
+ const final=demoReplayFrame(data,100);assert.equal(final.records.length,6);assert.equal(final.medium,4);assert.equal(final.resolved,1);
+ assert.equal(demoReplayFrame(data,NaN).count,0);
+ });

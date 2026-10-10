@@ -20,16 +20,38 @@ export function demoOperationalFeeds(game){
   review:'Brief the designated event lead before the guest ceremony and update the briefing when corroboration, a source correction or case disposition changes.'
  }};
 }
-const node=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;return n;};
+export function demoReplayFrame(data,step){
+ const count=Math.max(0,Math.min(data.records.length,Math.floor(Number.isFinite(step)?step:0)));
+ const records=data.records.slice(0,count),latest=records.at(-1);
+ const high=records.filter(r=>r.priority==='High'),medium=records.filter(r=>r.priority==='Medium'),resolved=records.filter(r=>r.key==='access');
+ return {records,latest,count,total:data.records.length,high:high.length,medium:medium.length,resolved:resolved.length,assessment:records.length?`At ${data.venue}, ${count} fictional feed record${count===1?' has':'s have'} arrived. ${high.length?'The explicit guest-directed message requires urgent protective review.':'No high-priority record has arrived in this replay.'} ${medium.length?`${medium.length} medium-priority record${medium.length===1?' requires':'s require'} verification; no shared cause or independent corroboration is established.`:''}`:'No fictional records have arrived yet. This is the start of the replay, not an assessment of the actual event.',decisions:records.map(r=>r.owner+': '+r.action),gaps:records.map(r=>r.assessment)};
+}
+let replayTimer=null;
+export function stopDemoReplay(){clearInterval(replayTimer);replayTimer=null;}
+const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 export function appendDemoOperationalFeeds(target,game){
  if(!target||target.querySelector('.demo-operational-feeds'))return;
  const data=demoOperationalFeeds(game);if(!data)return;
  const section=document.createElement('details');section.className='source-drilldown demo-operational-feeds';section.append(node('summary','Demo operational feeds & briefing — fictional'));
  section.append(node('p',data.classification+'. Records are tied to this game for walkthroughs and are excluded from public-source findings.'));
- section.append(node('h4',data.briefing.title));for(const [label,key] of [['Assessment','assessment'],['Decisions','decisions'],['Resolved issue','resolved'],['Information gaps','gaps'],['Review point','review']]){section.append(node('h5',label),node('p',data.briefing[key]));}
- for(const record of data.records){const detail=document.createElement('details');detail.append(node('summary',record.category+' · '+record.priority+' priority'));
- detail.append(node('h5',record.title),node('p',record.source+' · '+new Date(record.observedAt).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})),node('p',record.observation));
- const list=document.createElement('dl');for(const [label,value]of Object.entries(record.fields)){list.append(node('dt',label),node('dd',value));}detail.append(list);
- for(const [label,value]of [['Assessment',record.assessment],['Responsible role',record.owner],['Next decision',record.action],['Close when',record.close]])detail.append(node('h5',label),node('p',value));section.append(detail);}
- target.append(section);
+ const controls=node('div');controls.className='event-map-actions';const play=node('button','Play incoming feeds'),next=node('button','Next record'),reset=node('button','Restart story'),all=node('button','Show complete briefing');
+ for(const button of [play,next,reset,all]){button.type='button';controls.append(button);}section.append(controls);
+ const status=node('p');status.setAttribute('role','status');section.append(status);
+ const content=node('div');section.append(content);let step=data.records.length,playing=false;
+ const pause=()=>{stopDemoReplay();playing=false;play.textContent='Play incoming feeds';};
+ const paint=()=>{
+  const frame=demoReplayFrame(data,step);status.textContent=(playing?'Replaying fictional feeds · ':'Fictional feed snapshot · ')+frame.count+' of '+frame.total+' records received';next.disabled=step>=data.records.length;content.replaceChildren();
+  if(frame.latest){const notice=node('article');notice.className='brief-cue';notice.setAttribute('aria-label','Fictional feed notification');notice.append(node('strong','Latest demo update · '+frame.latest.priority+' priority'),node('p',frame.latest.title),node('p',frame.latest.owner+' — '+frame.latest.action));content.append(notice);}
+  content.append(node('h4',data.briefing.title),node('p',frame.assessment),node('p','Demo status: '+frame.high+' high priority · '+frame.medium+' medium priority · '+frame.resolved+' resolved vendor issue'));
+  if(frame.count===frame.total){for(const [label,key]of [['Decisions','decisions'],['Resolved issue','resolved'],['Information gaps','gaps'],['Review point','review']])content.append(node('h5',label),node('p',data.briefing[key]));}
+  else if(frame.records.length){content.append(node('h5','Decisions from received records'));for(const text of frame.decisions)content.append(node('p',text));content.append(node('h5','Assessment limits'));for(const text of frame.gaps)content.append(node('p',text));}
+  for(const record of frame.records){const detail=document.createElement('details');detail.append(node('summary',record.category+' · '+record.priority+' priority'));
+   detail.append(node('h5',record.title),node('p',record.source+' · '+new Date(record.observedAt).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})),node('p',record.observation));
+   const list=document.createElement('dl');for(const [label,value]of Object.entries(record.fields))list.append(node('dt',label),node('dd',value));detail.append(list);
+   for(const [label,value]of [['Assessment',record.assessment],['Responsible role',record.owner],['Next decision',record.action],['Close when',record.close]])detail.append(node('h5',label),node('p',value));content.append(detail);
+  }
+ };
+ next.onclick=()=>{pause();step=Math.min(step+1,data.records.length);paint();};reset.onclick=()=>{pause();step=0;paint();};all.onclick=()=>{pause();step=data.records.length;paint();};
+ play.onclick=()=>{if(playing){pause();paint();return;}pause();if(step>=data.records.length)step=0;playing=true;play.textContent='Pause replay';step=Math.min(step+1,data.records.length);paint();replayTimer=setInterval(()=>{if(!section.isConnected||section.closest('[hidden]')||!section.open){pause();paint();return;}if(document.hidden)return;step=Math.min(step+1,data.records.length);if(step===data.records.length)pause();paint();},3000);};
+ target.append(section);paint();
 }
