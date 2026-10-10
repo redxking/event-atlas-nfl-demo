@@ -21,6 +21,7 @@
     "sync:glendale-police": "node scripts/sync_glendale_public_calls.mjs",
     "sync:az511-alerts": "python3 scripts/sync_az511_public_alerts.py",
     "sync:houston-transtar": "python3 scripts/sync_houston_transtar_rss.py",
+    "sync:houston-active": "python3 scripts/sync_houston_active_incidents.py",
     "sync:charlotte-police": "node scripts/sync_charlotte_public_safety.mjs",
     "sync:arlington-police": "node scripts/sync_arlington_public_safety.mjs",
     "sync:denver-police": "node scripts/sync_denver_public_safety.mjs",
