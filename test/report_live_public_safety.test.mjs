@@ -7,7 +7,8 @@ test('direct public-safety checks are limited to supported near-term games',()=>
   const context={monitoringMode:'near_term_monitoring',venueId:'3673',kickoff:'2026-10-11T12:00:00Z',status:'scheduled'};
   assert.equal(directPublicSafetyKind(context,now),'seattle_fire');
   assert.equal(directPublicSafetyKind({...context,venueId:'3810'},now),'nashville_police');
-  for(const changed of [{venueId:'3493'},{monitoringMode:'season_planning'},{status:'cancelled'},{kickoff:'2026-10-09T00:00:00Z'},{kickoff:'invalid'}]){
+  assert.equal(directPublicSafetyKind({...context,venueId:'3628',lat:35.225833333,lon:-80.852777777},now),'cmpd_road');
+  for(const changed of [{venueId:'3493'},{venueId:'3628',lat:0,lon:0},{monitoringMode:'season_planning'},{status:'cancelled'},{status:'postponed'},{kickoff:'2026-10-09T00:00:00Z'},{kickoff:'2026-11-11T12:00:00Z'},{kickoff:'invalid'}]){
     assert.equal(directPublicSafetyKind({...context,...changed},now),null);
   }
 });
@@ -50,4 +51,11 @@ test('Nashville direct check requests a citywide count without individual calls'
     assert.equal(requested.some(url=>url.includes('outFields')||url.includes('returnGeometry=true')),false);
   }finally{globalThis.fetch=original}
   await assert.rejects(checkDirectPublicSafety('other',now),/Unsupported/);
+});
+
+test('CMPD direct check rejects an absent Charlotte point before requesting individual feed entries',async()=>{
+  const original=globalThis.fetch;
+  globalThis.fetch=()=>{throw Error('unexpected fetch')};
+  try{await assert.rejects(checkDirectPublicSafety('cmpd_road',Date.now(),{lat:0,lon:0}),/venue point unavailable/)}
+  finally{globalThis.fetch=original}
 });
