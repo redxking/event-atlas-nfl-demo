@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '26'
+      - run: npm ci
       - run: npm test
       - run: python3 -m unittest discover -s test -p test_nfl_news.py
       - run: npm run sync:sports
@@ -30,6 +31,7 @@ jobs:
       - run: npm run sync:police
       - run: npm run sync:charlotte-police
       - run: npm run sync:ntas
+      - run: npm run sync:septa
       - run: npm run sync:seams
       - run: npm run sync:tfr
       - uses: actions/configure-pages@v5

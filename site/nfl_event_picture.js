@@ -2,6 +2,7 @@ import {selectRoadContext} from './road_relevance.js?v=20261009-5';
 import {selectWeatherContext} from './weather_relevance.js';
 import {tfrAtKickoff} from './tfr_notam.js';
 import {selectNflNews} from './nfl_news_context.js';
+import {selectSeptaForGame} from './septa_b_alerts.js';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -11,7 +12,7 @@ const fresh=(value,now,maxAge)=>{
 const row=(name,state,asOf=null,detail='',sourceUrl=null)=>({name,state,asOf,detail,sourceUrl});
 
 export function buildNflEventPicture(game,inputs={},now=Date.now()){
-  const {schedule,ground,airspace,tfr,cameras,roads,roadDirect,conditions,police,cmpdTraffic,transit,transitSchedule,transitPredictions,ntas,news}=inputs;
+  const {schedule,ground,airspace,tfr,cameras,roads,roadDirect,conditions,police,cmpdTraffic,transit,transitSchedule,transitPredictions,septa,ntas,news}=inputs;
   const venueId=game.venue.id;
   const footprint=ground?.byVenue?.[venueId];
   const faa=airspace?.byGame?.[game.id];
@@ -34,6 +35,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   const transitScheduleContext=transitScheduleFresh?{state:transitSchedule.state,checkedAt:new Date(transitSchedule.checkedAt).toISOString(),stopId:transitSchedule.stopId,routeId:transitSchedule.routeId,serviceDate:transitSchedule.serviceDate,sourceUrl:transitSchedule.sourceUrl,totalReturned:transitSchedule.totalReturned,invalidCount:transitSchedule.invalidCount,arrivalCount:transitSchedule.arrivalCount,departureCount:transitSchedule.departureCount,screenable:transitSchedule.screenable,eventWindow:transitSchedule.eventWindow,withinWindowCount:transitSchedule.withinWindowCount,omittedEntryCount:transitSchedule.omittedEntryCount,entries:transitSchedule.entries.map(item=>({id:item.id,tripId:item.tripId,headsign:item.headsign,arrivalAt:item.arrivalAt,departureAt:item.departureAt,directionId:item.directionId,withinIllustrativeWindow:item.withinIllustrativeWindow,sourceUrl:item.sourceUrl})),interpretation:transitSchedule.interpretation}:null;
   const transitPredictionsFresh=venueId==='3738'&&['retrieved','partial'].includes(transitPredictions?.state)&&Number.isFinite(transitPredictions.checkedAt)&&transitPredictions.checkedAt<=now+60000&&now-transitPredictions.checkedAt<=10*60000&&Array.isArray(transitPredictions.entries)&&Number.isSafeInteger(transitPredictions.totalReturned);
   const transitPredictionsContext=transitPredictionsFresh?{state:transitPredictions.state,checkedAt:new Date(transitPredictions.checkedAt).toISOString(),sourceUrl:transitPredictions.sourceUrl,stopId:transitPredictions.stopId,routeId:transitPredictions.routeId,totalReturned:transitPredictions.totalReturned,invalidCount:transitPredictions.invalidCount,omittedEntryCount:transitPredictions.omittedEntryCount,entries:transitPredictions.entries.map(item=>({tripId:item.tripId,headsign:item.headsign,arrivalAt:item.arrivalAt,departureAt:item.departureAt,status:item.status,sourceUrl:item.sourceUrl})),interpretation:transitPredictions.interpretation}:null;
+  const septaContext=selectSeptaForGame(game,septa,now);
   const ntasFresh=ntas?.status==='ok'&&fresh(ntas.retrievedAt,now,12*HOUR)&&Array.isArray(ntas.active);
   const newsContext=selectNflNews(game,news,now);
   const usgsFresh=!conditions?.quakesError&&Array.isArray(conditions?.quakes?.features)&&Number.isFinite(conditions?.at)&&conditions.at<=now+60000&&now-conditions.at<=5*60000;
@@ -59,7 +61,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     row('CMPD open roadway incidents',venueId!=='3628'?'outside source jurisdiction':cmpdTraffic?.state==='failed'?'source failed':!cmpdTrafficFresh?'not current':cmpdTraffic.state==='partial'?'partial source data':'open-feed count checked',cmpdTrafficFresh?new Date(cmpdTraffic.checkedAt).toISOString():null,'Currently open traffic crashes, control malfunctions and obstructions; approximate source points counted within 5 km. No route impact, stadium incident or threat is inferred.',venueId==='3628'?'https://cmpdinfo.charlottenc.gov/api/v2.1/TrafficRSS':null),
     row('MBTA Foxboro station alerts',venueId!=='3738'?'outside source area':transit?.state==='failed'?'source failed':!transitFresh?'not current':transit.state==='partial'?'partial source data':'station alerts checked',transitFresh?new Date(transit.checkedAt).toISOString():null,'Filtered to Foxboro station; event-window overlap is a transit review cue, not verified event service impact or a threat.',venueId==='3738'?'https://api-v3.mbta.com/alerts?filter%5Bstop%5D=place-FS-0049':null),
     row('MBTA Foxboro station schedule',venueId!=='3738'?'outside source area':transitSchedule?.state==='failed'?'source failed':!transitScheduleFresh?'not current':transitSchedule.state==='partial'?'partial source data':'station schedule checked',transitScheduleFresh?new Date(transitSchedule.checkedAt).toISOString():null,'Published station service plan for the game date. No train position, capacity or guaranteed event access is inferred.',venueId==='3738'?transitSchedule?.sourceUrl||'https://api-v3.mbta.com/schedules':null),
-    row('MBTA Foxboro current predictions',venueId!=='3738'?'outside source area':transitPredictions?.state==='failed'?'source failed':!transitPredictionsFresh?'not current':transitPredictions.state==='partial'?'partial source data':'current predictions checked',transitPredictionsFresh?new Date(transitPredictions.checkedAt).toISOString():null,'Station predictions are estimates for current service. No result does not establish cancelled future service or train position.',venueId==='3738'?transitPredictions?.sourceUrl||'https://api-v3.mbta.com/predictions':null)
+    row('MBTA Foxboro current predictions',venueId!=='3738'?'outside source area':transitPredictions?.state==='failed'?'source failed':!transitPredictionsFresh?'not current':transitPredictions.state==='partial'?'partial source data':'current predictions checked',transitPredictionsFresh?new Date(transitPredictions.checkedAt).toISOString():null,'Station predictions are estimates for current service. No result does not establish cancelled future service or train position.',venueId==='3738'?transitPredictions?.sourceUrl||'https://api-v3.mbta.com/predictions':null),
+    row('SEPTA B Line service alerts',venueId!=='3806'?'outside source area':septaContext.state,septaContext?.sourceAt||null,'Route-wide notices may affect travel to NRG Station; only stop-specific selectors identify the station. Neither establishes stadium impact.',septaContext?.sourceUrl||null)
   ];
   const cues=[];
   if(weather?.state==='screened')for(const entry of weather.alerts.filter(item=>item.candidate)){
@@ -71,6 +74,9 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   }
   if(transitFresh&&transit.state==='retrieved'&&transit.screenable)for(const item of transit.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
     cues.push({type:'transit alert',title:item.header,basis:`MBTA Foxboro station; ${item.effect}; published active period overlaps illustrative event window. Service or route impact requires verification.`,sourceUrl:item.sourceUrl,sourceAt:item.updatedAt});
+  }
+  if(septaContext?.state==='current snapshot'&&septaContext.screenable)for(const item of septaContext.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
+    cues.push({type:'transit alert',title:item.header,basis:`SEPTA ${item.scope}; ${item.effect||'effect not supplied'}; alert period overlaps illustrative event window. Verify travel relevance with SEPTA.`,sourceUrl:item.sourceUrl,sourceAt:septaContext.sourceAt});
   }
   const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.','No authorized drone-detection feed is connected.','No active jurisdictional police alert feed is connected.','No verified protected-person attendance or protective-intelligence source is connected.'];
   if(!policeConnected)gaps.push('No jurisdictional police incident feed is connected for this venue.');
@@ -87,6 +93,9 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(venueId==='3738'&&transitScheduleFresh&&transitSchedule.state==='partial')gaps.push('MBTA Foxboro station schedule response was incomplete or malformed; the listed service count is partial.');
   if(venueId==='3738'&&!transitPredictionsFresh)gaps.push('MBTA Foxboro current predictions are unavailable or older than ten minutes; current train arrival estimates cannot be inferred.');
   if(venueId==='3738'&&transitPredictionsFresh&&transitPredictions.state==='partial')gaps.push('MBTA Foxboro current prediction response was incomplete or malformed; listed estimates are partial.');
+  if(venueId==='3806'&&!['current snapshot','partial'].includes(septaContext.state))gaps.push('SEPTA B Line service alert snapshot is unavailable or older than two hours; travel service status cannot be inferred.');
+  if(venueId==='3806'&&septaContext.state==='partial')gaps.push('SEPTA B Line alert snapshot is partial; event-time screening is incomplete.');
+  if(venueId==='3806'&&septaContext.state==='current snapshot'&&!septaContext.screenable)gaps.push('SEPTA B Line alerts cannot be screened against a confirmed future kickoff.');
   if(!cameraFresh||!cameraItems)gaps.push('No current roadway-camera metadata coverage is available for this venue.');
   if(road.timingState!=='matched')gaps.push(`Road event-time matching is unavailable (${road.timingState.replaceAll('_',' ')}).`);
   if(venueId==='3810'&&roadDirect?.state==='failed')gaps.push('Direct Tennessee DOT SmartWay check failed; the scheduled road snapshot may be stale.');
@@ -96,5 +105,5 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(!ntasFresh)gaps.push('Current DHS NTAS national advisory context is unavailable.');
   if(newsContext.state!=='current_snapshot')gaps.push('Current NFL publisher headline context is unavailable; team news may be missing.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,road:road.timingState==='matched'?road.overlapCount:0,transit:transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0},zoneReview,sources,gaps,policeContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,policeContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }
