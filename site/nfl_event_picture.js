@@ -84,10 +84,10 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     cues.push({type:'road condition',title:`${item.kind} · ${item.name}`,basis:`${item.agency}; ${item.distanceKm} km from candidate point; published window overlaps event`,sourceUrl:item.sourceUrl||null,sourceAt:item.sourceRecordDate||item.startAt||null});
   }
   if(transitFresh&&transit.state==='retrieved'&&transit.screenable)for(const item of transit.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
-    cues.push({type:'transit alert',title:item.header,basis:`MBTA Foxboro station; ${item.effect}; published active period overlaps illustrative event window. Service or route impact requires verification.`,sourceUrl:item.sourceUrl,sourceAt:item.updatedAt});
+    cues.push({type:'transit alert',sourceId:item.id,title:item.header,basis:`MBTA Foxboro station; ${item.effect}; published active period overlaps illustrative event window. Service or route impact requires verification.`,sourceUrl:item.sourceUrl,sourceAt:item.updatedAt});
   }
   if(septaContext?.state==='current snapshot'&&septaContext.screenable)for(const item of septaContext.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
-    cues.push({type:'transit alert',title:item.header,basis:`SEPTA ${item.scope}; ${item.effect||'effect not supplied'}; alert period overlaps illustrative event window. Verify travel relevance with SEPTA.`,sourceUrl:item.sourceUrl,sourceAt:septaContext.sourceAt});
+    cues.push({type:'transit alert',sourceId:item.id,title:item.header,basis:`SEPTA ${item.scope}; ${item.effect||'effect not supplied'}; alert period overlaps illustrative event window. Verify travel relevance with SEPTA.`,sourceUrl:item.sourceUrl,sourceAt:septaContext.sourceAt});
   }
   const gaps=['Venue operator has not approved the ground perimeter, entrances, queues, or camera coverage.','No verified stadium CCTV stream is connected.','Current FAA NOTAM status requires independent verification.','No authorized drone-detection feed is connected.','No active jurisdictional police alert feed is connected.','No verified protected-person attendance or protective-intelligence source is connected.'];
   if(!policeConnected)gaps.push('No jurisdictional police incident feed is connected for this venue.');

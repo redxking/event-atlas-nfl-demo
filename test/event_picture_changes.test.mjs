@@ -38,3 +38,24 @@ test('changed kickoff forecast is logged only across comparable current checks',
   assert.equal(changes.find(item=>item.kind==='forecast_changed')?.sourceUrl,base.sourceUrl);
   assert.ok(!diffEventPicture(before,{...after,forecastContext:{...after.forecastContext,state:'unavailable or stale'}},null,null,game,game).some(item=>item.kind==='forecast_changed'));
 });
+
+test('new NOAA outlook cues require two current comparable publisher snapshots',()=>{
+  for(const [type,sourceName] of [['convective outlook','NOAA SPC convective outlook'],['excessive rainfall outlook','NOAA WPC excessive-rainfall outlook']]){
+    const outlook={type,title:'Published outlook',basis:'Day 2 polygon at kickoff',sourceUrl:'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/example',sourceAt:'2026-10-10T01:00:00Z'};
+    const before={...picture('checked'),sources:[source(sourceName,'no point match in current Day 1–3 outlook')]};
+    const after={...before,sources:[source(sourceName,'published outlook at kickoff')],cues:[outlook]};
+    assert.equal(diffEventPicture(before,after,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,1);
+    assert.equal(diffEventPicture({...before,sources:[source(sourceName,'stale or unavailable')]},after,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
+  }
+});
+
+test('SEPTA alert ID prevents repeat additions when only the feed timestamp changes',()=>{
+  const sourceName='SEPTA B Line service alerts';
+  const first={type:'transit alert',sourceId:'B-line-1',title:'Service notice',basis:'SEPTA B Line route; SHUTTLE; alert period overlaps illustrative event window.',sourceUrl:'https://www.septa.org/alerts/',sourceAt:'2026-10-10T01:00:00Z'};
+  const before={...picture('checked',[first]),sources:[source(sourceName,'current snapshot')]};
+  const same={...before,cues:[{...first,sourceAt:'2026-10-10T02:00:00Z'}]};
+  assert.equal(diffEventPicture(before,same,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
+  const added={...same,cues:[...same.cues,{...first,sourceId:'B-line-2',title:'Second service notice'}]};
+  assert.equal(diffEventPicture(before,added,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,1);
+  assert.equal(diffEventPicture({...before,sources:[source(sourceName,'partial')]},added,null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
+});

@@ -1,10 +1,14 @@
-const cueSource={
-  'weather alert':['NWS point alerts','checked'],
-  'road condition':['Road conditions','time screened'],
-  'transit alert':['MBTA Foxboro station alerts','station alerts checked']
-};
+const cueSources=[
+  {type:'weather alert',name:'NWS point alerts',states:['checked']},
+  {type:'convective outlook',name:'NOAA SPC convective outlook',states:['no point match in current Day 1–3 outlook','published outlook at kickoff']},
+  {type:'excessive rainfall outlook',name:'NOAA WPC excessive-rainfall outlook',states:['no point match in current Day 1–3 outlook','published outlook at kickoff']},
+  {type:'road condition',name:'Road conditions',states:['time screened']},
+  {type:'transit alert',name:'MBTA Foxboro station alerts',states:['station alerts checked'],host:'api-v3.mbta.com'},
+  {type:'transit alert',name:'SEPTA B Line service alerts',states:['current snapshot'],host:'www.septa.org'}
+];
 const rows=picture=>new Map((picture?.sources||[]).map(item=>[item.name,item]));
-const cueKey=cue=>JSON.stringify([cue.type,cue.title,cue.sourceUrl,cue.sourceAt]);
+const cueKey=cue=>cue.sourceId?JSON.stringify([cue.type,cue.sourceId,cue.title,cue.basis]):JSON.stringify([cue.type,cue.title,cue.sourceUrl,cue.sourceAt]);
+const cueHost=cue=>{try{return new URL(cue.sourceUrl).hostname}catch{return null}};
 const forecastKey=forecast=>JSON.stringify([forecast?.period?.startTime,forecast?.period?.endTime,forecast?.period?.shortForecast,forecast?.period?.temperature,forecast?.period?.temperatureUnit,forecast?.period?.windSpeed,forecast?.period?.windDirection,forecast?.period?.precipitationPercent]);
 
 export function diffEventPicture(before,after,previousNews,currentNews,previousGame,currentGame,observedAt=new Date().toISOString()){
@@ -16,10 +20,11 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const prior=oldRows.get(name);
     if(prior&&prior.state!==next.state)changes.push({kind:'source_status_changed',observedAt,title:`${name}: ${prior.state} → ${next.state}`,detail:'Source coverage or screening status changed; verify the linked publisher before acting.',sourceUrl:next.sourceUrl||prior.sourceUrl||null});
   }
-  if(!eventWindowChanged)for(const [type,[sourceName,goodState]] of Object.entries(cueSource)){
-    if(oldRows.get(sourceName)?.state!==goodState||newRows.get(sourceName)?.state!==goodState)continue;
-    const oldKeys=new Set((before.cues||[]).filter(cue=>cue.type===type).map(cueKey));
-    for(const cue of (after.cues||[]).filter(cue=>cue.type===type))if(!oldKeys.has(cueKey(cue)))changes.push({kind:'newly_displayed_cue',observedAt,title:cue.title,detail:`New in this page's bounded ${type} sample. ${cue.basis} This is not a confirmed venue impact or threat.`,sourceUrl:cue.sourceUrl||null});
+  if(!eventWindowChanged)for(const spec of cueSources){
+    if(!spec.states.includes(oldRows.get(spec.name)?.state)||!spec.states.includes(newRows.get(spec.name)?.state))continue;
+    const matches=cue=>cue.type===spec.type&&(!spec.host||cueHost(cue)===spec.host);
+    const oldKeys=new Set((before.cues||[]).filter(matches).map(cueKey));
+    for(const cue of (after.cues||[]).filter(matches))if(!oldKeys.has(cueKey(cue)))changes.push({kind:'newly_displayed_cue',observedAt,title:cue.title,detail:`New in this page's bounded ${spec.type} sample. ${cue.basis} This is not a confirmed venue impact or threat.`,sourceUrl:cue.sourceUrl||null});
   }
   if(!eventWindowChanged&&before.forecastContext?.state==='current forecast'&&after.forecastContext?.state==='current forecast'&&before.forecastContext.sourceUrl===after.forecastContext.sourceUrl&&forecastKey(before.forecastContext)!==forecastKey(after.forecastContext))changes.push({kind:'forecast_changed',observedAt,title:'NWS kickoff forecast changed',detail:'The displayed hourly forecast values differ between two current checks. Verify the linked NWS forecast; this is not an observed hazard or threat.',sourceUrl:after.forecastContext.sourceUrl});
   if(previousNews?.state==='current_snapshot'&&currentNews?.state==='current_snapshot'){

@@ -1,7 +1,7 @@
 import {diffEventPicture} from './event_picture_changes.js';
 import {selectNflNews} from './nfl_news_context.js';
 
-const schema='event-atlas.published-report-state.v1';
+const schema='event-atlas.published-report-state.v2';
 const validTime=value=>Number.isFinite(Date.parse(value));
 const validPrior=(prior,game,now)=>prior?.schema===schema&&prior.eventId===game.id&&validTime(prior.generatedAt)&&Date.parse(prior.generatedAt)<=now&&now-Date.parse(prior.generatedAt)<=14*86400000&&prior.picture?.eventId===game.id&&Array.isArray(prior.picture.sources)&&prior.picture.sources.length<=50&&Array.isArray(prior.picture.cues)&&prior.picture.cues.length<=50&&Array.isArray(prior.news?.articles)&&prior.news.articles.length<=8&&Array.isArray(prior.changes)&&prior.changes.length<=30&&prior.changes.every(item=>typeof item?.kind==='string'&&item.kind.length<=40&&typeof item?.title==='string'&&item.title.length<=300&&typeof item?.detail==='string'&&item.detail.length<=1500&&(!item.sourceUrl||typeof item.sourceUrl==='string'&&item.sourceUrl.length<=1200))&&prior.game?.sourceUrl===game.sourceUrl;
 
