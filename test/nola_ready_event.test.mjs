@@ -6,6 +6,7 @@ import {buildNflEvidenceBundle} from '../site/nfl_evidence_bundle.js';
 import {buildNflPublicReport} from '../site/nfl_public_report.js';
 import {buildLocalAiPacket} from '../lib/local_ai_brief.mjs';
 import {diffEventPicture} from '../site/event_picture_changes.js';
+import {buildPublishedReportState} from '../site/published_report_changes.js';
 
 const schedule=JSON.parse(readFileSync(new URL('../site/nfl.json',import.meta.url)));
 const snapshot=JSON.parse(readFileSync(new URL('../site/nola_ready_event.json',import.meta.url)));
@@ -38,4 +39,15 @@ test('city passage revisions become source-linked change notices',()=>{
   const after={...before,nolaReadyEventContext:{...before.nolaReadyEventContext,asOf:new Date(now+3600000).toISOString(),claims:before.nolaReadyEventContext.claims.map(item=>item.id==='camp_closure'?{...item,sourceTextSha256:'a'.repeat(64)}:item)}};
   const change=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='city_event_notice_revised');
   assert.equal(change?.sourceUrl,snapshot.sourceUrl);
+});
+
+test('published comparison state retains city passage hashes across hourly builds',()=>{
+  const beforeBundle=buildNflEvidenceBundle(game,{schedule,nolaReadyEvent:snapshot},now);
+  const before=buildPublishedReportState(beforeBundle,game,null,null,now);
+  assert.equal(before.picture.nolaReadyEventContext?.claims.length,4);
+  const later=now+3600000;
+  const revised={...snapshot,checkedAt:new Date(later-1000).toISOString(),claims:snapshot.claims.map(item=>item.id==='camp_closure'?{...item,sourceTextSha256:'b'.repeat(64)}:item)};
+  const afterBundle=buildNflEvidenceBundle(game,{schedule,nolaReadyEvent:revised},later);
+  const after=buildPublishedReportState(afterBundle,game,null,before,later);
+  assert.equal(after.changes.find(item=>item.kind==='city_event_notice_revised')?.sourceUrl,snapshot.sourceUrl);
 });

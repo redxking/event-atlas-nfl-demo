@@ -7,7 +7,7 @@ import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggrega
 import {pointInsideRing} from './ground_relevance.js?v=20261009-1';
 import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-77';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-70';
-import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-43';
+import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-44';
 import {tfrAtKickoff} from './tfr_notam.js?v=20261009-1';
 import {chicagoCrimeQuery,chicagoCrimeDataset,summarizeChicagoCrimes} from './chicago_public_safety.js?v=20261009-1';
 import {indianapolisCfsLayer} from './indianapolis_public_safety.js';
