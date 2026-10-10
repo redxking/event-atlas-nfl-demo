@@ -42,7 +42,8 @@
     "sync:lambeau-plan": "python3 scripts/sync_lambeau_gameday.py",
     "sync:packers-release": "python3 scripts/sync_packers_game_release.py",
     "sync:patriots-preview": "python3 scripts/sync_patriots_game_preview.py",
-    "sync:jets-guide": "python3 scripts/sync_jets_gameday_guide.py"
+    "sync:jets-guide": "python3 scripts/sync_jets_gameday_guide.py",
+    "sync:seahawks-guide": "python3 scripts/sync_seahawks_gameday.py"
   },
   "dependencies": {
     "gtfs-realtime-bindings": "1.1.1"

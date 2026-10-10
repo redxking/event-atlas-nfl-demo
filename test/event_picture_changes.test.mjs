@@ -30,7 +30,8 @@ test('official game-announcement passage revisions require two newer checked sna
 test('Jets and Patriots passage revisions surface without claiming a cancelled event',()=>{
   const cases=[
     {eventId:'nfl:401872983',key:'jetsGuideContext',url:'https://www.newyorkjets.com/fans/gameday-guide-2026',state:'current_published_plan',id:'entry'},
-    {eventId:'nfl:401872986',key:'patriotsPreviewContext',url:'https://www.patriots.com/news/game-preview-patriots-vs-raiders-nfl-week-5',state:'current_published_announcements',id:'vinatieri_halftime'}
+    {eventId:'nfl:401872986',key:'patriotsPreviewContext',url:'https://www.patriots.com/news/game-preview-patriots-vs-raiders-nfl-week-5',state:'current_published_announcements',id:'vinatieri_halftime'},
+    {eventId:'nfl:401872992',key:'seahawksGuideContext',url:'https://www.seahawks.com/game-day/',state:'current_published_plan',id:'flyover'}
   ];
   for(const spec of cases){
     const claim={id:spec.id,category:'announced_person',sourceUrl:spec.url,sourceTextSha256:'a'.repeat(64)};
@@ -40,7 +41,7 @@ test('Jets and Patriots passage revisions surface without claiming a cancelled e
     const changed=diffEventPicture(before,after,null,null,game,game).find(item=>item.kind==='club_passage_revised');
     assert.equal(changed?.sourceUrl,spec.url);
     assert.match(changed.detail,/not verified attendance/);
-    const partial={...after,[spec.key]:{...after[spec.key],state:spec.eventId==='nfl:401872983'?'partial_published_plan':'partial_published_announcements',claims:[]}};
+    const partial={...after,[spec.key]:{...after[spec.key],state:spec.eventId==='nfl:401872986'?'partial_published_announcements':'partial_published_plan',claims:[]}};
     const missing=diffEventPicture(before,partial,null,null,game,game).find(item=>item.kind==='club_passage_unmatched');
     assert.match(missing?.detail||'',/does not prove the plan was cancelled/);
     assert.equal(diffEventPicture({...before,[spec.key]:{...before[spec.key],state:'stale_or_unavailable'}},after,null,null,game,game).some(item=>item.kind==='club_passage_revised'),false);

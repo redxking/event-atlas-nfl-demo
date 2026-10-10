@@ -41,6 +41,7 @@ jobs:
       - run: npm run sync:packers-release
       - run: npm run sync:patriots-preview
       - run: npm run sync:jets-guide
+      - run: npm run sync:seahawks-guide
       - run: npm run sync:philly-permits
       - run: npm run sync:njtransit-rail
       - run: npm run sync:nj511
