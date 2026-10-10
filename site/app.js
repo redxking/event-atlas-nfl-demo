@@ -346,6 +346,8 @@ function stopCameraVideo(){
   if(!cameraPlayer)return;
   const {video,hls}=cameraPlayer;
   const container=video.closest('.camera-video'),button=container?.previousElementSibling;
+  video.onplaying=null;video.ontimeupdate=null;video.onerror=null;video.onwaiting=null;video.onstalled=null;
+  const status=container?.querySelector('.camera-video-status');if(status)status.textContent='Stream stopped.';
   video.pause();hls?.destroy();video.removeAttribute('src');video.load();cameraPlayer=null;
   if(container)container.hidden=true;
   if(button?.classList.contains('camera-video-toggle'))button.textContent='Play public roadway video';
@@ -372,7 +374,10 @@ async function playCameraVideo(button,game,onFailure){
     status.textContent=`Inline playback failed in this browser. The ${agency} stream may still be available in the official camera viewer linked below.`;
     if(!failed){failed=true;onFailure?.()}
   };
-  video.onplaying=()=>{if(cameraPlayer?.video===video)status.textContent='Playing agency roadway stream. Capture latency and field of view are not independently verified.'};
+  let playbackBaseline=null;
+  video.onplaying=()=>{if(cameraPlayer?.video===video){playbackBaseline=video.currentTime;status.textContent='Playback started; checking that video frames and media time advance.'}};
+  video.ontimeupdate=()=>{if(cameraPlayer?.video===video&&advancingMedia(playbackBaseline,video))status.textContent='Roadway video is advancing in this browser. Capture time, latency and stadium visibility remain unverified.'};
+  video.onwaiting=video.onstalled=()=>{if(cameraPlayer?.video===video)status.textContent='Video is buffering; current playback is not confirmed. Check the agency viewer if updates do not resume.'};
   video.onerror=reportFailure;
   try{
     if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=url;await video.play()}

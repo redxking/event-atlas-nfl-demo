@@ -1,4 +1,5 @@
-import {publicRoadVideoAgency} from './camera_video.js';
+import {publicRoadVideoAgency,advancingMedia} from './camera_video.js?v=camera-progress-1';
+export {advancingMedia};
 
 const HOUR=3600000;
 const stillAgency=item=>{
@@ -9,7 +10,7 @@ const stillAgency=item=>{
   return null;
 };
 const validLink=url=>{try{return new URL(url).protocol==='https:'}catch{return false}};
-export const advancingMedia=(baseline,video)=>Number.isFinite(baseline)&&Number.isFinite(video?.currentTime)&&video.currentTime-baseline>=1&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0&&!video.paused;
+
 
 export function selectReportRoadCamera(snapshot,venueId,now=Date.now()){
   const built=Date.parse(snapshot?.builtAt);

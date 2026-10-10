@@ -8,3 +8,5 @@ export function publicRoadVideoAgency(item){
   if(item?.agency==='TDOT SmartWay'&&item?.inService===true&&/^tdot-smartway-\d{1,6}$/.test(item.id||'')&&/^https:\/\/mcleansfs[1-9]\d*\.us-east-1\.skyvdn\.com\/rtplive\/R3_\d{3}\/playlist\.m3u8$/.test(url))return 'TDOT SmartWay';
   return null;
 }
+
+export const advancingMedia=(baseline,video)=>Number.isFinite(baseline)&&Number.isFinite(video?.currentTime)&&video.currentTime-baseline>=1&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0&&!video.paused;
