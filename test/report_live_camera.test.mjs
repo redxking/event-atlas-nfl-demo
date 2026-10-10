@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {selectReportRoadCamera} from '../site/report_live_camera.js';
+import {advancingMedia,selectReportRoadCamera} from '../site/report_live_camera.js';
 import {renderPublicReportHtml} from '../scripts/render_public_report_html.mjs';
 
 const now=Date.parse('2026-10-10T12:00:00Z');
@@ -34,6 +34,14 @@ test('report exposes bounded alternate views and omits failed streams',()=>{
   assert.equal(selected.items[1].id,failed.id);
   assert.equal(selected.items[1].videoUrl,null);
   assert.equal(selected.items[2].videoUrl,alternate.videoUrl);
+});
+
+test('stream progress requires advancing decoded media in a playing browser element',()=>{
+  const video={currentTime:4.2,readyState:4,videoWidth:320,videoHeight:240,paused:false};
+  assert.equal(advancingMedia(2.3,video),true);
+  assert.equal(advancingMedia(4,video),false);
+  assert.equal(advancingMedia(2.3,{...video,videoWidth:0}),false);
+  assert.equal(advancingMedia(2.3,{...video,paused:true}),false);
 });
 
 test('published event report includes the on-demand roadway camera panel',()=>{

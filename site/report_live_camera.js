@@ -9,6 +9,7 @@ const stillAgency=item=>{
   return null;
 };
 const validLink=url=>{try{return new URL(url).protocol==='https:'}catch{return false}};
+export const advancingMedia=(baseline,video)=>Number.isFinite(baseline)&&Number.isFinite(video?.currentTime)&&video.currentTime-baseline>=1&&video.readyState>=2&&video.videoWidth>0&&video.videoHeight>0&&!video.paused;
 
 export function selectReportRoadCamera(snapshot,venueId,now=Date.now()){
   const built=Date.parse(snapshot?.builtAt);
@@ -28,7 +29,7 @@ if(typeof document!=='undefined'){
   const target=document.querySelector('#direct-road-camera');
   if(main&&target){
     let active=null,pending=false,hlsLoader=null,shownKey=null;
-    const stop=()=>{if(!active)return;const {video,hls,button,state,label}=active;active=null;video.onerror=null;video.onplaying=null;hls?.destroy();video.pause();video.removeAttribute('src');video.load();video.style.display='none';if(button.isConnected)button.textContent=label;if(state.isConnected)state.textContent='Stream stopped.'};
+    const stop=()=>{if(!active)return;const {video,hls,button,state,label}=active;active=null;video.onerror=null;video.onplaying=null;video.ontimeupdate=null;hls?.destroy();video.pause();video.removeAttribute('src');video.load();video.style.display='none';if(button.isConnected)button.textContent=label;if(state.isConnected)state.textContent='Stream stopped.'};
     const line=(text,parent=target)=>{const p=document.createElement('p');p.textContent=text;parent.append(p);return p};
     const link=(url,label)=>{const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=label;return a};
     async function refresh(){
@@ -53,9 +54,12 @@ if(typeof document!=='undefined'){
         const card=document.createElement('section');card.style.cssText='border-top:1px solid #36505d;margin-top:14px;padding-top:10px';target.append(card);
         line(`${item.agency} · ${item.name} · ${item.distanceKm} km from the stadium point candidate.`,card);
         if(item.stillUrl){
-          const img=document.createElement('img');img.alt=`${item.agency} public roadway image near ${item.name}`;img.referrerPolicy='no-referrer';img.loading='lazy';img.style.cssText='display:block;max-width:100%;max-height:420px;margin:12px 0';img.src=`${item.stillUrl}?t=${Date.now()}`;card.append(img);
-          const note=line('Publisher image freshness is unverified; check any overlaid timestamp. The image refreshes while this report is visible.',card);
-          const timer=setInterval(()=>{if(!img.isConnected){clearInterval(timer);return}if(document.visibilityState==='visible'){img.src=`${item.stillUrl}?t=${Date.now()}`;note.textContent=`Publisher image freshness is unverified. Rechecked ${new Date().toLocaleTimeString()}.`}},120000);
+          const img=document.createElement('img');img.alt=`${item.agency} public roadway image near ${item.name}`;img.referrerPolicy='no-referrer';img.loading='lazy';img.style.cssText='display:block;max-width:100%;max-height:420px;margin:12px 0';card.append(img);
+          const note=line('Image loading when in view; publisher capture time is unverified.',card);
+          img.onload=()=>{img.style.display='block';note.textContent=`Roadway image loaded in this browser ${new Date().toISOString()}. Publisher capture time is unverified; check any overlaid timestamp.`};
+          img.onerror=()=>{img.style.display='none';note.textContent='Roadway image unavailable in this browser. Use the agency viewer; this does not establish the camera is offline.'};
+          img.src=`${item.stillUrl}?t=${Date.now()}`;
+          const timer=setInterval(()=>{if(!img.isConnected){clearInterval(timer);return}if(document.visibilityState==='visible'){note.textContent='Rechecking roadway image; publisher capture time is unverified.';img.src=`${item.stillUrl}?t=${Date.now()}`}},120000);
         }
         if(item.videoUrl){
           const button=document.createElement('button');button.type='button';button.textContent=`Play ${item.name} roadway stream`;card.append(button);
@@ -81,7 +85,9 @@ if(typeof document!=='undefined'){
           button.addEventListener('click',async()=>{
             if(active?.video===video){stop();return}
             stop();active={video,hls:null,button,state,label:`Play ${item.name} roadway stream`};video.style.display='block';button.textContent='Stop this roadway stream';state.textContent='Connecting to the agency stream…';
-            video.onplaying=()=>{if(active?.video===video)state.textContent='Playing agency roadway stream; latency and field of view remain unverified.'};
+            let playbackBaseline=null;
+            video.onplaying=()=>{if(active?.video===video){playbackBaseline=video.currentTime;state.textContent='Playback started in this browser; checking media progress.'}};
+            video.ontimeupdate=()=>{if(active?.video===video&&advancingMedia(playbackBaseline,video))state.textContent='Roadway stream media time is advancing in this browser; capture time, latency and field of view remain unverified.'};
             video.onerror=fallback;
             try{
               if(video.canPlayType('application/vnd.apple.mpegurl')){video.src=item.videoUrl;await video.play()}
