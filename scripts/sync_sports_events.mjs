@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import {saveReconciledEventSnapshot} from '../lib/event_snapshot.mjs';
 import {pointInsideRing} from '../site/ground_relevance.js';
 import {nflSourceStatus} from '../lib/nfl_game_lifecycle.mjs';
+import {nflScoreboardState} from '../lib/nfl_scoreboard_state.mjs';
 const venues=JSON.parse(await fs.readFile('data/venues.json','utf8')).venues;
 const nflVenueCandidates=JSON.parse(await fs.readFile('data/nfl_venue_candidates.json','utf8'));
 const groundFootprints=JSON.parse(await fs.readFile('site/ground_footprints.json','utf8'));
@@ -11,7 +12,7 @@ const byName=new Map();for(const v of venues){const k=norm(v.name);let x=byName.
 const start=new Date(),end=new Date(start.getTime()+30*86400000),ymd=d=>d.toISOString().slice(0,10);
 const sources=[{id:'nfl',name:'2026 NFL regular season via ESPN scoreboard',dataset:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',status:'ok',records:0},{id:'mlb',name:'Major League Baseball schedule',dataset:'https://statsapi.mlb.com/api/v1/schedule',status:'ok',records:0},{id:'nhl',name:'National Hockey League schedule',dataset:'https://api-web.nhle.com/v1/schedule/',status:'ok',records:0}];
 const events=[];const places=new Map();
-function add({id,title,startsAtLocal,timeZone,sourceId,sourceUrl,sourceDataset,placeName,placeAddress=null,category,description,participants,status,timeTbd=false,sourceVenueId=null}){
+function add({id,title,startsAtLocal,timeZone,sourceId,sourceUrl,sourceDataset,placeName,placeAddress=null,category,description,participants,status,timeTbd=false,sourceVenueId=null,gameState=null}){
   if(!startsAtLocal||!placeName)return;
   const candidates=byName.get(norm(placeName))||[];
   const explicit=sourceId==='nfl'&&nflVenueCandidates[sourceVenueId];
@@ -31,7 +32,7 @@ function add({id,title,startsAtLocal,timeZone,sourceId,sourceUrl,sourceDataset,p
   const key=`${sourceId}|${sourceVenueId||norm(placeName)}`;
   const placeId='place:'+crypto.createHash('sha256').update(key).digest('hex').slice(0,16);
   if(!places.has(placeId))places.set(placeId,{id:placeId,name:placeName,address:placeAddress,lat,lon,coordinateSource,sourceIds:[sourceId],sourceVenueId,venueCandidateId:candidate?.id??null,matchStatus:candidate?'unreviewed unique-name candidate':'unlinked'});
-  events.push({id,title,startsAtLocal,endsAtLocal:null,timeZone,sourceId,sourceUrl,sourceDataset,sourcePlace:{name:placeName,address:placeAddress,lat,lon},placeId,venueId:candidate?.id??null,venueLinkStatus:candidate?'unreviewed unique-name candidate':'unlinked',category,description,timeTbd,organizer:sourceId==='nfl'?'National Football League':sourceId==='mlb'?'Major League Baseball':'National Hockey League',participants,status,retrievedAt:new Date().toISOString()});
+  events.push({id,title,startsAtLocal,endsAtLocal:null,timeZone,sourceId,sourceUrl,sourceDataset,sourcePlace:{name:placeName,address:placeAddress,lat,lon},placeId,venueId:candidate?.id??null,venueLinkStatus:candidate?'unreviewed unique-name candidate':'unlinked',category,description,timeTbd,gameState,organizer:sourceId==='nfl'?'National Football League':sourceId==='mlb'?'Major League Baseball':'National Hockey League',participants,status,retrievedAt:new Date().toISOString()});
 }
 async function get(url){const r=await fetch(url,{headers:{'User-Agent':'EventAtlas/0.2 (public sports schedule evaluation)'},signal:AbortSignal.timeout(20000)});if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json()}
 try{
@@ -47,7 +48,7 @@ try{
       const home=competitors.find(c=>c.homeAway==='home')?.team?.displayName,away=competitors.find(c=>c.homeAway==='away')?.team?.displayName;
       if(!home||!away)throw Error(`NFL game ${game.id} missing teams`);
       const address=[venue.address?.city,venue.address?.state,venue.address?.country].filter(Boolean).join(', ');
-      add({id:`nfl:${game.id}`,title:`${away} at ${home}`,startsAtLocal:game.date,timeZone:'UTC',sourceId:'nfl',sourceUrl:game.links?.find(l=>l.rel?.includes('summary'))?.href||`https://www.espn.com/nfl/game/_/gameId/${game.id}`,sourceDataset:url,sourceVenueId:String(venue.id),placeName:venue.fullName,placeAddress:address,category:`NFL regular season · week ${week}`,description:`ESPN scoreboard status: ${game.status?.type?.description||'not supplied'}; neutral site: ${competition.neutralSite?'yes':'no'}`,participants:[{type:'team',name:away,role:'away'},{type:'team',name:home,role:'home'}],status:nflSourceStatus(game.status?.type),timeTbd:/TBD/i.test(game.status?.type?.shortDetail||'')});
+      add({id:`nfl:${game.id}`,title:`${away} at ${home}`,startsAtLocal:game.date,timeZone:'UTC',sourceId:'nfl',sourceUrl:game.links?.find(l=>l.rel?.includes('summary'))?.href||`https://www.espn.com/nfl/game/_/gameId/${game.id}`,sourceDataset:url,sourceVenueId:String(venue.id),placeName:venue.fullName,placeAddress:address,category:`NFL regular season · week ${week}`,description:`ESPN scoreboard status: ${game.status?.type?.description||'not supplied'}; neutral site: ${competition.neutralSite?'yes':'no'}`,participants:[{type:'team',name:away,role:'away'},{type:'team',name:home,role:'home'}],status:nflSourceStatus(game.status?.type),timeTbd:/TBD/i.test(game.status?.type?.shortDetail||''),gameState:nflScoreboardState(game,competition)});
     }
   }
   if(ids.size!==272)throw Error(`NFL season returned ${ids.size} games, expected 272`);

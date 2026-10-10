@@ -42,3 +42,13 @@ test('active event report labels hourly forecast as a forecast for the event hou
   assert.ok(report.includes('Forecast, not an observed condition'));
   assert.ok(!report.includes('## Kickoff forecast'));
 });
+
+test('publisher scoreboard state is attributed without implying security impact',()=>{
+  const active=structuredClone(bundle);
+  active.event.status='in progress in source';
+  active.event.sourceRetrievedAt='2026-10-11T21:06:00Z';
+  active.event.gameState={phase:'in progress',away:{name:'Away',score:20},home:{name:'Home',score:17},period:3,clock:'05:14'};
+  const report=buildNflPublicReport(active);
+  assert.match(report,/Publisher game state.*Away 20, Home 17; period 3, clock 05:14/);
+  assert.match(report,/do not establish crowd movement, public-safety impact, or a threat/);
+});

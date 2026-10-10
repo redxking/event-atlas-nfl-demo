@@ -16,6 +16,7 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
   const changes=[],oldRows=rows(before),newRows=rows(after);
   const eventWindowChanged=previousGame?.kickoff!==currentGame?.kickoff||previousGame?.status!==currentGame?.status||previousGame?.timeTbd!==currentGame?.timeTbd;
   if(eventWindowChanged)changes.push({kind:'schedule_changed',observedAt,title:'Published game time or status changed',detail:'Review the new schedule and repeat event-window screening. The change is not an incident finding.',sourceUrl:currentGame?.sourceUrl||null});
+  if(!eventWindowChanged&&previousGame?.gameState&&currentGame?.gameState&&Number.isFinite(Date.parse(previousGame.sourceRetrievedAt))&&Date.parse(currentGame.sourceRetrievedAt)>Date.parse(previousGame.sourceRetrievedAt)&&JSON.stringify(previousGame.gameState)!==JSON.stringify(currentGame.gameState))changes.push({kind:'game_state_changed',observedAt,title:'Publisher game score or period changed',detail:'The publisher scoreboard differs from the prior retrieved snapshot. Confirm the latest game state with the source; this does not establish crowd movement, venue impact, or a threat.',sourceUrl:currentGame.sourceUrl||null});
   for(const [name,next] of newRows){
     const prior=oldRows.get(name);
     if(prior&&prior.state!==next.state)changes.push({kind:'source_status_changed',observedAt,title:`${name}: ${prior.state} → ${next.state}`,detail:'Source coverage or screening status changed; verify the linked publisher before acting.',sourceUrl:next.sourceUrl||prior.sourceUrl||null});

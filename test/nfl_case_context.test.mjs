@@ -22,6 +22,9 @@ test('changed game and stale schedule cannot masquerade as current matched conte
   assert.equal(mismatch.status,'source_mismatch');
   assert.equal(mismatch.evidence,null);
   assert.match(mismatch.reason,/kickoff/);
+  const changedScore=buildNflCaseContext(subject,{...event,gameState:{phase:'in progress',away:{name:'Visitors',score:7},home:{name:'Hosts',score:3}}},{schedule},now);
+  assert.equal(changedScore.status,'source_mismatch');
+  assert.match(changedScore.reason,/publisher game state/);
   const stale=buildNflCaseContext(subject,event,{schedule:{...schedule,builtAt:'2026-10-08T00:00:00Z'}},now);
   assert.equal(stale.status,'stale_schedule_snapshot');
   assert.equal(buildNflCaseContext(subject,null,{schedule},now).status,'unavailable');

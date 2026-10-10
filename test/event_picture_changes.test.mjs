@@ -22,6 +22,15 @@ test('schedule change blocks old-window cue comparison',()=>{
   assert.deepEqual(changes.map(item=>item.kind),['schedule_changed']);
 });
 
+test('score changes require two newer retrieved publisher states',()=>{
+  const earlier={...game,sourceRetrievedAt:'2026-10-11T18:00:00Z',gameState:{phase:'in progress',away:{name:'Away',score:7},home:{name:'Home',score:3},period:1,clock:'10:00'}};
+  const later={...earlier,sourceRetrievedAt:'2026-10-11T19:00:00Z',gameState:{...earlier.gameState,away:{name:'Away',score:10}}};
+  const change=diffEventPicture(picture('checked'),picture('checked'),null,null,earlier,later).find(item=>item.kind==='game_state_changed');
+  assert.equal(change?.sourceUrl,game.sourceUrl);
+  assert.match(change.detail,/does not establish crowd movement/);
+  assert.ok(!diffEventPicture(picture('checked'),picture('checked'),null,null,earlier,{...later,sourceRetrievedAt:earlier.sourceRetrievedAt}).some(item=>item.kind==='game_state_changed'));
+});
+
 test('headline addition requires two current publisher snapshots',()=>{
   const article={title:'Packers update',publisher:'CBS Sports',publishedAt:'2026-10-10T00:00:00Z',url:'https://www.cbssports.com/nfl/news/example'};
   const current={state:'current_snapshot',articles:[article]};

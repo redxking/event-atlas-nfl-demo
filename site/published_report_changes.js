@@ -1,4 +1,4 @@
-import {diffEventPicture} from './event_picture_changes.js';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-3';
 import {selectNflNews} from './nfl_news_context.js';
 
 const schema='event-atlas.published-report-state.v3';
@@ -11,5 +11,5 @@ export function buildPublishedReportState(bundle,game,newsSnapshot,prior=null,no
   const comparable=validPrior(prior,game,now);
   const changes=comparable?diffEventPicture(prior.picture,picture,prior.news,news,prior.game,game,new Date(now).toISOString()):[];
   const history=comparable?[...changes,...prior.changes].slice(0,30):[];
-  return {schema,eventId:game.id,generatedAt:new Date(now).toISOString(),comparison:comparable?'previous published run':'baseline; no comparable previous run',picture,news:{state:news.state,articles:news.articles},game:{kickoff:game.kickoff,status:game.status,timeTbd:game.timeTbd,sourceUrl:game.sourceUrl},changes:history,newChangeCount:changes.length};
+  return {schema,eventId:game.id,generatedAt:new Date(now).toISOString(),comparison:comparable?'previous published run':'baseline; no comparable previous run',picture,news:{state:news.state,articles:news.articles},game:{kickoff:game.kickoff,status:game.status,timeTbd:game.timeTbd,gameState:game.gameState??null,sourceRetrievedAt:game.sourceRetrievedAt,sourceUrl:game.sourceUrl},changes:history,newChangeCount:changes.length};
 }
