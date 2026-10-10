@@ -14,11 +14,13 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('data-report-path="reports/nfl-123.html"'));
   assert.ok(html.includes('report_refresh.js?v=20261010-1'));
   assert.ok(html.includes('report_live_nws.js?v=20261010-1'));
+  assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
   assert.ok(html.includes('report_live_public_safety.js?v=20261010-1'));
   assert.ok(html.includes('data-venue-id="3810"'));
   assert.ok(html.includes('id="direct-public-safety"'));
   assert.ok(html.includes('data-venue-lat="38.9" data-venue-lon="-76.8"'));
   assert.ok(html.includes('id="direct-nws"'));
+  assert.ok(html.includes('id="direct-nws-forecast"'));
   assert.throws(()=>renderPublicReportHtml(markdown,{title:'x',generatedAt:'x',markdownPath:'../other.md'}),/Invalid/);
 });
 
