@@ -10,6 +10,7 @@ test('draft brief carries only reviewed claims and active approved designations'
   assert.equal(brief.status,'draft_internal_review_only');
   assert.deepEqual(brief.reviewedAssessments.map(item=>item.id),['accepted']);
   assert.deepEqual(brief.protectedPeople.map(item=>item.id),['person-1']);
+  assert.equal(brief.protectedPeople[0].eventAttendance.state,'not_verified');
   assert.equal(brief.pendingReview.assessments,1);
   assert.equal(brief.pendingReview.personRecords,1);
   assert.equal(brief.overallJudgment.severity,'not_synthesized');
@@ -17,6 +18,16 @@ test('draft brief carries only reviewed claims and active approved designations'
   assert.equal(JSON.stringify(brief).includes('Unreviewed claim'),false);
   assert.equal(JSON.stringify(brief).includes('Unreviewed Example'),false);
   assert.equal(JSON.stringify(brief).includes('Expired Example'),false);
+});
+
+test('reviewed event-specific announcement remains expected attendance, never confirmed presence',()=>{
+  const at='2026-10-09T20:00:00.000Z';
+  const person={id:'person-1',status:'approved',retentionReviewDue:false,retentionUntil:'2026-10-10T20:00:00Z',displayName:'Jordan Example',role:'team_official',professionalRole:'Synthetic official',review:{reviewerId:'reviewer',createdAt:at},attendanceClaim:{state:'announced_expected',eventId:'game-1',sourceUrl:'https://example.org/announcement',authority:'Synthetic team',claim:'Expected at the game',observedAt:at}};
+  const detail={case:{id:'case-1',subject:{type:'published_event',id:'game-1'}},sourceDrift:{status:'unchanged_since_intake'},assessments:[],personScopes:[{id:'scope-1',status:'approved',expiresAt:'2026-10-10T20:00:00Z',people:[person]}]};
+  const brief=buildInternalCaseBrief(detail,{generatedAt:at,generatedBy:'analyst',auditHead:'c'.repeat(64)});
+  assert.equal(brief.protectedPeople[0].eventAttendance.state,'announced_expected');
+  assert.match(brief.protectedPeople[0].eventAttendance.interpretation,/not confirmed/);
+  assert.equal(brief.protectedPeople[0].eventAttendance.sourceUrl,'https://example.org/announcement');
 });
 
 test('source drift and missing current context remain explicit gaps',()=>{
