@@ -15,6 +15,8 @@ import {readVotingHistory} from './lib/voting_history.mjs';
 import {mbtaFoxboroAlertsUrl,summarizeMbtaFoxboroAlerts} from './site/mbta_foxboro_alerts.js';
 import {mbtaFoxboroSchedulesUrl,summarizeMbtaFoxboroSchedules} from './site/mbta_foxboro_schedules.js';
 import {mbtaFoxboroPredictionsUrl,summarizeMbtaFoxboroPredictions} from './site/mbta_foxboro_predictions.js';
+import {fetchSelectedGame} from './site/espn_game_summary.js';
+import {selectKickoffForecast,selectEventHourForecast} from './site/nws_forecast.js';
 const root=path.dirname(fileURLToPath(import.meta.url));
 const port=Number(process.env.PORT||4173);
 const snapshot=JSON.parse(await fs.readFile(path.join(root,'data/venues.json'),'utf8'));
@@ -63,6 +65,23 @@ async function kickoffForecast(event,place){
   const period=(forecast.data?.properties?.periods||[]).find(p=>Date.parse(p.startTime)<=kickoff&&kickoff<Date.parse(p.endTime));
   if(!period)return {status:'unavailable',reason:forecast.error||'No forecast period covers kickoff',retrievedAt:forecast.at,stale:forecast.stale};
   return {status:forecast.stale?'stale':'ok',startTime:period.startTime,endTime:period.endTime,temperature:period.temperature,temperatureUnit:period.temperatureUnit,shortForecast:period.shortForecast,windSpeed:period.windSpeed,windDirection:period.windDirection,probabilityOfPrecipitation:period.probabilityOfPrecipitation?.value??null,url,retrievedAt:forecast.at,stale:forecast.stale};
+}
+async function selectedNflForecast(game){
+  if(!game||!Number.isFinite(game.venue?.lat)||!Number.isFinite(game.venue?.lon))return null;
+  const now=Date.now(),kickoff=Date.parse(game.kickoff),active=game.status==='in progress in source';
+  const target=active?now:kickoff;
+  if(game.timeTbd||!Number.isFinite(kickoff)||(active?(now<kickoff||now>kickoff+9*3600000):(target<now||target-now>168*3600000)))return null;
+  const venue=game.venue;
+  const point=await remote(`nws-point:nfl:${venue.id}`,`https://api.weather.gov/points/${venue.lat},${venue.lon}`,86400000);
+  const url=point.data?.properties?.forecastHourly;
+  if(point.stale||!/^https:\/\/api\.weather\.gov\/gridpoints\/[A-Z]{3,4}\/\d+,\d+\/forecast\/hourly$/.test(url||''))return null;
+  const hourly=await remote(`nws-hourly:nfl:${venue.id}`,url,300000);
+  const periods=hourly.data?.properties?.periods;
+  if(hourly.stale||!Array.isArray(periods)||periods.length>300)return null;
+  const period=periods.find(item=>Date.parse(item.startTime)<=target&&target<Date.parse(item.endTime));
+  if(!period)return null;
+  const raw={state:'ok',checkedAt:hourly.at,kickoff:game.kickoff,sourceUrl:url,period};
+  return active?selectEventHourForecast(game,raw,Date.now()):selectKickoffForecast(game,raw,Date.now());
 }
 function caseDetail(id,user){
   const item=analystStore.getCaseFor(user,id);
@@ -141,7 +160,7 @@ if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/review')&
 if(u.pathname.startsWith('/api/person-scopes/')&&u.pathname.endsWith('/people')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/person-scopes/'.length,-'/people'.length));const body=await readBody(req);try{return send(res,201,analystStore.createProtectedPerson(user,id,body))}catch(error){return send(res,error.message==='Scope not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/protected-people/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/protected-people/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewProtectedPerson(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Person not found'?404:400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');return brief?send(res,200,brief):send(res,404,{error:'Case not found'})}catch(error){return send(res,400,{error:error.message})}}
-if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ai-draft')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ai-draft'.length));try{const brief=await draftCaseBrief(id,user,false);if(!brief)return send(res,404,{error:'Case not found'});const packet=buildLocalAiPacket(brief),requestId=randomUUID(),packetHash=localAiDraftHash(packet);analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'requested'});let result;try{result=await generateLocalAiDraft(packet)}catch(error){analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'failed',errorCode:'generation_failed'});throw error}const draftHash=localAiDraftHash(result.draft),receipt=analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'succeeded',draftHash});return send(res,200,{...result,draftSha256:draftHash,receiptId:receipt.id,receiptAuditHead:receipt.auditHead})}catch(error){return send(res,400,{error:error.message})}}
+if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/ai-draft')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/ai-draft'.length));try{const brief=await draftCaseBrief(id,user,false);if(!brief)return send(res,404,{error:'Case not found'});const game=nflSchedule?.games?.find(item=>item.id===brief.nflContext?.evidence?.event?.id);const [directGame,forecastContext]=game?await Promise.all([fetchSelectedGame(game),selectedNflForecast(game)]):[null,null];const packet=buildLocalAiPacket(brief,{directGame,forecastContext}),requestId=randomUUID(),packetHash=localAiDraftHash(packet);analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'requested'});let result;try{result=await generateLocalAiDraft(packet)}catch(error){analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'failed',errorCode:'generation_failed'});throw error}const draftHash=localAiDraftHash(result.draft),receipt=analystStore.recordAiDraftEvent(user,id,{requestId,model:LOCAL_MODEL,packetHash,stage:'succeeded',draftHash});return send(res,200,{...result,draftSha256:draftHash,receiptId:receipt.id,receiptAuditHead:receipt.auditHead})}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='GET'){const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length)),items=analystStore.listBriefSnapshotsFor(user,id);if(!items)return send(res,404,{error:'Case not found'});analystStore.recordCaseRead(user,id,'brief_snapshot.listed');return send(res,200,{items})}
 if(u.pathname.startsWith('/api/cases/')&&u.pathname.endsWith('/brief-snapshots')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/cases/'.length,-'/brief-snapshots'.length));try{const brief=await draftCaseBrief(id,user,u.searchParams.get('context')!=='none');if(!brief)return send(res,404,{error:'Case not found'});return send(res,201,analystStore.saveBriefSnapshot(user,id,brief))}catch(error){return send(res,400,{error:error.message})}}
 if(u.pathname.startsWith('/api/brief-snapshots/')&&u.pathname.endsWith('/review')&&req.method==='POST'){if(!sameOrigin(req,res))return;const user=operator(req,res);if(!user)return;const id=decodeURIComponent(u.pathname.slice('/api/brief-snapshots/'.length,-'/review'.length));const body=await readBody(req);try{return send(res,201,analystStore.reviewBriefSnapshot(user,id,body.decision,body.rationale))}catch(error){return send(res,error.message==='Brief snapshot not found'?404:400,{error:error.message})}}

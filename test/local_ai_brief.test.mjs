@@ -37,6 +37,21 @@ test('local AI packet can cite exact-game ESPN article metadata without article 
   assert.ok(!JSON.stringify(packet).includes('PRIVATE BODY'));
 });
 
+test('local AI packet includes fresh exact-game status and current forecast with source IDs',()=>{
+  const at=Date.parse('2026-10-10T02:00:00Z');
+  const gameBrief={...brief,nflContext:{...brief.nflContext,evidence:{...brief.nflContext.evidence,event:{...brief.nflContext.evidence.event,id:'nfl:401872980'},picture:{...brief.nflContext.evidence.picture,forecastContext:{state:'current event-hour forecast',checkedAt:new Date(at).toISOString(),sourceUrl:'https://api.weather.gov/gridpoints/GRB/78,31/forecast/hourly',period:{shortForecast:'Sunny',temperature:74,temperatureUnit:'F',windSpeed:'7 mph',windDirection:'S',precipitationPercent:0}}}}}};
+  const direct={state:'checked',checkedAt:new Date(at).toISOString(),sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401872980',sourceStatus:'Final',gameState:{phase:'final',away:{name:'Tampa Bay Buccaneers',score:24},home:{name:'Dallas Cowboys',score:16}},reportedAttendance:92351,scheduleDiffers:false};
+  const packet=buildLocalAiPacket(gameBrief,{directGame:direct,forecastContext:gameBrief.nflContext.evidence.picture.forecastContext,now:at});
+  assert.deepEqual(packet.evidence.slice(0,2).map(item=>item.id),['D1','F1']);
+  assert.match(packet.evidence[0].text,/reported attendance: 92351/);
+  assert.match(packet.evidence[1].text,/Forecast, not observed conditions/);
+  const stale=buildLocalAiPacket(gameBrief,{directGame:{...direct,checkedAt:new Date(at-11*60000).toISOString()},now:at});
+  assert.equal(stale.evidence[0].kind,'source_status');
+  assert.ok(!stale.evidence[0].text.includes('92351'));
+  const mismatch=buildLocalAiPacket(gameBrief,{directGame:{...direct,sourceUrl:'https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=999'},now:at});
+  assert.equal(mismatch.evidence.some(item=>item.id==='D1'),false);
+});
+
 test('local model result must cite supplied evidence IDs',()=>{
   const packet=buildLocalAiPacket(brief);
   const draft={selectedEvidenceIds:['C1'],reviewQuestions:[{question:'Is the road condition relevant to event access?',evidenceIds:['C1']}]};
