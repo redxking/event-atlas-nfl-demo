@@ -3,13 +3,13 @@ import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=event-views
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitoring-2';
 import {getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
-import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=event-views-1';
+import {eventTypeLabel,exampleSummary,renderAdditionalEvent} from './multi_event.js?v=concern-map-1';
 import {stopMovementTracking} from './movement_map.js?v=multi-events-1';
-import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=decision-briefs-1';
+import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=concern-map-1';
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
-import {createGeographicExplorer} from './geographic_explorer.js?v=screening-loading-1';
-import {renderEventGeographicMap} from './event_geographic_map.js?v=multi-events-1';
+import {createGeographicExplorer} from './geographic_explorer.js?v=concern-map-1';
+import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=concern-map-1';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=assessments-2';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
@@ -17,7 +17,7 @@ import {selectWeatherContext} from './weather_relevance.js';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-98';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=concern-map-1';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=20261010-92';
 import {buildNflPublicReport} from './nfl_public_report.js?v=20261010-65';
 import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';
@@ -682,7 +682,7 @@ function renderPeopleProtection(picture){
 }
 
 function renderAttention(game,picture){
-  const summary=attentionSummary(picture);geographicSummaries.set(game.id,summary);refreshThreatReport();
+  const summary=attentionSummary(picture);renderEventConcerns(game,summary.items);geographicSummaries.set(game.id,summary);refreshThreatReport();
   const badge=[...document.querySelectorAll('[data-attention-game]')].find(node=>node.dataset.attentionGame===game.id);
   if(badge){badge.textContent=summary.label;badge.dataset.tone=summary.tone;}
   const target=$('game-attention');if(!target)return;

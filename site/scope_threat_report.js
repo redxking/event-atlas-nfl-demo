@@ -1,3 +1,4 @@
+import {concernIdentity} from './concern_location.js';
 import {humanText} from './attention_summary.js';
 import {demoPeopleForEvent} from './demo_people.js';
 import {findingDecision} from './finding_decision.js';
@@ -7,7 +8,7 @@ const safeUrl=value=>{try{const u=new URL(value);return ['https:','http:'].inclu
 export function buildScopeThreatReport({title,level,games,summaries,start,end},now=new Date()){
  const unique=new Map();let assessed=0,affected=0,urgent=0;
  for(const game of games){const summary=summaries.get(game.id);if(!summary||summary.label==='Monitoring not started')continue;assessed++;if(summary.items.length)affected++;if(summary.urgent.length)urgent++;
-  for(const cue of summary.items){const url=safeUrl(cue.sourceUrl);if(!url)continue;const key=[url,cue.trigger,cue.sourceAt].join('|');if(!unique.has(key))unique.set(key,{...cue,sourceUrl:url,games:[]});if(!unique.get(key).games.some(item=>item.id===game.id))unique.get(key).games.push(game);}}
+  for(const cue of summary.items){const url=safeUrl(cue.sourceUrl);if(!url)continue;const key=concernIdentity({...cue,sourceUrl:url});if(!unique.has(key))unique.set(key,{...cue,sourceUrl:url,games:[]});if(!unique.get(key).games.some(item=>item.id===game.id))unique.get(key).games.push(game);}}
  const findings=[...unique.values()].sort((a,b)=>Number(b.domain==='weather alert')-Number(a.domain==='weather alert'));
  affected=new Set(findings.flatMap(c=>c.games.map(g=>g.id))).size;urgent=new Set(findings.filter(c=>c.domain==='weather alert').flatMap(c=>c.games.map(g=>g.id))).size;
  const venues=new Set(games.map(g=>g.venue.id)).size;const pending=games.length-assessed;

@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {sourcePoint,locatedConcerns} from '../site/concern_location.js';
+import {buildNflReviewQueue} from '../site/nfl_review_queue.js';
+import {buildScopeThreatReport} from '../site/scope_threat_report.js';
+const cue={type:'road condition',sourceId:'agency-1',title:'Closure',sourceUrl:'https://example.com/feed',sourceAt:'2026-10-10T12:00:00Z',location:{lat:44.5,lon:-88.1}};
+const game={id:'a',title:'Game A',venue:{id:'1',name:'Venue'},kickoff:'2026-10-11T17:00:00Z'};
+test('source points reject missing, coerced and impossible coordinates',()=>{for(const p of [null,{lat:'44',lon:0},{lat:91,lon:0},{lat:0,lon:181},{lat:NaN,lon:0}])assert.equal(sourcePoint(p),null);assert.deepEqual(sourcePoint({lat:0,lon:0}),{lat:0,lon:0});});
+test('queue retains publisher identity and point without inferring venue impact',()=>{const q=buildNflReviewQueue(game,{cues:[cue]},'near_term_monitoring',Date.parse('2026-10-10'));assert.equal(q.items[0].sourceId,'agency-1');assert.deepEqual(q.items[0].location,cue.location);assert.match(q.items[0].action,/whether it affects an actual event route/);const bad=buildNflReviewQueue(game,{cues:[{...cue,location:{lat:95,lon:0}}]},'near_term_monitoring');assert.equal(bad.items[0].location,null);});
+test('map excludes gaps and missing geometry and deduplicates record identities',()=>{const q=buildNflReviewQueue(game,{cues:[cue]},'near_term_monitoring').items[0];assert.equal(locatedConcerns([q,q,{...q,sourceId:'agency-2'},{...q,location:null},{...q,status:'source_check_needed'},{...q,sourceUrl:'javascript:alert(1)'}]).length,2);});
+test('rollup preserves distinct source records with identical titles and timestamps',()=>{const items=buildNflReviewQueue(game,{cues:[cue,{...cue,sourceId:'agency-2'}]},'near_term_monitoring').items;const report=buildScopeThreatReport({title:'Event',level:'event',games:[game],summaries:new Map([['a',{label:'2 concerns',items,urgent:[]} ]])});assert.equal(report.findings.length,2);});

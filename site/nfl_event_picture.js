@@ -9,7 +9,8 @@ import {selectNj511ForGame} from './nj511_events.js';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
-import {buildNflReviewQueue} from './nfl_review_queue.js?v=20261010-3';
+import {sourcePoint} from './concern_location.js';
+import {buildNflReviewQueue} from './nfl_review_queue.js?v=concern-map-1';
 import {selectEonetForGame} from './eonet_nfl.js?v=20261010-1';
 import {selectNifcForGame} from './nifc_wildfire.js?v=20261010-1';
 import {selectAirnowForGame} from './airnow_pm25.js?v=20261010-1';
@@ -260,7 +261,7 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
     cues.push({type:'access plan overlap',sourceId:`saints-access:${item.id}`,title:`Champions Square plan and ${item.name}`,basis:`Club-planned Champions Square window ${saintsAccessComparison.plannedWindow.startAt} to ${saintsAccessComparison.plannedWindow.endAt} overlaps a DOTD-published road window ${item.startAt} to ${item.endAt}, ${item.distanceKm} km from the candidate venue point. Route and actual impact unverified`,sourceUrl:item.sourceUrl,relatedSourceUrl:saintsAccessComparison.clubSourceUrl,sourceAt:item.sourceRecordDate||item.startAt});
   }
   if(road.timingState==='matched')for(const item of road.records.filter(record=>record.overlaps&&!saintsAccessComparison.matches.some(match=>match.id===record.id)).slice(0,4)){
-    cues.push({type:'road condition',sourceId:item.id,title:`${item.kind} · ${item.name}`,basis:`${item.agency}; ${item.distanceKm} km from candidate point; published window ${item.startAt} to ${item.endAt} overlaps event`,sourceUrl:item.sourceUrl||null,sourceAt:item.sourceRecordDate||item.startAt||null});
+    cues.push({type:'road condition',sourceId:item.id,location:sourcePoint(item),title:`${item.kind} · ${item.name}`,basis:`${item.agency}; ${item.distanceKm} km from candidate point; published window ${item.startAt} to ${item.endAt} overlaps event`,sourceUrl:item.sourceUrl||null,sourceAt:item.sourceRecordDate||item.startAt||null});
   }
   if(transitFresh&&transit.state==='retrieved'&&transit.screenable)for(const item of transit.alerts.filter(alert=>alert.eventWindowOverlap).slice(0,4)){
     cues.push({type:'transit alert',sourceId:item.id,title:item.header,basis:`MBTA Foxboro station; ${item.effect}; published active period overlaps illustrative event window. Service or route impact requires verification.`,sourceUrl:item.sourceUrl,sourceAt:item.updatedAt});

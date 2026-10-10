@@ -1,5 +1,8 @@
+import {humanText} from './attention_summary.js';
+import {locatedConcerns} from './concern_location.js';
+import {findingDecision} from './finding_decision.js';
 import {attachMovementTracking} from './movement_map.js?v=multi-events-1';
-let map,groundLayer,airLayer,venueLayer,controls,eventId,resizeObserver;
+let map,groundLayer,airLayer,venueLayer,controls,eventId,resizeObserver,concernLayer,concernGameId,concerns=[];
 const textNode=text=>{const node=document.createElement('div');node.textContent=text;return node;};
 const validRing=ring=>Array.isArray(ring)&&ring.length>=4&&ring.every(p=>Array.isArray(p)&&Number.isFinite(p[0])&&Number.isFinite(p[1])&&Math.abs(p[0])<=180&&Math.abs(p[1])<=90);
 export function renderEventGeographicMap(game,ground,airspace){
@@ -13,7 +16,9 @@ export function renderEventGeographicMap(game,ground,airspace){
   map=L.map(target,{scrollWheelZoom:false}).setView([venue.lat,venue.lon],15);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map).on('tileerror',()=>{document.getElementById('event-map-tile-status').textContent='Street map unavailable. Boundary overlays remain visible; retry when connectivity returns.';});
   groundLayer=L.layerGroup().addTo(map);airLayer=L.layerGroup().addTo(map);venueLayer=L.layerGroup().addTo(map);
+  concernLayer=L.layerGroup().addTo(map);
   controls=L.control.layers(null,game.eventType&&game.eventType!=='nfl'?{'Event location':venueLayer}:{'Stadium outline':groundLayer,'FAA airspace':airLayer,'Stadium location':venueLayer},{collapsed:false}).addTo(map);
+  controls.addOverlay(concernLayer,'Source concerns');
   L.control.scale({imperial:true,metric:true}).addTo(map);
   resizeObserver=new ResizeObserver(()=>map.invalidateSize());resizeObserver.observe(target);eventId=null;
  }
@@ -28,5 +33,29 @@ export function renderEventGeographicMap(game,ground,airspace){
  document.getElementById('map-show-stadium').onclick=()=>map.setView([venue.lat,venue.lon],16);
  document.getElementById('map-show-airspace').onclick=frame;
  if(!game.eventType||game.eventType==='nfl')attachMovementTracking(map,controls,game,record?.ring);
+ if(concernGameId!==game.id){concerns=[];concernGameId=game.id;}
+ drawConcerns(game);
  if(eventId!==game.id){map.setView([venue.lat,venue.lon],15);eventId=game.id;}
+}
+
+export function renderEventConcerns(game,items){
+ concernGameId=game.id;concerns=locatedConcerns(items);
+ if(map&&eventId===game.id)drawConcerns(game);
+}
+function drawConcerns(game){
+ concernLayer.clearLayers();
+ for(const cue of concerns){
+  const content=document.createElement('div');content.className='concern-map-popup';
+  const add=(tag,text)=>{const n=document.createElement(tag);n.textContent=text;content.append(n);};
+  add('strong',cue.trigger);add('p','Publisher location · event impact requires verification');
+  add('p',humanText(cue.basis));add('p','Reported: '+(cue.sourceAt?new Date(cue.sourceAt).toLocaleString():'Time not supplied'));
+  add('p','Next step: '+findingDecision(cue).verify);
+  const link=document.createElement('a');link.textContent='Review source';link.href=cue.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
+  const marker=window.L.circleMarker([cue.location.lat,cue.location.lon],{className:'source-concern-marker',radius:9,color:'#8c4800',weight:2,fillColor:'#ffb454',fillOpacity:.95}).bindTooltip(cue.trigger).bindPopup(content).addTo(concernLayer);
+  const makeAccessible=()=>{const shape=marker.getElement();if(!shape)return;shape.setAttribute('tabindex','0');shape.setAttribute('role','button');shape.setAttribute('aria-label',cue.trigger+' — review source concern');shape.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();marker.openPopup();}});};marker.on('add',makeAccessible);makeAccessible();
+ }
+ let button=document.getElementById('map-show-concerns');
+ if(!button){button=document.createElement('button');button.id='map-show-concerns';button.type='button';document.querySelector('.event-map-actions')?.append(button);}
+ button.hidden=!concerns.length;button.textContent='Show source concerns ('+concerns.length+')';
+ button.onclick=()=>map.fitBounds([[game.venue.lat,game.venue.lon],...concerns.map(c=>[c.location.lat,c.location.lon])],{padding:[30,30],maxZoom:15});
 }

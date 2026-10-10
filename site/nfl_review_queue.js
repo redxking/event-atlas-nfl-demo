@@ -1,3 +1,4 @@
+import {sourcePoint} from './concern_location.js';
 const actions={
   'weather alert':{domain:'weather alert',check:'Confirm the current NWS alert, its footprint, validity window, and venue relevance with the issuing office or official alert record.'},
   'road condition':{domain:'road access',check:'Confirm the road record is still active and whether it affects an actual event route with the road agency and venue transport lead.'},
@@ -29,7 +30,7 @@ export function buildNflReviewQueue(game,picture,monitoringMode,now=Date.now()){
     const action=actions[cue?.type];
     const sourceUrl=safeUrl(cue?.sourceUrl);
     if(!action||!sourceUrl)return null;
-    return {domain:action.domain,trigger:String(cue.title||cue.type).slice(0,180),basis:String(cue.basis||'').slice(0,400),sourceAt:validTime(cue.sourceAt)?new Date(cue.sourceAt).toISOString():null,sourceUrl,relatedSourceUrl:safeUrl(cue.relatedSourceUrl),phase,action:action.check,status:'unreviewed_source_cue'};
+    return {sourceId:cue.sourceId==null?null:String(cue.sourceId).slice(0,300),location:sourcePoint(cue.location),domain:action.domain,trigger:String(cue.title||cue.type).slice(0,180),basis:String(cue.basis||'').slice(0,400),sourceAt:validTime(cue.sourceAt)?new Date(cue.sourceAt).toISOString():null,sourceUrl,relatedSourceUrl:safeUrl(cue.relatedSourceUrl),phase,action:action.check,status:'unreviewed_source_cue'};
   }).filter(Boolean).slice(0,12);
   const items=[...recovery,...cues];
   return {state:items.length?'review_candidates':'no_time_screened_cues',items,note:items.length?'Source-linked verification tasks. Source failures are coverage gaps; other rows are unreviewed publisher observations and forecasts. None is a threat, confirmed venue impact, or completed analyst action.':'No time-screened cue appears in the bounded current sample. This is not an all-clear; inspect source status and missing operational inputs.'};
