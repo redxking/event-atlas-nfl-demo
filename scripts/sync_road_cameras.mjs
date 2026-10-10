@@ -182,6 +182,18 @@ try{
 }catch(error){sources.push({id:'txdot-dfw-camera-assets',url:TXDOT_CCTV_LAYER,status:'failed',error:String(error)})}
 if(sources.every(source=>source.status==='failed'))throw Error('Every public camera metadata source failed');
 const byVenue=selectCameraCoverage(venues,cameras,sources);
+const caltransStreams=Object.values(byVenue).flat().filter(item=>item.agency==='Caltrans'&&item.videoUrl);
+const streamChecks=new Map(await Promise.all([...new Set(caltransStreams.map(item=>item.videoUrl))].map(async videoUrl=>{
+  try{
+    const response=await fetch(videoUrl,{method:'HEAD',signal:AbortSignal.timeout(8000)});
+    const contentType=response.headers.get('content-type')||'';
+    return [videoUrl,response.ok&&/^application\/(?:vnd\.apple\.mpegurl|x-mpegURL)/i.test(contentType)&&response.headers.get('access-control-allow-origin')==='*'];
+  }catch{return [videoUrl,false]}
+})));
+for(const item of caltransStreams){
+  item.videoPlaylistStatus=streamChecks.get(item.videoUrl)?'playlist_reachable_at_sync':'playlist_unavailable_at_sync';
+  if(item.videoPlaylistStatus!=='playlist_reachable_at_sync')delete item.videoUrl;
+}
 const out={builtAt:new Date().toISOString(),basis:'Public roadway camera metadata within 15 km of unreviewed venue point; distance does not establish a view of the venue, image freshness, or operational status.',sources,byVenue};
 await fs.writeFile(path.join(site,'cameras.json'),JSON.stringify(out));
 console.log('Camera metadata sources:',sources.map(source=>`${source.id} ${source.status} ${source.records||0}`).join(', '),'venue matches:',Object.values(byVenue).map(items=>items.length).join(','));

@@ -35,6 +35,9 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
   const snapshot=JSON.parse(fs.readFileSync(new URL('../site/cameras.json',import.meta.url)));
   const items=snapshot.byVenue?.['3798']||[];
   assert.ok(items.some(item=>item.videoUrl),'expected a public WisDOT HLS link in the saved snapshot');
+  for(const item of Object.values(snapshot.byVenue).flat().filter(item=>item.agency==='Caltrans'&&item.videoPlaylistStatus)){
+    assert.equal(item.videoPlaylistStatus==='playlist_reachable_at_sync',!!item.videoUrl);
+  }
   for(const item of Object.values(snapshot.byVenue).flat().filter(item=>item.videoUrl)){
     if(item.agency==='WisDOT 511'){
       assert.equal(item.operationalStatus,'Enabled');
