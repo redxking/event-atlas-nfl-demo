@@ -41,14 +41,19 @@ export function createGeographicExplorer({openGame,onScopeChange}){
   const nextScope=JSON.stringify([scope,selected.map(game=>game.id)]);if(scopeSignature!==nextScope){scopeSignature=nextScope;onScopeChange?.(selected);}
   container.querySelector('h2').textContent=scope.venue?(selected[0]?.venue.name||'Venue events'):scope.state?scope.state+' event overview':scope.region?'FEMA Region '+scope.region+' overview':'National event overview';
   setGeographicTrail(makeTrail(scope));refreshThreatReport();
-  totals.replaceChildren(...[`${count.events} events`,`${count.venues} venues`,`${count.affected} events with potential concerns`,`${count.urgent} events with urgent weather concerns`,`${count.sourceConcerns} distinct source concerns`,`${count.pending} events awaiting screening`].map(text=>node('span',text)));
+  const labels=[`${count.events} events`,`${count.venues} venues`];
+  if(count.affected)labels.push(`${count.affected} events with potential concerns`);
+  if(count.urgent)labels.push(`${count.urgent} events with urgent weather concerns`);
+  if(count.sourceConcerns)labels.push(`${count.sourceConcerns} distinct source concerns`);
+  if(count.pending)labels.push(selected.some(game=>summaries.has(game.id))?`${count.pending} events awaiting screening`:'Loading event screening');
+  totals.replaceChildren(...labels.map(text=>node('span',text)));
   panel.replaceChildren(node('h3',scope.venue?'Select an event':scope.state?'Select a venue':scope.region?'Select a state':'Select a FEMA region'));
   const groups=new Map();const level=scope.venue?'event':scope.state?'venue':scope.region?'state':'region';
   for(const game of selected){const key=level==='event'?game.id:level==='venue'?game.venue.id:level==='state'?stateOf(game):regionOf(game);if(!key)continue;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(game);}
   if(!selected.length)panel.append(node('p','No events in this area for the selected dates.'));
   for(const [key,items] of [...groups].sort(([a],[b])=>a.localeCompare(b,undefined,{numeric:true}))){
    items.sort((a,b)=>Date.parse(a.kickoff)-Date.parse(b.kickoff));const stats=rollup(items,summaries);const title=level==='event'?items[0].title:level==='venue'?items[0].venue.name:level==='state'?key:'FEMA Region '+key;
-   const select=button('',()=>{if(level==='event'){currentEvent=key;render();}else jump(level,key);});select.className='geo-choice';select.append(node('strong',title),node('small',level==='event'?new Date(items[0].kickoff).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}):`${stats.events} events · ${stats.affected} with concerns`));select.setAttribute('aria-pressed',String(currentEvent===key));panel.append(select);
+   const select=button('',()=>{if(level==='event'){currentEvent=key;render();}else jump(level,key);});select.className='geo-choice';select.append(node('strong',title),node('small',level==='event'?new Date(items[0].kickoff).toLocaleString('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'}):`${stats.events} events${stats.affected?' · '+stats.affected+' with concerns':stats.pending?' · Screening pending':''}`));select.setAttribute('aria-pressed',String(currentEvent===key));panel.append(select);
   }
   if(currentEvent){const game=selected.find(g=>g.id===currentEvent);if(game){const card=node('article',undefined,'geo-event-card');card.append(node('h3',game.title),node('p',game.venue.name),node('p',summaries.get(game.id)?.label||'Assessment pending'),button('Open game briefing',()=>openGame(game.id)));panel.append(card);}}
   if(!window.L){status.textContent='Map unavailable. Use the geographic selection buttons.';return;}

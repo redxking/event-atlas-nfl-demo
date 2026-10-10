@@ -2,9 +2,11 @@
 """Snapshot DHS's public consolidated NTAS feed for the public demo."""
 import argparse
 import json
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
+from urllib.error import HTTPError, URLError
 from xml.etree import ElementTree as ET
 
 SOURCE = "https://www.dhs.gov/ntas/1.1/feed.xml"
@@ -55,13 +57,25 @@ def main():
             payload = Path(args.fixture).read_bytes()
         else:
             request = Request(SOURCE, headers={"User-Agent": "EventAtlasPublicDemo/1.0", "Accept": "application/xml"})
-            with urlopen(request, timeout=25) as response:
-                payload = response.read(1_000_001)
+            for attempt in range(3):
+                try:
+                    with urlopen(request, timeout=15) as response:
+                        payload = response.read(1_000_001)
+                    break
+                except HTTPError as error:
+                    if attempt == 2 or (error.code != 429 and error.code < 500):
+                        raise
+                except (URLError, TimeoutError):
+                    if attempt == 2:
+                        raise
+                time.sleep(0.5 * (attempt + 1))
         snapshot["active"] = parse_feed(payload, now)
         snapshot["activeCount"] = len(snapshot["active"])
     except Exception as error:
         snapshot["status"] = "unavailable"
         snapshot["error"] = type(error).__name__
+        if isinstance(error, HTTPError):
+            snapshot["httpStatus"] = error.code
     OUTPUT.write_text(json.dumps(snapshot, indent=2, ensure_ascii=False) + "\n")
     print(f"DHS NTAS: {snapshot['status']}, {snapshot['activeCount']} active advisories")
 

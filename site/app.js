@@ -7,7 +7,7 @@ import {stopMovementTracking} from './movement_map.js?v=multi-events-1';
 import {createThreatReportButton,refreshThreatReport} from './scope_threat_report.js?v=decision-briefs-1';
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
-import {createGeographicExplorer} from './geographic_explorer.js?v=decision-briefs-1';
+import {createGeographicExplorer} from './geographic_explorer.js?v=screening-loading-1';
 import {renderEventGeographicMap} from './event_geographic_map.js?v=multi-events-1';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=assessments-2';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';

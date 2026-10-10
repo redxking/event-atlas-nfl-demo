@@ -9,7 +9,15 @@ let snapshot;
 try{
   const schedule=JSON.parse(await fs.readFile(path.join(site,'nfl.json'),'utf8'));
   if(schedule?.source?.status!=='ok'||!Array.isArray(schedule.games))throw Error('NFL schedule unavailable');
-  const response=await fetch(eonetSourceUrl,{headers:{Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public natural-event context (https://github.com/redxking/event-atlas-nfl-demo)'},signal:AbortSignal.timeout(25000)});
+  let response;
+  for(let attempt=0;attempt<3;attempt++){
+    try{response=await fetch(eonetSourceUrl,{headers:{Accept:'application/geo+json, application/json','User-Agent':'EventAtlas NFL public natural-event context (https://github.com/redxking/event-atlas-nfl-demo)'},signal:AbortSignal.timeout(15000)});
+      if(response.status!==429&&response.status<500)break;
+      if(attempt===2)break;
+      await response.body?.cancel();
+    }catch(error){if(attempt===2)throw error;}
+    await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
+  }
   if(!response.ok||new URL(response.url).hostname!=='eonet.gsfc.nasa.gov')throw Error(`Unexpected NASA EONET response ${response.status}`);
   const body=await response.text();
   if(body.length>5000000)throw Error('NASA EONET response exceeds size limit');
