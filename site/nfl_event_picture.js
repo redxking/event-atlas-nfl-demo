@@ -23,7 +23,7 @@ import {selectJetsGamedayGuide,jetsGamedayGuideUrl} from './jets_gameday_guide.j
 import {selectSeahawksGameday,seahawksGamedayUrl} from './seahawks_gameday.js?v=20261010-1';
 import {selectSoundTransitSeahawks,compareSounderToGates,soundTransitSeahawksUrl} from './sound_transit_seahawks.js?v=20261010-1';
 import {selectSoundTransitAlertsForGame,soundTransitAlertsPage} from './sound_transit_alerts.js?v=20261010-1';
-import {selectSeattleFireAggregate,seattleFireDataset} from './seattle_fire_aggregate.js?v=20261010-1';
+import {selectSeattleFireAggregate,seattleFireDataset} from './seattle_fire_aggregate.js?v=20261010-2';
 import {compareJetsTravelPlan} from './jets_travel_context.js?v=20261010-1';
 import {compareClubAviation} from './club_aviation_context.js?v=20261010-2';
 import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';

@@ -20,6 +20,9 @@ test('Socrata request asks only for a bounded area count and source time',()=>{
   const summary=summarizeSeattleFireAggregate([{nearby:'14',latest:'2026-10-09T23:39:00.000'}],metadata,query,now);
   assert.equal(summary.nearbyCount,14);
   assert.equal(summary.radiusKm,5);
+  const empty=summarizeSeattleFireAggregate([{nearby:'0',latest:null}],metadata,query,now);
+  assert.equal(empty.nearbyCount,0);
+  assert.equal(selectSeattleFireAggregate(game,empty,now).state,'recent_area_count');
   for(const field of ['address','incident_number','response_type'])assert.equal(JSON.stringify(summary).includes(field),false);
   assert.throws(()=>summarizeSeattleFireAggregate([{nearby:'14'}],{...metadata,rowsUpdatedAt:Math.floor(now/1000)-3600},query,now),/stale/);
 });

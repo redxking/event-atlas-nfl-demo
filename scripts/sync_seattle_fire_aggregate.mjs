@@ -11,7 +11,7 @@ try{
   if(!metaResponse.ok||!countResponse.ok||new URL(metaResponse.url).origin!=='https://data.seattle.gov'||new URL(countResponse.url).origin!=='https://data.seattle.gov')throw Error('Seattle Fire source request failed');
   const [metaRaw,countRaw]=await Promise.all([metaResponse.text(),countResponse.text()]);
   if(metaRaw.length>200000||countRaw.length>10000)throw Error('Seattle Fire source response exceeds bound');
-  const result=summarizeSeattleFireAggregate(JSON.parse(countRaw),JSON.parse(metaRaw),query);
+  const result={...summarizeSeattleFireAggregate(JSON.parse(countRaw),JSON.parse(metaRaw),query),retrievalMode:'scheduled_snapshot'};
   await fs.writeFile(output,JSON.stringify(result)+'\n');
   console.log(JSON.stringify({status:result.status,nearbyCount:result.nearbyCount,sourceUpdatedAt:result.sourceUpdatedAt}));
 }catch(error){

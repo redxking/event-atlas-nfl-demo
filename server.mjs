@@ -149,7 +149,7 @@ async function draftCaseBrief(id,user,includeContext){
     if(game?.venue?.id==='3673'){
       const query=seattleFireAggregateQuery();
       const [count,metadata]=await Promise.all([remote('seattle:fire:count',query.url,300000),remote('seattle:fire:metadata',seattleFireMetadataUrl,300000)]);
-      if(!count.stale&&!metadata.stale&&count.data&&metadata.data)try{seattleFireAggregate=summarizeSeattleFireAggregate(count.data,metadata.data,query,Math.max(count.at,metadata.at))}catch{seattleFireAggregate=null}
+      if(!count.stale&&!metadata.stale&&count.data&&metadata.data)try{seattleFireAggregate={...summarizeSeattleFireAggregate(count.data,metadata.data,query,Math.max(count.at,metadata.at)),retrievalMode:'local_server_direct'}}catch{seattleFireAggregate=null}
       else seattleFireAggregate=null;
     }
     if(game){
