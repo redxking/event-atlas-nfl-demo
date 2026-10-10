@@ -25,17 +25,24 @@ The schedule builder now retains originally scoped games moved outside the windo
 - Local browser smoke test: all 29 games reached 35/35 deliveries and enabled synthetic camera playback. This does not prove playback for every game.
 - Representative browser checks covered actual advancing synthetic video, camera outage/recovery, area editing, review invalidation, model applicability, cross-game duplicate claims, and a downloaded three-snapshot history archive.
 - Responsive check: observed 391-pixel content width, 383-pixel document width; populated game had no horizontal page overflow. Keyboard area editing and stale-model hiding passed.
-- Earlier map and camera deployments succeeded. This checkpoint's model/relationship/history changes still need deployed verification after publication.
+- Deployed application revision `39bc3d5ff217253831e93fe87bc293cdfdde9031` passed GitHub Actions run `38075710165`. All 17 scoped application assets returned HTTP 200 and exactly matched committed bytes. The refreshed schedule matched all 29 frozen games.
 
-## Remaining acceptance work
+## Final acceptance
 
-- Verify the latest deployment and inspect every scoped game's complete workflow against the acceptance matrix, including exports, review transitions and failure states.
-- Improve demo navigation and presentation; assess whether shared templates provide sufficient scenario diversity for the requested demonstration.
-- Current schedule was refreshed and matches all 29 frozen games. Cancellation, postponement, missing-record and moved-outside-window handling now have six passing mutation tests. Verify the new status presentation after deployment; future publisher changes still require reconciliation.
-- Public participant coverage is mapped for all 29 games: 31 validated snapshot announcements across nine games; other games explicitly report missing public-role coverage and retain fictional examples. Verify the rendered role panel after deployment. Complete remaining per-dataset end-to-end coverage checks.
-- Changed-input analysis now has a labeled rule-driven backend simulation across seven guided stages. Local browser checks passed all 203 game/stage combinations, including applicable-model visibility, camera-outage coverage and stale-source counts. Verify this workflow after deployment. Actual model runs remain recorded full-replay rankings.
-- All 29 local browser exports now have saved hash evidence and passing citation, model, review and edited-area checks. All 29 mobile/keyboard checks and public-role panels passed. Deployed acceptance remains open.
-- Five synthetic infrastructure layers now arrive through the GIS feed: utility corridor, hospital access route, transit hub, choke point and construction zone. All 29 local browser checks passed layer arrival and area-intersection updates; a downloaded export retained all five geometry records and evidence IDs. Verify the deployed layers.
-- Complete the final requirement-by-requirement audit after deployed verification.
+Demonstration acceptance passed on October 10, 2026. The per-game, per-dataset and 11-requirement matrix is `data/acceptance/nfl_window.json`; deployed byte hashes, browser boundaries and downloaded-file hashes are in `data/acceptance/nfl_deployment_evidence.json`.
 
-Other uncommitted changes to the main application and local analysis backend predate this increment and have been preserved. Their presence is not evidence of verified or deployed functionality. The goal remains active and incomplete.
+- All 29 deployed game workflows passed review invalidation, camera outage/recovery, recorded-model applicability and stale-source checks on revision `85f6431`. Those workflow modules are unchanged in the final release.
+- All 29 games passed the final release's infrastructure checks: absent before injection, five layers after injection, all five intersecting the expanded exercise area, with the correct recorded model result.
+- A deployed synthetic video advanced at 800 by 450 pixels and stopped on injected outage. This verifies the procedural demonstration, not real stadium CCTV.
+- All 29 local downloaded briefs passed citation, label, model and edited-area checks. The final deployed brief and history downloads also passed, including all five infrastructure geometries and their evidence references.
+- All 203 local game/stage combinations, all 29 mobile and keyboard checks, and all 29 public-role panels passed. These are local browser evidence; matching deployed assets are recorded separately.
+- Public-role coverage includes 31 snapshot announcements across nine games. Missing coverage, international source limits, public-camera availability and directory-only sources remain explicit. Announcements do not establish attendance.
+- Push-triggered and hourly GitHub Actions refresh/deployment are configured. Future upstream changes and source outages remain possible; freshness, unavailable states and schedule reconciliation expose them.
+
+The demo is available at https://redxking.github.io/event-atlas-nfl-demo/window-demo.html. Browser cache bypass was required to inspect the newly published module during rollout; final verification matched the release.
+
+## Completion boundary
+
+The fixed-window demonstration is complete. Restricted feeds, investigative people, sensitive infrastructure and venue-camera examples are fictional. Monitoring circles are editable exercise areas based on unreviewed venue coordinate candidates. Recorded Qwen runs are actual local inference; changing-input analysis is explicitly simulated. GitHub Pages does not provide online inference, authenticated analyst accounts or an operational audit backend. Session history must be exported before leaving the page. Demonstration acceptance does not establish operational law-enforcement readiness.
+
+Other uncommitted changes to the main application and local analysis backend predate this increment and have been preserved. They are excluded from this acceptance claim. This final checkpoint and evidence-only commit do not change the verified application release.

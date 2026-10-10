@@ -1,0 +1,156 @@
+{
+  "schema": "event-atlas.deployment-acceptance.v1",
+  "revision": "39bc3d5ff217253831e93fe87bc293cdfdde9031",
+  "run": 38075710165,
+  "checkedAt": "2026-10-10T18:30:33.084Z",
+  "assetChecks": [
+    {
+      "path": "site/window-demo.css",
+      "sha256": "a3d4c65b955b715da91c9f289172d89854660beb047863d2e56d21c557dfb704",
+      "status": 200
+    },
+    {
+      "path": "site/window-demo.html",
+      "sha256": "8a83584112df450d9fad9b92236ce57301ad38b8b31c11288948bb4f272d58ad",
+      "status": 200
+    },
+    {
+      "path": "site/window-demo.js",
+      "sha256": "b1035cf3fc210df8cb1a869a1def548a35011e853236c0626f18117b863aae1b",
+      "status": 200
+    },
+    {
+      "path": "site/window_ai_contract.js",
+      "sha256": "2fcd647d74971308eef4d110fc6a78c9575a8947e3afbc1756f048d0457538dc",
+      "status": 200
+    },
+    {
+      "path": "site/window_analysis_simulator.js",
+      "sha256": "882ce0ed3f95f018e35abc6183e22470bb296f7c75e2e99c205d76bdb6099d19",
+      "status": 200
+    },
+    {
+      "path": "site/window_brief_history.js",
+      "sha256": "ca799bf0f8a537d30496e160b5895f74dda19846d211dd8e42cfe88c63b243f8",
+      "status": 200
+    },
+    {
+      "path": "site/window_camera.js",
+      "sha256": "ff557ae6d0473839d116e5818beedb91559af1e1621149c35a65946009b29d52",
+      "status": 200
+    },
+    {
+      "path": "site/window_feed_engine.js",
+      "sha256": "32edf2914d627fab926e276a7936dd3bd858a262240a304c0e2e3794d12e7461",
+      "status": 200
+    },
+    {
+      "path": "site/window_infrastructure.js",
+      "sha256": "faa6dafc6a3083a3971c93da19657d9937aa4977f9d0de27e01ee11023eba4f7",
+      "status": 200
+    },
+    {
+      "path": "site/window_map.js",
+      "sha256": "8cefdf6c94133f7d3b875a89d521e801ebc2b312b80d1fc2acbbf19165930607",
+      "status": 200
+    },
+    {
+      "path": "site/window_model_snapshots.json",
+      "sha256": "c1a1ebed432a4a28115169d16c0b219b27ff942995e7c561437e984f49030553",
+      "status": 200
+    },
+    {
+      "path": "site/window_public_context.js",
+      "sha256": "63227807c272099ff83681b1549c95baf33a853f5ab63ca7a8a936ff24770dc7",
+      "status": 200
+    },
+    {
+      "path": "site/window_relationships.js",
+      "sha256": "422464b30783c9ec131090cd0a54d39826890c2cb82a3d9f05f92b2666d9ff55",
+      "status": 200
+    },
+    {
+      "path": "site/window_review_engine.js",
+      "sha256": "1d22d7c5fad471e2bac48a4d5cd9aea67a072bb63084215eca319ad664a717ae",
+      "status": 200
+    },
+    {
+      "path": "site/window_spatial_engine.js",
+      "sha256": "af0a1ed7690990a3ea07e9cb8a6ec5f23f9a23bae1ac32389183fd5ad8e05adf",
+      "status": 200
+    },
+    {
+      "path": "site/window_supplemental_feeds.js",
+      "sha256": "3690d561969c7b010d85ae7ddb831ddc832e51b515bd06d5ccf2a13b4811dca6",
+      "status": 200
+    },
+    {
+      "path": "site/window_venues.json",
+      "sha256": "8996837f7a809444df5ea5b39479d9d82018fab040bb885bc94e0730a6097f8e",
+      "status": 200
+    }
+  ],
+  "schedule": {
+    "builtAt": "2026-10-10T18:27:22.019Z",
+    "counts": {
+      "total": 29,
+      "us": 27,
+      "international": 2
+    },
+    "reconciliation": {
+      "state": "matches_frozen_scope",
+      "entered": [],
+      "left": [],
+      "kickoffChanged": [],
+      "crosswalkMismatch": [],
+      "exceptions": [],
+      "missing": [],
+      "currentWindowCount": 29,
+      "frozenScopeCount": 29,
+      "retainedMovedGames": []
+    }
+  },
+  "boundary": "HTTP 200 and exact committed byte matches; browser behavior recorded separately",
+  "browser": {
+    "checkedAt": "2026-10-10T18:36:23.363108+00:00",
+    "games": 29,
+    "failures": 0,
+    "latestRevisionChecks": [
+      "No infrastructure before GIS injection",
+      "Five infrastructure layers after injection",
+      "All five intersect an edited 3000 m area",
+      "Recorded model matches full replay inputs"
+    ],
+    "priorRevisionWorkflowChecks": {
+      "revision": "85f6431",
+      "games": 29,
+      "failures": 0,
+      "checks": [
+        "Review saved and invalidated by contrary evidence",
+        "Camera outage disables playback; fresh frame recovery enables it",
+        "Stale-feed analysis shows 26 stale sources"
+      ],
+      "representativeVideo": {
+        "width": 800,
+        "height": 450,
+        "currentTime": 12.581543,
+        "paused": false,
+        "readyState": 4,
+        "outageStopsPlayback": true
+      }
+    },
+    "boundary": "Latest delta verified in browser; unchanged workflow modules byte-matched. Mobile/keyboard and all-game export evidence was collected locally. Browser cache was bypassed for the published release."
+  },
+  "downloadedExports": [
+    {
+      "filename": "nfl-401873010-SYNTHETIC-revision-35 (2).json",
+      "sha256": "23196495b7b848fa11c027df11d0ec14b5fdca520f20d56ee36e61434cc3494b",
+      "bytes": 103786
+    },
+    {
+      "filename": "nfl-401873010-SYNTHETIC-history.json",
+      "sha256": "6a111f854157fa0ae4a72ddb8762f8dcb148cb401b9f6ead1c62dc4d945e1055",
+      "bytes": 248242
+    }
+  ]
+}
