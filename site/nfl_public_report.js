@@ -32,6 +32,8 @@ export function buildNflPublicReport(bundle){
     bundle.reportMonitoringMode==='season_planning'?'Event-window checks have not started. Current source records are planning context and do not establish conditions at kickoff.':'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',
     ''
   ];
+  const queue=picture.reviewQueue;
+  rows.push('## Analyst verification queue',line('State',queue?.state||'unavailable'),...(queue?.items||[]).map((item,index)=>`- **${index+1}. ${clean(item.domain)} — ${clean(item.trigger)}:** ${clean(item.action)} Source basis: ${clean(item.basis)}; source time ${iso(item.sourceAt)}; review phase ${clean(item.phase)}. ${source(item.sourceUrl,'Publisher record')}`),clean(queue?.note||'No generated verification queue is available; inspect the source status and gaps below.'),'');
   if(bundle.publishedChanges){
     const changes=bundle.publishedChanges;
     rows.push('## Changes observed across published runs',line('Comparison',changes.comparison),line('New entries in this build',changes.newChangeCount),...((changes.items||[]).length?(changes.items||[]).slice(0,30).map(item=>`- **${clean(item.title)}:** ${clean(item.kind.replaceAll('_',' '))}; observed ${iso(item.observedAt)}. ${clean(item.detail)} ${source(item.sourceUrl,'Publisher source')}`):['No comparable change entry is recorded. A missing entry does not establish that sources or conditions are unchanged.']),'This is a bounded history of displayed source samples, not a complete publisher history. An item that disappears is not treated as resolved. Changes are unreviewed and do not establish a threat.','');

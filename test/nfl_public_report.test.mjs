@@ -18,6 +18,16 @@ test('season planning report does not imply live event checks',()=>{
   assert.ok(!report.includes('Near-term source monitoring'));
 });
 
+test('report presents source-linked analyst action as unreviewed verification',()=>{
+  const withQueue=structuredClone(bundle);
+  withQueue.picture.reviewQueue={state:'review_candidates',items:[{domain:'road access',trigger:'Listed lane work',basis:'Published window overlaps kickoff',sourceAt:'2026-10-10T00:00:00Z',sourceUrl:'https://example.org/road',phase:'before listed kickoff',action:'Confirm active status with road agency.',status:'unreviewed_source_cue'}],note:'Source-linked verification tasks, not threats.'};
+  const report=buildNflPublicReport(withQueue);
+  assert.match(report,/## Analyst verification queue/);
+  assert.match(report,/Confirm active status with road agency/);
+  assert.match(report,/Publisher record\]\(https:\/\/example.org\/road\)/);
+  assert.match(report,/not threats/);
+});
+
 test('public report flattens untrusted publisher text and omits unsafe links',()=>{
   const altered=structuredClone(bundle);altered.picture.cues[0].title='Lane work\n## FALSE ASSESSMENT';altered.picture.cues[0].sourceUrl='javascript:alert(1)';
   const report=buildNflPublicReport(altered);

@@ -9,6 +9,7 @@ import {selectNj511ForGame} from './nj511_events.js';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
+import {buildNflReviewQueue} from './nfl_review_queue.js?v=20261010-2';
 
 const HOUR=3600000;
 const fresh=(value,now,maxAge)=>{
@@ -150,5 +151,8 @@ export function buildNflEventPicture(game,inputs={},now=Date.now()){
   if(directGameContext&&directGameContext.state!=='checked')gaps.push('The selected-game direct ESPN check is unavailable, stale, or has an identity mismatch; use the dated published snapshot and verify the game source.');
   if(directGameContext?.state==='checked'&&directGameContext.scheduleDiffers)gaps.push('The direct ESPN game-summary date differs from the published schedule; verify kickoff with NFL or host club and repeat event-window screening.');
   if(!usgsFresh)gaps.push('Current USGS regional earthquake context is unavailable.');
-  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
+  const kickoff=Date.parse(game.kickoff);
+  const queueMode=inputs.monitoringMode||(game.status==='in progress in source'||!game.timeTbd&&Number.isFinite(kickoff)&&kickoff>=now-18*HOUR&&kickoff-now<=7*24*HOUR?'near_term_monitoring':'season_planning');
+  const reviewQueue=buildNflReviewQueue(game,{cues,sources},queueMode,now);
+  return {kind:'public_source_event_picture',generatedAt:new Date(now).toISOString(),eventId:game.id,venueId,cues,cueCounts:{weather:weather?.state==='screened'?weather.candidateCount:0,outlook:convectiveOutlook.match?.categoryRank>=3?1:0,rainfall:excessiveRainOutlook.match?1:0,road:road.timingState==='matched'?road.overlapCount:0,transit:(transitFresh&&transit.state==='retrieved'&&transit.screenable?transit.overlapCount:0)+(septaContext?.state==='current snapshot'&&septaContext.screenable?septaContext.overlapCount:0)},reviewQueue,zoneReview,sources,gaps,forecastContext:kickoffForecast,observationContext,gameArticle:gameArticleContext,directGame:directGameContext,convectiveOutlook,excessiveRainOutlook,policeContext,citywideAlertsContext,phillyPermitContext,openRoadwayContext,transitContext,transitScheduleContext,transitPredictionsContext,septaContext,njTransitRailContext,nj511Context,assessment:{severity:'not_assessed',confidence:'not_assessed'},interpretation:'Review cues are source observations for analyst verification, not assessed threats or verified event impacts.'};
 }

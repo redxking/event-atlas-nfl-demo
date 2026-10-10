@@ -104,7 +104,7 @@ for(const game of games){
   const [forecast,mbta,directGame]=monitoringMode==='near_term_monitoring'
     ?await Promise.all([forecastFor(game),publishedMbta(game),fetchSelectedGame(game)])
     :[null,{transit:null,transitSchedule:null},null];
-  const bundle=buildNflEvidenceBundle(game,{...inputs,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
+  const bundle=buildNflEvidenceBundle(game,{...inputs,monitoringMode,conditions,forecast,directGame,police:monitoringMode==='near_term_monitoring'?publishedPolice(game):null,...mbta});
   bundle.reportMonitoringMode=monitoringMode;
   let changeState=null;
   if(monitoringMode==='near_term_monitoring'){

@@ -13,6 +13,8 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.equal(picture.cues.length,2);
   assert.equal(picture.cues[0].sourceUrl,'https://api.weather.gov/alerts/1');
   assert.equal(picture.cues[1].sourceUrl,'https://example.gov/road/1');
+  assert.equal(picture.reviewQueue.items.length,2);
+  assert.equal(picture.reviewQueue.items[0].status,'unreviewed_source_cue');
   assert.deepEqual(picture.assessment,{severity:'not_assessed',confidence:'not_assessed'});
   assert.ok(picture.gaps.some(gap=>gap.includes('stadium CCTV')));
   assert.equal(picture.zoneReview.find(zone=>zone.name==='Stadium ground perimeter').state,'unreviewed mapped candidate');
