@@ -69,3 +69,16 @@ test('Dallas-area TxDOT inventory does not claim Houston coverage',()=>{
   assert.equal(rows.find(row=>row.id==='arlington').camera,'connected');
   assert.equal(rows.find(row=>row.id==='houston').camera,'not_connected');
 });
+
+test('camera directory and failed stadium-area publishers remain distinct from connected inventory',()=>{
+  const stadiums=[
+    {venue:{id:'la',name:'Superdome',address:'New Orleans, LA, USA',lat:29.9509,lon:-90.0813}},
+    {venue:{id:'tn',name:'Nissan Stadium',address:'Nashville, TN, USA',lat:36.1665,lon:-86.7713}},
+    {venue:{id:'nj',name:'MetLife Stadium',address:'East Rutherford, NJ, USA',lat:40.8135,lon:-74.0745}}
+  ];
+  const camera={builtAt:'2026-10-09T17:00:00Z',sources:[{id:'la511-public-cameras',status:'directory_only'},{id:'tdot-smartway-cameras',status:'failed'},{id:'njta-public-road-cameras',status:'failed'}],byVenue:{}};
+  const rows=summarizeCoverage(stadiums,camera,null,now).rows;
+  assert.equal(rows.find(row=>row.id==='la').camera,'directory_only');
+  assert.equal(rows.find(row=>row.id==='tn').camera,'source_failed');
+  assert.equal(rows.find(row=>row.id==='nj').camera,'source_failed');
+});

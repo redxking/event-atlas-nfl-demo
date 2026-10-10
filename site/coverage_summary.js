@@ -1,18 +1,15 @@
+import {cameraSourceIdsForVenue,roadSourceIdsForVenue} from './venue_source_scope.js';
+
 const HOUR=3600000;
-const configuredSources={
-  camera:{CA:['caltrans-d4','caltrans-d7'],WA:['wsdot-seattle'],MD:['md-chart-cameras','md-imap-cameras'],GA:['gdot-atlanta-cameras'],IL:['idot-gateway-chicago'],WI:['wisdot-511-green-bay'],PA:['penndot-camera-inventory'],MN:['mndot-iris-cameras'],TX:['txdot-dfw-camera-assets']},
-  road:{CA:['caltrans-lcs-d4','caltrans-lcs-d7'],WA:['wsdot-road-alerts'],MD:['md-chart-incidents','md-chart-closures'],IL:['idot-closure-incidents'],WI:['wisdot-511-events-green-bay'],LA:['ladotd-511-new-orleans'],TN:['tdot-smartway-nashville'],NJ:['njit-transcom-wzdx'],NC:['ncdot-drivenc-wzdx'],MO:['modot-wzdx'],MN:['mndot-iris-incidents'],AZ:['aztech-wzdx']}
-};
 
 function feedState(venue,snapshot,kind,now){
   if(!snapshot)return 'unavailable';
   const builtAt=Date.parse(snapshot.builtAt);
   if(!Number.isFinite(builtAt)||builtAt>now+HOUR||now-builtAt>12*HOUR)return 'stale';
-  const state=venue.address?.match(/\b([A-Z]{2}), USA$/)?.[1];
-  if(state==='TX'&&(venue.lat<32.68||venue.lat>32.85||venue.lon< -97.25||venue.lon> -96.9))return 'not_connected';
   if(Object.hasOwn(snapshot.byVenue||{},venue.id))return 'connected';
-  const expected=configuredSources[kind][state]||[];
+  const expected=kind==='camera'?cameraSourceIdsForVenue(venue):roadSourceIdsForVenue(venue);
   const sourceStatus=new Map((snapshot.sources||[]).map(source=>[source.id,source.status]));
+  if(expected.some(id=>sourceStatus.get(id)==='directory_only'))return 'directory_only';
   if(expected.some(id=>sourceStatus.get(id)==='failed')&&!expected.some(id=>sourceStatus.get(id)==='ok'))return 'source_failed';
   return 'not_connected';
 }

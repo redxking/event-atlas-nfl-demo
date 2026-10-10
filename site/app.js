@@ -219,7 +219,7 @@ function renderCoverage(){
   const target=$('coverage');
   if(!target||!snapshot)return;
   const result=summarizeCoverage(snapshot.games,cameraSnapshot,roadSnapshot);
-  const label={connected:'Connected snapshot',not_connected:'No connector',source_failed:'Configured source failed',stale:'Stale snapshot',unavailable:'Unavailable',candidate:'Unreviewed point',unmapped:'No point'};
+  const label={connected:'Connected snapshot',directory_only:'Publisher directory only',not_connected:'No connector',source_failed:'Configured source failed',stale:'Stale snapshot',unavailable:'Unavailable',candidate:'Unreviewed point',unmapped:'No point'};
   const ground=groundSnapshot?.byVenue||{};
   target.innerHTML=`<div class="coverage-totals"><div><strong>${result.points}/${result.total}</strong><span>VENUE POINT CANDIDATES</span></div><div><strong>${Object.keys(ground).length}/${result.total}</strong><span>OSM FOOTPRINT CANDIDATES</span></div><div><strong>${result.cameras}/${result.total}</strong><span>CAMERA METADATA FEEDS</span></div><div><strong>${result.roads}/${result.total}</strong><span>ROAD CONDITION FEEDS</span></div></div>`+
     `<p>Camera and road counts require a source snapshot built within 12 hours. Ground outlines are dated, one-time research candidates and are not approved perimeters. A connected feed does not verify camera video, a venue view, road impact, or completeness. ${!cameraSnapshot||!roadSnapshot?'Some snapshots are still loading or unavailable.':''}</p>`+
@@ -231,7 +231,7 @@ function renderVenueMap(rows){
   const target=$('venue-map');
   if(!target||!snapshot)return;
   const markers=venueMarkers(rows,snapshot.games);
-  const labels={connected:'connected snapshot',not_connected:'no connector',source_failed:'configured source failed',stale:'stale snapshot',unavailable:'unavailable'};
+  const labels={connected:'connected snapshot',directory_only:'publisher directory only',not_connected:'no connector',source_failed:'configured source failed',stale:'stale snapshot',unavailable:'unavailable'};
   target.innerHTML=`<div class="map-scroll"><div class="map-stage">${markers.map(marker=>`<button type="button" class="map-marker ${marker.state}${snapshot.games.find(game=>game.id===selected)?.venue.id===marker.id?' selected':''}" style="left:${marker.x/10}%;top:${marker.y/5.7}%" data-venue-id="${esc(marker.id)}" data-game-id="${esc(marker.gameId)}" title="${esc(marker.name)}" aria-label="${esc(marker.name)}: camera ${esc(labels[marker.camera])}, road ${esc(labels[marker.road])}. Open ${esc(marker.gameTitle||'venue')}"></button>`).join('')}</div></div>`;
   target.querySelectorAll('.map-marker').forEach(button=>button.addEventListener('click',()=>{
     if(!button.dataset.gameId)return;

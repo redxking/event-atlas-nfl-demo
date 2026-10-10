@@ -3,6 +3,8 @@ const iso=value=>{const time=Date.parse(value);return Number.isFinite(time)?new 
 const source=(url,label='Source')=>{try{const parsed=new URL(url);return parsed.protocol==='https:'?`[${clean(label)}](${parsed.href.replace(/[()]/g,encodeURIComponent)})`:'Source link unavailable'}catch{return 'Source link unavailable'}};
 const line=(label,value)=>`- **${label}:** ${clean(value)||'not supplied'}`;
 const section=(title,rows,empty)=>[`## ${title}`,rows.length?rows.join('\n'):empty,''].join('\n');
+const sourceState=(picture,name)=>picture.sources?.find(item=>item.name===name)?.state||'source state unavailable';
+const screenedCount=(count,state,accepted)=>accepted.includes(state)?`${count??0} in completed source screen`:`unavailable (${state})`;
 
 export function buildNflPublicReport(bundle){
   if(bundle?.schema!=='event-atlas.public-evidence-bundle.v1'||!bundle.event||!bundle.venue||!bundle.picture)throw Error('Current NFL public evidence bundle required');
@@ -24,10 +26,10 @@ export function buildNflPublicReport(bundle){
     '',
     '## Review summary',
     line('Assessment','Severity not assessed; confidence not assessed'),
-    line('NWS alert review candidates',bundle.reportMonitoringMode==='season_planning'?'not checked outside near-term window':picture.cueCounts?.weather??0),
-    line('SPC forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.outlook??0),
-    line('WPC rainfall forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.rainfall??0),
-    line('Roadway time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.road??0),
+    line('NWS alert review candidates',bundle.reportMonitoringMode==='season_planning'?'not checked outside near-term window':screenedCount(picture.cueCounts?.weather,sourceState(picture,'NWS point alerts'),['checked'])),
+    line('SPC forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':screenedCount(picture.cueCounts?.outlook,picture.convectiveOutlook?.state||'source state unavailable',['published outlook at kickoff','no point match in current Day 1–3 outlook'])),
+    line('WPC rainfall forecast review candidates',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':screenedCount(picture.cueCounts?.rainfall,picture.excessiveRainOutlook?.state||'source state unavailable',['published outlook at kickoff','no point match in current Day 1–3 outlook'])),
+    line('Roadway time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':screenedCount(picture.cueCounts?.road,sourceState(picture,'Road conditions'),['time screened'])),
     ...(event.id==='nfl:401872987'?[line('Saints pregame and DOTD published-window overlaps',picture.saintsAccessComparison?.state==='unavailable'?'unavailable':picture.cueCounts?.accessPlan??0)]:[]),
     line('Transit alert time overlaps',bundle.reportMonitoringMode==='season_planning'?'not screened outside near-term window':picture.cueCounts?.transit??0),
     bundle.reportMonitoringMode==='season_planning'?'Event-window checks have not started. Current source records are planning context and do not establish conditions at kickoff.':'These counts are bounded source review cues. They do not establish event impact, a person at risk, or a threat.',

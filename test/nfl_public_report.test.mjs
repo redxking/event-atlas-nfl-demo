@@ -13,6 +13,27 @@ test('public report binds event, current source cues, records, gaps, and source 
   assert.match(report,/not an incident chronology/);
 });
 
+test('review summary does not turn failed or unscreenable sources into zero findings',()=>{
+  const failed=structuredClone(bundle);
+  failed.picture.sources.push({name:'NWS point alerts',state:'source failed'});
+  failed.picture.sources[0].state='stale';
+  failed.picture.convectiveOutlook={state:'stale or unavailable'};
+  failed.picture.excessiveRainOutlook={state:'outside published Day 1–3 window'};
+  const report=buildNflPublicReport(failed);
+  assert.match(report,/NWS alert review candidates:\*\* unavailable \(source failed\)/);
+  assert.match(report,/SPC forecast review candidates:\*\* unavailable \(stale or unavailable\)/);
+  assert.match(report,/WPC rainfall forecast review candidates:\*\* unavailable \(outside published Day 1–3 window\)/);
+  assert.match(report,/Roadway time overlaps:\*\* unavailable \(stale\)/);
+  const screened=structuredClone(failed);
+  screened.picture.sources.find(item=>item.name==='NWS point alerts').state='checked';
+  screened.picture.sources[0].state='time screened';
+  screened.picture.convectiveOutlook.state='no point match in current Day 1–3 outlook';
+  screened.picture.excessiveRainOutlook.state='no point match in current Day 1–3 outlook';
+  const completed=buildNflPublicReport(screened);
+  assert.match(completed,/NWS alert review candidates:\*\* 0 in completed source screen/);
+  assert.match(completed,/Roadway time overlaps:\*\* 1 in completed source screen/);
+});
+
 test('Packers exact-game report attributes announced people and flyover without claiming attendance',()=>{
   const selected=structuredClone(bundle);
   selected.event.id='nfl:401872990';

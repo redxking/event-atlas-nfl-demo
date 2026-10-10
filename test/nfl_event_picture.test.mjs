@@ -23,6 +23,12 @@ test('event picture preserves source-linked review cues without making a threat 
   assert.ok(picture.gaps.some(gap=>gap.includes('active jurisdictional police alert')));
 });
 
+test('malformed NWS alert payload remains a source failure in the event picture',()=>{
+  const picture=buildNflEventPicture(game,{...inputs,conditions:{at:now,alerts:{features:null}}},now);
+  assert.equal(picture.sources.find(item=>item.name==='NWS point alerts').state,'source failed');
+  assert.equal(picture.cueCounts.weather,0);
+});
+
 test('Denver delayed crime aggregate appears as context without generating a threat cue',()=>{
   const denverGame={...game,venue:{id:'3937',lat:39.743888888,lon:-105.02}};
   const police={state:'retrieved',checkedAt:now,context:{nearby:4800,start:'2026-09-02',end:'2026-10-02',radiusKm:5,sourceLatestAt:now-24*3600000,sourceLagHours:24,checkedAt:now}};
