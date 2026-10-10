@@ -1,4 +1,4 @@
-import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-64';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=20261010-65';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
 
@@ -31,6 +31,7 @@ export function buildNflEvidenceBundle(game,inputs={},now=Date.now()){
     },
     publicObservations:{
       gameArticle:picture.gameArticle,
+      clubAnnouncedPeople:picture.announcedPeople,
       selectedGameDirectCheck:picture.directGame,
       nflHeadlines:{state:news.state,coverage:news.coverage,sourceUrl:news.sourceUrl,sources:news.sources,articles:news.articles},
       weather:Array.isArray(alerts)?alerts.map(feature=>{const p=feature.properties||{};return {sourceId:feature.id||null,sourceUrl:p['@id']||null,event:p.event||null,severity:p.severity||null,urgency:p.urgency||null,status:p.status||null,effective:p.effective||null,ends:p.ends||p.expires||null}}):null,
