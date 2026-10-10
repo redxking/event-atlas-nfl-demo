@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildLocalAiPacket,generateLocalAiDraft,validateLocalAiDraft} from '../lib/local_ai_brief.mjs';
+import {buildCitedLocalAiTriage,buildLocalAiPacket,generateLocalAiDraft,validateLocalAiDraft} from '../lib/local_ai_brief.mjs';
 import fs from 'node:fs';
 import {selectChiefsGameCenter} from '../site/chiefs_game_center.js';
 import {selectRidekcArrowhead} from '../site/ridekc_arrowhead.js';
@@ -242,6 +242,16 @@ test('local model result must cite supplied evidence IDs',()=>{
   assert.throws(()=>validateLocalAiDraft(`${longRanking},X1`,expanded),/unknown/);
 });
 
+test('cited triage copies the exact selected source row and rejects a substituted claim',()=>{
+  const packet=buildLocalAiPacket(brief);
+  const draft=validateLocalAiDraft('C1,S1,G1',packet);
+  const triage=buildCitedLocalAiTriage(packet,draft);
+  assert.equal(triage.selected[0].sourceText,packet.evidence[0].text);
+  assert.equal(triage.selected[0].sourceUrl,packet.evidence[0].sourceUrl);
+  assert.equal(triage.assessment.personRisk,'not_assessed');
+  assert.throws(()=>buildCitedLocalAiTriage(packet,{selectedEvidence:[{...draft.selectedEvidence[0],text:'Confirmed threat'}],coverageGaps:[]}),/no longer matches/);
+});
+
 test('local Ollama request fixes model and endpoint without private fields',async()=>{
   const packet=buildLocalAiPacket(brief);
   let called=false;
@@ -251,4 +261,7 @@ test('local Ollama request fixes model and endpoint without private fields',asyn
   assert.equal(result.schema,'event-atlas.local-ai-draft.v4');
   assert.deepEqual(result.draft.selectedEvidence,packet.evidence);
   assert.equal(result.publicPacketSha256.length,64);
+  assert.equal(result.triage.status,'ai_selected_application_composed_unreviewed');
+  assert.deepEqual(result.triage.selected.map(item=>item.sourceText),packet.evidence.map(item=>item.text));
+  assert.equal(result.triage.assessment.severity,'not_assessed');
 });
