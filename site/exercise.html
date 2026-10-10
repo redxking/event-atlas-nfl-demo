@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="author" content="Angelis Pseftis">
+  <meta name="creator" content="Angelis Pseftis">
+  <title>Event Atlas | Simulated Briefing Desk</title>
+  <link rel="stylesheet" href="exercise.css?v=20261010-1">
+  <script type="module" src="exercise_app.js?v=20261010-1"></script>
+</head>
+<body>
+  <header class="topbar"><a href="./" class="brand"><span class="brand-mark">EA</span><span>EVENT ATLAS <small>SIMULATED BRIEFING DESK</small></span></a><a href="./">Public NFL demo ↗</a></header>
+  <div class="mode-banner" role="status">SIMULATED EXERCISE · All events, people, agencies, observations, and assessments on this page are fictional.</div>
+  <main>
+    <section class="intro"><p class="eyebrow">EVENT BRIEFING DESK / TRAINING TENANT</p><h1>Follow the evidence.<br><em>Keep the decision human.</em></h1><p>Replay three fictional event stories. Reveal source records, inspect competing explanations, preview a monitoring-area change, and export a point-in-time exercise report. Every record is isolated from the public NFL briefings.</p><p class="meta" id="exercise-clock">Loading exercise clock…</p></section>
+    <nav class="scenario-nav" id="scenario-nav" aria-label="Exercise scenarios"></nav>
+    <div id="load-state" role="status">Loading fictional scenarios…</div>
+    <div id="exercise-workspace" hidden>
+      <section class="event-head"><div><p class="eyebrow" id="event-jurisdiction"></p><h2 id="event-title"></h2><p id="event-place"></p></div><div class="status-card"><span>EXERCISE STATUS</span><strong id="event-state"></strong><small id="event-start"></small></div></section>
+      <section class="controls" aria-label="Exercise playback"><div><strong id="step-label"></strong><p>Records appear in scripted order. The exercise clock and every observation are fictional.</p></div><div class="buttons"><button id="reset" type="button">Reset</button><button id="next" type="button">Reveal next record</button><button id="play" type="button">Play exercise</button><button id="download" type="button">Export visible evidence</button></div></section>
+      <div class="columns"><div class="primary">
+        <section class="card"><div class="section-title"><div><p class="eyebrow">01 / SITUATION</p><h3>What the evidence supports</h3></div><span class="pill" id="candidate-state"></span></div><p class="lead" id="candidate-summary"></p><dl id="candidate-details" class="key-values"></dl><div id="candidate-evidence"></div></section>
+        <section class="card"><div class="section-title"><div><p class="eyebrow">02 / SOURCE RECORDS</p><h3>Observed in this replay</h3></div><span id="record-count" class="pill"></span></div><div id="records"></div></section>
+        <section class="card"><div class="section-title"><div><p class="eyebrow">03 / REPORT</p><h3>Versioned exercise brief</h3></div><span id="report-state" class="pill"></span></div><div id="report"></div></section>
+      </div><aside class="rail">
+        <section class="card"><p class="eyebrow">SOURCE HEALTH</p><h3>Fictional connectors</h3><div id="sources"></div></section>
+        <section class="card" id="geometry-card" hidden><p class="eyebrow">MONITORING AREA</p><h3>Exercise geometry</h3><p>The outline is schematic; it is not a real venue or security perimeter.</p><svg id="area-map" role="img" aria-label="Schematic fictional monitoring area" viewBox="0 0 320 220"></svg><p id="area-note"></p><button id="area-toggle" type="button">Preview expanded area</button></section>
+        <section class="card"><p class="eyebrow">DATA MODE</p><h3>Exercise only</h3><p>These scripted records do not enter the live NFL schedule, public change feed, operational cases, or real person profiles. Severity and confidence shown here are fictional scenario labels.</p></section>
+      </aside></div>
+    </div>
+  </main>
+  <footer>EVENT ATLAS / SIMULATED EXERCISE · No operational threat finding or approved notice is produced.</footer>
+</body>
+</html>

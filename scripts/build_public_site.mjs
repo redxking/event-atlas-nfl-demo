@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import {validateExerciseCatalog} from '../site/exercise_scenarios.js';
 const root=path.resolve(import.meta.dirname,'..');
 const sports=JSON.parse(await fs.readFile(path.join(root,'data/sports_events.json'),'utf8'));
 const source=sports.sources.find(item=>item.id==='nfl');
@@ -14,4 +15,6 @@ if(games.length!==source.records||new Set(games.map(game=>game.id)).size!==games
 const out={builtAt:new Date().toISOString(),source:{name:source.name,url:source.dataset,status:source.status,reportedTotal:source.reportedTotal,usGames:games.length,internationalExcluded:source.excludedInternational,snapshotRetrievedAt:sports.retrievedAt},games};
 await fs.mkdir(path.join(root,'site'),{recursive:true});
 await fs.writeFile(path.join(root,'site/nfl.json'),JSON.stringify(out));
+const exercise=validateExerciseCatalog(JSON.parse(await fs.readFile(path.join(root,'data/demo_scenarios.json'),'utf8')));
+await fs.writeFile(path.join(root,'site/exercise_scenarios.json'),JSON.stringify(exercise)+'\n');
 console.log(`Built public NFL snapshot: ${games.length} games, ${new Set(games.map(game=>game.venue.id)).size} venues`);
