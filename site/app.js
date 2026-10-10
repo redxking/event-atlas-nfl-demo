@@ -25,7 +25,7 @@ import {selectSeptaForGame,septaAlertsPage} from './septa_b_alerts.js';
 import {buildExerciseBrief,exerciseStages} from './demo_exercise.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-1';
 import {shouldAdoptPublishedSnapshot} from './published_snapshot_refresh.js';
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-5';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-6';
 import {fetchSelectedGame} from './espn_game_summary.js?v=20261010-2';
 import {parseTennesseeRoadEvents,tennesseeRoadLayer,tennesseeRoadQuery} from './tennessee_road_events.js?v=20261009-1';
 const $=id=>document.getElementById(id);
@@ -611,7 +611,8 @@ async function refreshPublishedSnapshots(){
     {id:'wpcRain',file:'wpc_rain_outlooks.json',key:'byVenue',get:()=>wpcRainSnapshot,set:value=>{wpcRainSnapshot=value}},
     {id:'airspace',file:'seams.json',key:'byGame',get:()=>seamsSnapshot,set:value=>{seamsSnapshot=value}},
     {id:'tfr',file:'tfr.json',key:'byVenue',get:()=>tfrSnapshot,set:value=>{tfrSnapshot=value}},
-    {id:'septa',file:'septa_b_alerts.json',key:'alerts',clock:'retrievedAt',get:()=>septaSnapshot,set:value=>{septaSnapshot=value}}
+    {id:'septa',file:'septa_b_alerts.json',key:'alerts',clock:'retrievedAt',get:()=>septaSnapshot,set:value=>{septaSnapshot=value}},
+    {id:'phillyAlerts',file:'philly_city_alerts.json',key:'context',get:()=>phillyAlertsSnapshot,set:value=>{phillyAlertsSnapshot=value}}
   ];
   try{
     const results=await Promise.allSettled(feeds.map(feed=>json(feed.file,15000)));
@@ -649,6 +650,7 @@ async function refreshPublishedSnapshots(){
       if(changed.has('airspace'))renderAirspace(game);
       if(changed.has('tfr'))renderTfr(game);
       if(changed.has('septa'))renderTransit(game);
+      if(changed.has('phillyAlerts')&&game.venue.id==='3806')renderPublicSafety(game);
       if(changed.size)renderBrief(game);
     }
   }finally{publicationRefreshPending=false}

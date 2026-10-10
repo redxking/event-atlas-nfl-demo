@@ -16,6 +16,16 @@ test('new source cue is linked only across comparable current checks',()=>{
   assert.equal(diffEventPicture(picture('source failed'),picture('checked',[weatherCue]),null,null,game,game).filter(item=>item.kind==='newly_displayed_cue').length,0);
 });
 
+test('Philadelphia notice changes are reported only across complete city checks, without clearance claims',()=>{
+  const notice={title:'Citywide notice',detail:'Initial text',url:'https://www.phila.gov/notice'};
+  const city=alerts=>({state:'retrieved',alerts,sourceUrl:'https://api.phila.gov/phila/site-wide-alerts/v1'});
+  const before={...picture('checked'),citywideAlertsContext:city([notice])};
+  const after={...picture('checked'),citywideAlertsContext:city([{...notice,detail:'Updated text'},{title:'New notice',detail:'New text',url:'https://www.phila.gov/new'}])};
+  assert.deepEqual(diffEventPicture(before,after,null,null,game,game).map(item=>item.kind),['city_notice_changed','new_city_notice']);
+  assert.equal(diffEventPicture(after,before,null,null,game,game).some(item=>/resolved|cleared/.test(item.kind)),false);
+  assert.equal(diffEventPicture({...before,citywideAlertsContext:{...city([notice]),state:'partial'}},after,null,null,game,game).some(item=>item.kind==='new_city_notice'),false);
+});
+
 test('schedule change blocks old-window cue comparison',()=>{
   const moved={...game,kickoff:'2026-10-11T21:00:00Z'};
   const changes=diffEventPicture(picture('checked'),picture('checked',[weatherCue]),null,null,game,moved);

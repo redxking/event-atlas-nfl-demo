@@ -1,4 +1,4 @@
-import {diffEventPicture} from './event_picture_changes.js?v=20261010-5';
+import {diffEventPicture} from './event_picture_changes.js?v=20261010-6';
 import {selectNflNews} from './nfl_news_context.js';
 
 const schema='event-atlas.published-report-state.v3';
@@ -7,7 +7,7 @@ const validPrior=(prior,game,now)=>prior?.schema===schema&&prior.eventId===game.
 
 export function buildPublishedReportState(bundle,game,newsSnapshot,prior=null,now=Date.now()){
   const news=selectNflNews(game,newsSnapshot,now);
-  const picture={eventId:game.id,sources:bundle.picture.sources.slice(0,50),cues:bundle.picture.cues.slice(0,50),forecastContext:bundle.picture.forecastContext,gameArticle:bundle.picture.gameArticle};
+  const picture={eventId:game.id,sources:bundle.picture.sources.slice(0,50),cues:bundle.picture.cues.slice(0,50),forecastContext:bundle.picture.forecastContext,gameArticle:bundle.picture.gameArticle,citywideAlertsContext:bundle.picture.citywideAlertsContext};
   const comparable=validPrior(prior,game,now);
   const changes=comparable?diffEventPicture(prior.picture,picture,prior.news,news,prior.game,game,new Date(now).toISOString()):[];
   const history=comparable?[...changes,...prior.changes].slice(0,30):[];

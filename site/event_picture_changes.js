@@ -39,5 +39,13 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     const oldUrls=new Set(previousNews.articles.map(item=>item.url));
     for(const item of currentNews.articles)if(!oldUrls.has(item.url))changes.push({kind:'newly_displayed_headline',observedAt,title:item.title,detail:`${item.publisher} RSS team mention, published ${item.publishedAt}. Verify that the article concerns this game; it does not establish attendance or a threat.`,sourceUrl:item.url});
   }
+  const oldCity=before.citywideAlertsContext,newCity=after.citywideAlertsContext;
+  if(oldCity?.state==='retrieved'&&newCity?.state==='retrieved'&&Array.isArray(oldCity.alerts)&&Array.isArray(newCity.alerts)&&oldCity.alerts.length<=20&&newCity.alerts.length<=20){
+    const oldNotices=new Map(oldCity.alerts.map(item=>[JSON.stringify([item.title,item.url]),item]));
+    for(const item of newCity.alerts.slice(0,4)){
+      const previous=oldNotices.get(JSON.stringify([item.title,item.url]));
+      if(!previous||previous.detail!==item.detail)changes.push({kind:previous?'city_notice_changed':'new_city_notice',observedAt,title:`Philadelphia city notice: ${item.title}`,detail:'A city website-wide notice was added or its displayed text changed between two checked snapshots. Verify its current content and event relevance; this is not a stadium incident, impact, or threat finding.',sourceUrl:item.url||newCity.sourceUrl||null});
+    }
+  }
   return changes.slice(0,12);
 }
