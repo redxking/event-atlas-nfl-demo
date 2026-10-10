@@ -10,5 +10,5 @@ export function humanLabel(value) {
 }
 
 export function humanText(value){
- return String(value??'').replace(/\b(?:stale_or_unavailable|no_coverage|not_started|current_snapshot|not_assessed|reported_unreviewed|source_check_needed|updated_evidence|not_reviewed|pre_event|during_event|post_event)\b/g,humanLabel).replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\b/g,value=>new Date(value).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',timeZone:'America/New_York'})).replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g,humanLabel);
+ return String(value??'').split(/(https?:\/\/\S+)/g).map(part=>part.startsWith('http://')||part.startsWith('https://')?part:part.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g,humanLabel)).join('').replace(/\b(?:stale_or_unavailable|no_coverage|not_started|current_snapshot|not_assessed|reported_unreviewed|source_check_needed|updated_evidence|not_reviewed|pre_event|during_event|post_event)\b/g,humanLabel).replace(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\b/g,value=>new Date(value).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short',timeZone:'America/New_York'})).replace(/\b[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+\b/g,humanLabel);
 }

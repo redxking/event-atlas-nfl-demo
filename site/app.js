@@ -13,7 +13,7 @@ import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './w
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
 import {createGeographicExplorer} from './geographic_explorer.js?v=map-key-1';
 import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-key-2';
-import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=human-feeds-2';
+import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=human-feeds-4';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=20261010-6';
 import {selectWeatherContext} from './weather_relevance.js';
