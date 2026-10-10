@@ -129,6 +129,18 @@ export function diffEventPicture(before,after,previousNews,currentNews,previousG
     }
     for(const item of oldCityEvent.claims)if(!newClaims.has(item.id))changes.push({kind:'city_event_notice_unmatched',observedAt,title:`NOLA Ready festival passage no longer matches: ${item.id.replaceAll('_',' ')}`,detail:'The bounded extractor no longer matches this city passage. Verify the city page; this does not establish that an event or closure ended.',sourceUrl:cityUrl});
   }
+  const oldActive=before.nolaReadyActiveContext,newActive=after.nolaReadyActiveContext;
+  const activeUrl='https://ready.nola.gov/incident/';
+  const validActive=item=>/^[a-z0-9_-]{3,120}$/.test(item?.id||'')&&typeof item.title==='string'&&item.title.length>=3&&item.title.length<=180&&item.url===`${activeUrl}${item.id}/`;
+  if(!eventWindowChanged&&currentGame?.venue?.id==='3493'&&oldActive?.state==='current_index'&&newActive?.state==='current_index'&&oldActive.sourceUrl===activeUrl&&newActive.sourceUrl===activeUrl&&Number.isFinite(Date.parse(oldActive.asOf))&&Date.parse(newActive.asOf)>Date.parse(oldActive.asOf)&&Array.isArray(oldActive.entries)&&Array.isArray(newActive.entries)&&oldActive.entries.length<=20&&newActive.entries.length<=20&&oldActive.entries.every(validActive)&&newActive.entries.every(validActive)){
+    const prior=new Map(oldActive.entries.map(item=>[item.id,item]));
+    const next=new Map(newActive.entries.map(item=>[item.id,item]));
+    for(const item of newActive.entries){
+      const old=prior.get(item.id);
+      if(!old||old.title!==item.title)changes.push({kind:old?'city_index_title_changed':'city_index_item_added',observedAt,title:`NOLA Ready index: ${item.title}`,detail:'The city active-incident index lists this item in the newer check. Open its page to verify dates, location, current status, and event relevance. The listing is not proof of a stadium incident or threat.',sourceUrl:item.url});
+    }
+    for(const item of oldActive.entries)if(!next.has(item.id))changes.push({kind:'city_index_item_unlisted',observedAt,title:`NOLA Ready index no longer lists: ${item.title}`,detail:'The newer city index no longer lists this item. This does not prove the event or incident ended; verify its page and the issuing authority.',sourceUrl:item.url});
+  }
   const priorGeorgia=before.georgiaTrafficContext,nextGeorgia=after.georgiaTrafficContext;
   if(!eventWindowChanged&&after.eventId==='nfl:401872993'&&priorGeorgia?.state==='current_retrieval_time_basis_unverified'&&nextGeorgia?.state==='current_retrieval_time_basis_unverified'&&priorGeorgia.sourcePageUrl==='https://incidentreport.dot.ga.gov/'&&nextGeorgia.sourcePageUrl===priorGeorgia.sourcePageUrl&&Number.isFinite(Date.parse(priorGeorgia.asOf))&&Date.parse(nextGeorgia.asOf)>Date.parse(priorGeorgia.asOf)&&Array.isArray(priorGeorgia.records)&&Array.isArray(nextGeorgia.records)&&priorGeorgia.records.length<=10&&nextGeorgia.records.length<=10){
     const oldById=new Map(priorGeorgia.records.map(item=>[item.id,item]));
