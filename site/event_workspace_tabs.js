@@ -6,7 +6,10 @@ export function installEventWorkspaceTabs(target,{peopleLabel='People'}={}){
  const panels=new Map(),buttons=new Map();
  for(const [id,label] of choices){const panel=node('section');panel.id='event-view-'+id;panel.className='event-view-panel';panel.setAttribute('role','tabpanel');panel.setAttribute('aria-labelledby','event-tab-'+id);panel.tabIndex=0;panels.set(id,panel);const button=node('button',label);button.type='button';button.id='event-tab-'+id;button.setAttribute('role','tab');button.setAttribute('aria-controls',panel.id);buttons.set(id,button);nav.append(button);}
  const map=target.querySelector('.event-map-panel'),alerts=target.querySelector('#game-attention'),people=target.querySelector('#people-protection');
- if(map)panels.get('map').append(map);const notices=target.querySelector('#event-notifications');if(notices)panels.get('map').append(notices);if(alerts)panels.get('map').append(alerts);
+ if(map)panels.get('map').append(map);
+ const rail=node('aside');rail.className='event-concern-rail';rail.setAttribute('aria-label','Event assessment and notifications');
+ if(alerts)rail.append(alerts);const notices=target.querySelector('#event-notifications');if(notices)rail.append(notices);
+ if(rail.childElementCount)panels.get('map').append(rail);
  if(people)panels.get('people').append(people);
  const feeds=panels.get('feeds');feeds.append(node('h4','Source feeds'),node('p','Open a source to review its records, timestamps and event relevance. Failed or delayed sources remain visible as coverage gaps.'));
  for(const section of [...target.querySelectorAll(':scope > .source-drilldown,:scope > .event-monitoring-plan,:scope > .facts')])feeds.append(section);

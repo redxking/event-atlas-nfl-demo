@@ -3,7 +3,7 @@ import {stopDemoTracking} from './demo_tracking.js?v=palette-2';
 import {renderEventNotifications} from './event_notifications.js';
 import {appendDemoOperationalFeeds,stopDemoReplay,getDemoReplaySnapshot} from './demo_operational_feeds.js?v=replay-report-1';
 import {installBriefingGuide} from './briefing_guide.js?v=map-layers-1';
-import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=event-notifications-1';
+import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=operations-rail-1';
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitoring-2';
 import {getAdditionalSummary} from './event_catalog.js?v=event-monitoring-1';
@@ -707,7 +707,7 @@ function renderAttention(game,picture){
   if(badge){badge.textContent=summary.label;badge.dataset.tone=summary.tone;}
   renderEventNotifications($('event-notifications'),game,summary.items);
   const target=$('game-attention');if(!target)return;
-  target.innerHTML=`<h4>Threat assessment</h4>${summary.items.length?`<p>${summary.items.length} source concern${summary.items.length===1?'':'s'} require verification. Review the notifications above, map markers and event report for supporting records and decisions.</p>`:`<p class="quiet-state">${summary.screeningState==='pending'?'Source screening has not started. Event conditions are unknown.':'No flagged concerns in the reviewed feed results.'}</p>`}<p class="attention-note">Known high threats have not been established by these feeds. Potential concerns require assessment; supporting records and coverage gaps are in Source feeds.</p>`;
+  target.innerHTML=`<h4>Threat assessment</h4>${summary.items.length?`<p>${summary.items.length} source concern${summary.items.length===1?'':'s'} require verification. Review the notifications, map markers and event report for supporting records and decisions.</p>`:`<p class="quiet-state">${summary.screeningState==='pending'?'Source screening has not started. Event conditions are unknown.':'No flagged concerns in the reviewed feed results.'}</p>`}<p class="attention-note">Known high threats have not been established by these feeds. Potential concerns require assessment; supporting records and coverage gaps are in Source feeds.</p>`;
 }
 function installBriefingNavigation(){
   const detail=$('detail');

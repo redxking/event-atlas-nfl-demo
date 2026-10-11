@@ -148,7 +148,7 @@ body[data-workspace-view="event"] .detail>.read-threat-report{padding:12px 20px;
 .threat-report-dialog p{line-height:1.75;max-width:78ch}.threat-report-dialog section{margin:28px 0}.threat-report-dialog a{color:#125b91}.threat-report-dialog summary{color:#204c70}
 .threat-report-dialog .report-finding{background:#fff;border:1px solid #d5dfe8;border-left:3px solid #a96b0d;border-radius:4px;padding:12px 18px;margin:16px 0}
 .threat-report-dialog>button{background:#153c61;color:#fff;border-color:#153c61;box-shadow:0 3px 12px #12283f22}.threat-report-dialog::backdrop{background:#020a16cc;backdrop-filter:blur(3px)}
-@media(min-width:1200px){#event-view-map{display:grid;grid-template-columns:minmax(0,2.25fr) minmax(300px,.9fr);gap:24px;align-items:start}#event-view-map>.event-map-panel{grid-column:1;grid-row:1 / span 2}#event-view-map>#game-attention{grid-column:2;margin:0}#event-view-map>#event-notifications{grid-column:2;margin:0}#event-geographic-map{height:520px}}
+@media(min-width:1200px){#event-view-map{display:grid;grid-template-columns:minmax(0,2.25fr) minmax(300px,.9fr);gap:24px;align-items:start}#event-view-map>.event-map-panel{grid-column:1;grid-row:1}#event-view-map>.event-concern-rail{grid-column:2;grid-row:1}#event-geographic-map{height:520px}}
 @media(max-width:1100px){.geo-layout{grid-template-columns:1fr}.geo-layout #venue-map{height:auto;min-height:0;aspect-ratio:1.8 / 1}.geo-selection{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:750px){.geo-selection{grid-template-columns:repeat(2,minmax(0,1fr))}.event-overview-map{padding:18px}.geo-controls .read-threat-report{margin-left:0}.hero-status{min-width:0}.event-map-panel{padding:14px}.threat-report-dialog{padding:22px}.topbar .source-link{display:none}}
 @media(max-width:500px){.geo-total{flex-basis:120px;padding-bottom:16px;margin-right:10px}.geo-total strong{font-size:30px}.event-overview-map>h2{font-size:22px}.geo-controls{align-items:stretch}.geo-controls label{flex:1 1 120px}.geo-controls input{max-width:none;width:100%}.geo-controls>button{flex:1}.geo-layout{gap:18px;margin:20px 0}.event-view-tabs{gap:16px}.topbar{gap:10px;padding:0 16px}.brand{font-size:12px;gap:9px}.brand small{font-size:8px}.brand-mark{width:34px;height:34px}.hero{padding-top:24px}body[data-workspace-view="events"] .game-list{grid-template-columns:1fr}.game{padding:18px}.threat-report-dialog h2{font-size:24px}}
@@ -158,3 +158,6 @@ body[data-workspace-view="event"] .workspace-nav{margin-top:20px}
 
 /* Keep the overlay inventory accessible without covering the stadium. */
 .event-map-panel .leaflet-control-layers-toggle{width:auto;height:auto;min-height:36px;padding:8px 12px;background-image:none;font:600 13px/20px system-ui,sans-serif;color:#172b42;text-decoration:none;white-space:nowrap}.event-map-panel .leaflet-control-layers-expanded{max-width:220px;max-height:300px;overflow-y:auto}.event-map-panel .leaflet-control-layers-list{margin:0}
+
+/* Keep the assessment and notifications together at the top of the map rail. */
+.event-concern-rail{display:grid;gap:20px;align-content:start;min-width:0}.event-concern-rail>.attention-panel{margin:0}
