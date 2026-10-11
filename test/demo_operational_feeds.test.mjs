@@ -18,3 +18,20 @@ test('fixtures do not populate real findings or counts',()=>{const report=buildS
  const final=demoReplayFrame(data,100);assert.equal(final.records.length,6);assert.equal(final.medium,4);assert.equal(final.resolved,1);
  assert.equal(demoReplayFrame(data,NaN).count,0);
  });
+
+test('event report follows received replay records without promoting them into real findings',()=>{
+ for(const game of games){
+  const snapshot={eventId:game.id,count:0,updatedAt:'2026-10-10T20:00:00Z'};
+  const context={title:game.title,level:'event',games:[game],summaries:new Map(),replaySnapshot:snapshot};
+  const start=buildScopeThreatReport(context);assert.equal(start.demoBriefing.count,0);assert.equal(start.demoBriefing.records.length,0);
+  const first=buildScopeThreatReport({...context,replaySnapshot:{...snapshot,count:1}});assert.equal(first.demoBriefing.high,1);assert.equal(first.demoBriefing.medium,0);assert.equal(first.demoBriefing.records[0].eventId,game.id);assert.doesNotMatch(first.demoBriefing.decisions.join(' '),/cyber|airspace|document claim/i);
+  const complete=buildScopeThreatReport({...context,replaySnapshot:{...snapshot,count:6}});assert.equal(complete.demoBriefing.records.length,6);assert.equal(complete.demoBriefing.resolved,1);
+  for(const report of [start,first,complete]){assert.equal(report.findings.length,0);assert.equal(report.eventRollup.length,0);assert.equal(report.decisions.length,0);assert.equal(report.coverageGaps.length,0);}
+ }
+});
+
+test('replay report rejects foreign game, invalid counts and geographic rollup scope',()=>{
+ const context={title:'Scope',level:'event',games:[games[0]],summaries:new Map()};
+ for(const replaySnapshot of [{eventId:games[1].id,count:6},{eventId:games[0].id,count:-1},{eventId:games[0].id,count:7},{eventId:games[0].id,count:1.5}])assert.equal(buildScopeThreatReport({...context,replaySnapshot}).demoBriefing,null);
+ for(const level of ['national','region','state','venue'])assert.equal(buildScopeThreatReport({...context,level,replaySnapshot:{eventId:games[0].id,count:6}}).demoBriefing,null);
+});

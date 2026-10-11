@@ -28,9 +28,16 @@ export function demoReplayFrame(data,step){
  return {records,latest,count,total:data.records.length,high:high.length,medium:medium.length,resolved:resolved.length,assessment:records.length?`At ${data.venue}, ${count} fictional feed record${count===1?' has':'s have'} arrived. ${high.length?'The explicit guest-directed message requires urgent protective review.':'No high-priority record has arrived in this replay.'} ${medium.length?`${medium.length} medium-priority record${medium.length===1?' requires':'s require'} verification; no shared cause or independent corroboration is established.`:''}`:'No fictional records have arrived yet. This is the start of the replay, not an assessment of the actual event.',decisions:records.map(r=>r.owner+': '+r.action),gaps:records.map(r=>r.assessment)};
 }
 let replayTimer=null;
+const replaySnapshots=new Map();
+export function getDemoReplaySnapshot(eventId){return replaySnapshots.get(eventId)||null;}
+export function demoReplayBriefing(game,snapshot){
+ if(!snapshot||snapshot.eventId!==game?.id||!Number.isInteger(snapshot.count)||snapshot.count<0)return null;
+ const data=demoOperationalFeeds(game);if(!data||snapshot.count>data.records.length)return null;
+ return {...demoReplayFrame(data,snapshot.count),eventId:game.id,eventTitle:game.title,venue:data.venue,updatedAt:snapshot.updatedAt,classification:data.classification};
+}
 export function stopDemoReplay(){clearInterval(replayTimer);replayTimer=null;}
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-export function appendDemoOperationalFeeds(target,game){
+export function appendDemoOperationalFeeds(target,game,{onUpdate=()=>{}}={}){
  if(!target||target.querySelector('.demo-operational-feeds'))return;
  const data=demoOperationalFeeds(game);if(!data)return;
  const section=document.createElement('details');section.className='source-drilldown demo-operational-feeds';section.append(node('summary','Demo operational feeds & briefing — fictional'));
@@ -41,7 +48,7 @@ export function appendDemoOperationalFeeds(target,game){
  const content=node('div');section.append(content);let step=data.records.length,playing=false;
  const pause=()=>{stopDemoReplay();playing=false;play.textContent='Play incoming feeds';};
  const paint=()=>{
-  const frame=demoReplayFrame(data,step);status.textContent=(playing?'Replaying fictional feeds · ':'Fictional feed snapshot · ')+frame.count+' of '+frame.total+' records received';next.disabled=step>=data.records.length;content.replaceChildren();
+  const frame=demoReplayFrame(data,step);replaySnapshots.set(game.id,{eventId:game.id,count:frame.count,updatedAt:new Date().toISOString()});onUpdate();status.textContent=(playing?'Replaying fictional feeds · ':'Fictional feed snapshot · ')+frame.count+' of '+frame.total+' records received';next.disabled=step>=data.records.length;content.replaceChildren();
   if(frame.latest){const notice=node('article');notice.className='brief-cue';notice.setAttribute('aria-label','Fictional feed notification');notice.append(node('strong','Latest demo update · '+frame.latest.priority+' priority'),node('p',frame.latest.title),node('p',frame.latest.owner+' — '+frame.latest.action));content.append(notice);}
   content.append(node('h4',data.briefing.title),node('p',frame.assessment),node('p','Demo status: '+frame.high+' high priority · '+frame.medium+' medium priority · '+frame.resolved+' resolved vendor issue'));
   if(frame.count===frame.total){for(const [label,key]of [['Decisions','decisions'],['Resolved issue','resolved'],['Information gaps','gaps'],['Review point','review']])content.append(node('h5',label),node('p',data.briefing[key]));}

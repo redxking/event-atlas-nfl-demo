@@ -1,3 +1,4 @@
+import {demoReplayBriefing} from './demo_operational_feeds.js?v=replay-report-1';
 import {selectScopeChanges} from './scope_changes.js?v=history-1';
 import {sourceCoverageGap,screeningPending} from './source_coverage.js?v=coverage-1';
 import {concernIdentity} from './concern_location.js';
@@ -7,8 +8,9 @@ import {groupFindingDecisions,findingAssessment} from './finding_decision.js?v=e
 const clean=value=>humanText(String(value??'').replace(/_/g,' '));
 const time=value=>value&&Number.isFinite(Date.parse(value))?new Date(value).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'})+' ET':'Not supplied';
 const safeUrl=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)?u.href:null;}catch{return null;}};
-export function buildScopeThreatReport({title,level,games,summaries,start,end,changeFeed},now=new Date()){
+export function buildScopeThreatReport({title,level,games,summaries,start,end,changeFeed,replaySnapshot},now=new Date()){
  const changes=selectScopeChanges(games,changeFeed,now.getTime());
+ const demoBriefing=level==='event'&&games.length===1?demoReplayBriefing(games[0],replaySnapshot):null;
  const unique=new Map();let assessed=0,affected=0,urgent=0;
  for(const game of games){const summary=summaries.get(game.id);if(screeningPending(summary))continue;assessed++;if(summary.items.length)affected++;if(summary.urgent.length)urgent++;
   for(const cue of summary.items){const url=safeUrl(cue.sourceUrl);if(!url)continue;const key=concernIdentity({...cue,sourceUrl:url});if(!unique.has(key))unique.set(key,{...cue,sourceUrl:url,games:[]});if(!unique.get(key).games.some(item=>item.id===game.id))unique.get(key).games.push(game);}}
@@ -33,7 +35,7 @@ export function buildScopeThreatReport({title,level,games,summaries,start,end,ch
  const decisionGroups=groupFindingDecisions(findings);
  const decisions=decisionGroups.map(d=>`${d.title} at ${d.venue.name} — ${d.findings.length} source record${d.findings.length===1?'':'s'} linked to ${d.games.map(g=>g.title).join('; ')}. Possible consequence: ${d.impact} Responsible role: ${d.owner}. Verification: ${d.verificationSteps.map(clean).join(' ')} Escalate when: ${d.escalate} Close when: ${d.close} ${d.review}`);
 
- return {title:`${title} — Threat report`,level,generatedAt:now.toISOString(),author:'Angelis Pseftis',games,findings,eventRollup,assessments,timeline,coverageGaps,changes,decisions:decisionGroups,sections:[
+ return {title:`${title} — Threat report`,level,generatedAt:now.toISOString(),author:'Angelis Pseftis',games,findings,eventRollup,assessments,timeline,coverageGaps,changes,demoBriefing,decisions:decisionGroups,sections:[
  {heading:'Executive assessment',paragraphs:[frame,overview,...(findings.length?[`The reported issues are concentrated at ${[...new Set(affectedGames.map(g=>g.venue.name))].join(', ')}. One reported condition is ${clean(findings[0].trigger)}: ${clean(findings[0].basis)}. ${urgent?'Review the official weather instructions first.':'The available findings support verification of operational impact, not designation of a confirmed security threat.'}`]:[])]},
  {heading:'Threat and hazard rollup',paragraphs:domainNarratives.length?[...domainNarratives,...coordination]:['No event-linked threat or hazard finding is supported by the screened records in this scope.']},
  {heading:'Decisions requiring attention',paragraphs:decisions.length?decisions:['No new operational change is supported by the available findings. The unresolved coverage gaps below limit this assessment.']},
@@ -56,6 +58,16 @@ function renderReport(context){
   if(!report.findings.length)findings.append(el('p','No source concerns are available for this scope.'));
   report.findings.forEach((cue,index)=>{const item=el('article');item.className='report-finding';item.append(el('h4',`${index+1}. ${clean(cue.trigger)}`),el('p',clean(cue.basis)||'The source supplied no additional explanation.'),el('p','Affected event checks: '+cue.games.map(g=>g.title+' at '+g.venue.name+' on '+time(g.kickoff)).join('; ')),el('p','Source time: '+time(cue.sourceAt)),el('p','Next check: '+(clean(cue.action)||'Confirm event relevance with the source and responsible lead.')));const link=el('a','Review source');link.href=cue.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';item.append(link);findings.append(item);});body.append(findings);
  }}
+ if(report.demoBriefing){
+  const brief=report.demoBriefing,section=el('section');section.className='demo-replay-report';section.append(el('h3','Incoming-feed demonstration briefing — fictional'),el('p','This game-bound replay is separate from the public-source assessment and counts. Only records received so far appear below. The people examples elsewhere in this report are independent scenario examples.'),el('p','Replay updated '+time(brief.updatedAt)+' · '+brief.count+' of '+brief.total+' fictional records received'),el('p',brief.assessment),el('p','Fictional status: '+brief.high+' high priority · '+brief.medium+' medium priority · '+brief.resolved+' resolved vendor issue'));
+  if(!brief.count)section.append(el('p','Start or advance the incoming-feed story in Source feeds. No demo evidence has arrived; no demo decision is supported yet.'));
+  for(const [index,record]of brief.records.entries()){
+   const card=el('article');card.className='report-finding';card.dataset.demoRecordId=record.id;
+   card.append(el('h4','Demo record '+(index+1)+' · '+record.priority+' · '+record.title),el('p','Fictional source: '+record.source+' · Scenario observation time: '+time(record.observedAt)),el('p',record.observation),el('p','Assessment: '+record.assessment),el('p','Responsible role: '+record.owner),el('p','Decision option: '+record.action),el('p','Close when: '+record.close));section.append(card);
+  }
+  section.append(el('p','The user determines any action. Repetition, receipt acknowledgment, missing identity and overlapping records do not independently establish corroboration or a shared cause.'));
+  body.append(section);
+ }
  if(context.games.some(game=>!game.eventType||game.eventType==='nfl')){const demo=el('details');demo.append(el('summary','Demo scenario briefing — fictional people and incidents'));demo.append(el('p','The same demonstration scenario is available for each game. It is excluded from the public-source assessment and is not counted as separate real-world threats across events.'));
  const sample=demoPeopleForEvent(context.games.find(game=>!game.eventType||game.eventType==='nfl'));demo.append(el('p','The demonstration features Elena Marlow, an honorary guest, and Marcus Wren, a retired athlete. Their attendance and all associated records are fictional.'));
  for(const c of sample.cases){demo.append(el('h4',clean(c.priority)+' — '+c.title),el('p',c.connection+' '+c.confidence+'. '+c.uncertainties.join(' ')),el('p','Suggested response: '+c.options.join(' ')+' Responsible role: '+c.owner+'. Review point: '+c.checkpoint+'.'),el('p','Escalation condition: '+c.escalate+' Resolution condition: '+c.close));}body.append(demo);}
