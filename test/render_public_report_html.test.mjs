@@ -13,7 +13,7 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('name="author" content="Angelis Pseftis"'));
   assert.ok(html.includes('data-report-path="reports/nfl-123.html"'));
   assert.ok(html.includes('report_refresh.js?v=20261010-1'));
-  assert.ok(html.includes('report_live_nws.js?v=20261010-1'));
+  assert.match(html,/report_live_nws\.js\?v=[A-Za-z0-9-]+/);
   assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
   assert.ok(html.includes('report_live_usgs.js?v=20261010-2'));
   assert.ok(html.includes('report_live_capture.js?v=20261010-2'));

@@ -30,3 +30,11 @@ test('stale, malformed, partial and unknown-kickoff SEPTA data do not produce re
   assert.equal(buildNflEventPicture(game,{septa:{...snapshot,status:'partial'}},now).cueCounts.transit,0);
   assert.equal(buildNflEventPicture({...game,timeTbd:true},{septa:snapshot},now).cueCounts.transit,0);
 });
+
+test('ended SEPTA periods are retained without a current transit cue',()=>{
+ const liveNow=Date.parse(game.kickoff)+3600000;
+ const data={status:'ok',sourceAt:new Date(liveNow).toISOString(),retrievedAt:new Date(liveNow).toISOString(),alerts:[{id:'ended',header:'Fixture ended notice',periods:[{start:game.kickoff,end:new Date(liveNow).toISOString()}],sourceUrl:'https://www.septa.org/alerts/'}]};
+ const selected=selectSeptaForGame(game,data,liveNow);assert.equal(selected.alerts.length,1);assert.equal(selected.overlapCount,0);
+ assert.equal(buildNflEventPicture(game,{septa:data},liveNow).cueCounts.transit,0);
+ data.alerts[0].periods[0].end=null;assert.equal(selectSeptaForGame(game,data,liveNow).overlapCount,1);
+});

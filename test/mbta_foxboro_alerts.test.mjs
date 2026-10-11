@@ -29,3 +29,11 @@ test('evidence export marks alert records beyond its 30-record bound',()=>{
   assert.equal(out.alerts.length,30);
   assert.equal(out.omittedAlertCount,5);
 });
+
+test('ended Foxboro service notices remain records but leave current concern counts',()=>{
+ const checkedAt=Date.parse(game.kickoff)+3600000;
+ const output=summarizeMbtaFoxboroAlerts({data:[alert('ended','2026-10-18T15:00:00Z',new Date(checkedAt).toISOString()),alert('ongoing','2026-10-18T15:00:00Z',null)]},game,checkedAt);
+ assert.equal(output.alerts.length,2);assert.equal(output.overlapCount,1);
+ assert.equal(output.alerts.find(a=>a.id==='ended').eventWindowOverlap,false);
+ assert.equal(output.alerts.find(a=>a.id==='ongoing').eventWindowOverlap,true);
+});

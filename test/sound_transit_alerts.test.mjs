@@ -47,3 +47,10 @@ test('a newly added operator notice enters the change trail without a threat con
   assert.equal(changes.find(item=>item.kind==='operator_notice_added')?.sourceUrl,context.alerts.find(item=>item.eventNamed).sourceUrl);
   assert.match(changes.find(item=>item.kind==='operator_notice_added').detail,/does not establish/);
 });
+
+test('ended Sound Transit periods leave current overlap counts while open periods remain',()=>{
+ const liveNow=Date.parse(game.kickoff)+3600000;
+ const data={...snapshot,status:'ok',sourceAt:new Date(liveNow).toISOString(),retrievedAt:new Date(liveNow).toISOString(),alerts:[{id:'ended',header:'Fixture service notice',routes:['SNDR_TL'],effect:'NO_SERVICE',activePeriods:[{start:game.kickoff,end:new Date(liveNow).toISOString()}]}]};
+ const selected=selectSoundTransitAlertsForGame(game,data,liveNow);assert.equal(selected.state,'current_snapshot');assert.equal(selected.overlapCount,0);
+ data.alerts[0].activePeriods[0].end=null;assert.equal(selectSoundTransitAlertsForGame(game,data,liveNow).overlapCount,1);
+});
