@@ -1,3 +1,4 @@
+import {selectNtas} from './national_source_context.js?v=national-integrity-1';
 import {stopDemoTracking} from './demo_tracking.js?v=palette-2';
 import {renderEventNotifications} from './event_notifications.js';
 import {appendDemoOperationalFeeds,stopDemoReplay,getDemoReplaySnapshot} from './demo_operational_feeds.js?v=replay-report-1';
@@ -20,7 +21,7 @@ import {selectWeatherContext} from './weather_relevance.js?v=expiry-1';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=environment-integrity-1';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=national-integrity-1';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=environment-integrity-1';
 import {buildNflPublicReport} from './nfl_public_report.js?v=two-week-screening-1';
 import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';
@@ -239,10 +240,11 @@ async function loadSpaceWeather(){
 async function loadNtas(){
   const target=$('ntas');
   try{
-    const feed=await json('ntas.json'),age=Date.now()-Date.parse(feed.retrievedAt);
-    ntasSnapshot=feed;
+    const received=await json('ntas.json');
+    ntasSnapshot=received;
+    const feed=selectNtas(received);
     if(selected&&snapshot)renderBrief(snapshot.games.find(game=>game.id===selected));
-    if(feed.status!=='ok'||!Number.isFinite(age)||age>12*3600000||age<0){
+    if(feed.state!=='current national snapshot'){
       target.innerHTML=`<p>Advisory snapshot unavailable or more than 12 hours old. Check ${link(feed.sourceUrl||'https://www.dhs.gov/ntas/1.1/feed.xml','DHS NTAS')} directly.</p>`;
       return;
     }
