@@ -15,7 +15,7 @@ export function selectRoadContext(game,snapshot,now=Date.now()){
   const ranked=records.map(record=>{
     const from=Date.parse(record.startAt),through=Date.parse(record.endAt);
     const timed=record.timingPolicy!=='source_listed_only'&&Number.isFinite(from)&&Number.isFinite(through)&&through>=from;
-    const overlaps=canMatch&&timed&&from<=end&&through>=start;
+    const overlaps=canMatch&&timed&&from<=end&&through>=start&&through>now;
     return {...record,timed,overlaps};
   }).sort((a,b)=>Number(b.overlaps)-Number(a.overlaps)||a.distanceKm-b.distanceKm||String(a.id).localeCompare(String(b.id)));
   let timingState='matched';

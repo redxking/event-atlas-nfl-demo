@@ -1,4 +1,4 @@
-import {selectWeatherContext} from './weather_relevance.js';
+import {selectWeatherContext} from './weather_relevance.js?v=expiry-1';
 
 const HOUR=3600000;
 const allowedAlertUrl=value=>{

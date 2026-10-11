@@ -15,7 +15,7 @@ export function selectWeatherContext(game,features,retrievedAt,now=Date.now()){
     const sourceValid=(!p.status||p.status==='Actual')&&!/^cancel/i.test(p.messageType||'');
     const candidate=feedFresh&&gameReady&&sourceValid&&validWindow&&
       ['Severe','Extreme'].includes(p.severity)&&['Immediate','Expected'].includes(p.urgency)&&
-      starts<=windowEnd&&ends>=windowStart;
+      starts<=windowEnd&&ends>=windowStart&&ends>now;
     return {feature,candidate,validWindow};
   }).sort((a,b)=>Number(b.candidate)-Number(a.candidate));
   const state=!feedFresh?'stale':!gameReady?'kickoff_unavailable':'screened';

@@ -253,3 +253,13 @@ test('WPC rainfall forecast appears as a source-linked planning cue, not an asse
  assert.equal(picture.reviewQueue.items.filter(c=>c.domain==='road access').length,1);
  assert.equal(picture.reviewQueue.items.filter(c=>c.domain==='weather alert').length,0);
  });
+
+test('game briefing removes ended weather and roadway concerns without discarding source context',()=>{
+ const liveNow=Date.parse('2026-10-11T21:00:00Z');
+ const liveGame={...game,status:'in progress in source'};
+ const liveInputs={...inputs,roads:{...inputs.roads,builtAt:new Date(liveNow).toISOString(),byVenue:{3687:[{...inputs.roads.byVenue[3687][0],endAt:new Date(liveNow).toISOString()}]}},conditions:{at:liveNow,alerts:{features:[{properties:{status:'Actual',effective:'2026-10-11T19:00:00Z',ends:new Date(liveNow).toISOString(),expires:'2026-10-12T01:00:00Z',severity:'Severe',urgency:'Immediate','@id':'https://api.weather.gov/alerts/ended'}}]}}};
+ const picture=buildNflEventPicture(liveGame,liveInputs,liveNow);
+ assert.equal(picture.cueCounts.weather,0);assert.equal(picture.cueCounts.road,0);
+ assert.equal(picture.reviewQueue.items.filter(c=>['weather alert','road access'].includes(c.domain)).length,0);
+ assert.ok(picture.sources.some(s=>s.name==='NWS point alerts'&&s.state==='checked'));
+});

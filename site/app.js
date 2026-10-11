@@ -15,12 +15,12 @@ import {createGeographicExplorer} from './geographic_explorer.js?v=operations-1'
 import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=palette-2';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=coverage-1';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
-import {selectRoadContext} from './road_relevance.js?v=20261010-6';
-import {selectWeatherContext} from './weather_relevance.js';
+import {selectRoadContext} from './road_relevance.js?v=expiry-1';
+import {selectWeatherContext} from './weather_relevance.js?v=expiry-1';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=two-week-screening-1';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=expiry-1';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=two-week-screening-1';
 import {buildNflPublicReport} from './nfl_public_report.js?v=two-week-screening-1';
 import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';

@@ -64,3 +64,13 @@ test('Tennessee source-listed events cannot become kickoff time overlaps',()=>{
   assert.equal(result.overlapCount,0);
   assert.equal(result.records[0].timed,false);
 });
+
+test('ended road windows remain source context without current overlap counts',()=>{
+ const liveNow=Date.parse('2026-10-11T21:00:00Z');
+ for(const endAt of ['2026-10-11T20:59:59Z','2026-10-11T21:00:00Z']){
+  const data={...snapshot,builtAt:new Date(liveNow).toISOString(),byVenue:{stadium:[{id:'ended',distanceKm:1,startAt:'2026-10-11T18:00:00Z',endAt}]}};
+  const result=selectRoadContext({...game,status:'in progress in source'},data,liveNow);
+  assert.equal(result.timingState,'matched');assert.equal(result.overlapCount,0);
+  assert.equal(result.records.length,1);assert.equal(result.records[0].overlaps,false);
+ }
+});

@@ -40,3 +40,14 @@ test('stale, TBD, cancelled, nonactual, low urgency, and invalid windows do not 
   ];
   for(const [event,features,at] of cases)assert.equal(selectWeatherContext(event,features,at,now).candidateCount,0);
 });
+
+test('ended weather hazards leave current concern counts even when their window overlaps the game',()=>{
+ const liveGame={...game,kickoff:'2026-10-11T12:00:00Z',status:'in progress in source'};
+ for(const ends of ['2026-10-11T13:59:59Z','2026-10-11T14:00:00Z']){
+  const record=feature({effective:'2026-10-11T13:00:00Z',ends,expires:'2026-10-11T20:00:00Z'});
+  const result=selectWeatherContext(liveGame,[record],now,now);
+  assert.equal(result.state,'screened');assert.equal(result.candidateCount,0);
+  assert.equal(result.alerts[0].feature,record);assert.equal(result.alerts[0].candidate,false);
+ }
+ assert.equal(selectWeatherContext(liveGame,[feature({effective:'2026-10-11T13:00:00Z',ends:'2026-10-11T14:00:01Z'})],now,now).candidateCount,1);
+});

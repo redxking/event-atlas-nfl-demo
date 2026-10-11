@@ -1,6 +1,6 @@
 import {selectDenverEventPlan} from './denver_event_plan.js';
 import {selectSofiContext} from './sofi_context.js';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=two-week-screening-1';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=expiry-1';
 import {buildVenueZoneRegistry} from './zone_registry.js';
 import {selectNflNews} from './nfl_news_context.js?v=20261010-3';
 import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';
