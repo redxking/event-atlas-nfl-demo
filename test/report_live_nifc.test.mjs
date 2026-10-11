@@ -32,7 +32,7 @@ test('direct NIFC refuses incomplete or stale checks rather than reporting zero 
 
 test('published report includes the direct NIFC panel and module',()=>{
   const html=renderPublicReportHtml('# Report',{title:'Report',generatedAt:new Date(now).toISOString(),markdownPath:'nfl-42.md',liveContext:{monitoringMode:context.monitoringMode,lat:context.lat,lon:context.lon,kickoff:context.kickoff,status:context.status}});
-  assert.ok(html.includes('report_live_nifc.js?v=20261010-4'));
+  assert.match(html,/report_live_nifc\.js\?v=[A-Za-z0-9-]+/);
   assert.ok(html.includes('id="direct-nifc"'));
 });
 
