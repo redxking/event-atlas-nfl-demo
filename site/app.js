@@ -14,7 +14,7 @@ import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './w
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
 import {createGeographicExplorer} from './geographic_explorer.js?v=state-labels-1';
 import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-layers-1';
-import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=coverage-1';
+import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=operations-refinement-1';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=expiry-1';
 import {selectWeatherContext} from './weather_relevance.js?v=expiry-1';
