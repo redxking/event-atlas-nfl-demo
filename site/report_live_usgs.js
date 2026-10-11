@@ -1,4 +1,4 @@
-import {selectUsgsForGame,usgsSourceUrl} from './usgs_nfl.js?v=20261010-1';
+import {selectUsgsForGame,usgsSourceUrl} from './usgs_nfl.js?v=usgs-integrity-1';
 
 const HOUR=3600000;
 

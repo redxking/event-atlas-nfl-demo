@@ -10,15 +10,18 @@ export function selectUsgsForGame(game,conditions,now=Date.now(),monitoringMode=
   const publisherAt=feed.metadata?.generated;
   if(publisherAt!==undefined&&(!Number.isFinite(publisherAt)||publisherAt>now+60000||now-publisherAt>HOUR))return {state:'stale_or_unavailable',asOf:null,sourceUrl:usgsSourceUrl,events:[]};
   const lat=game?.venue?.lat,lon=game?.venue?.lon;
-  if(!Number.isFinite(lat)||!Number.isFinite(lon))return {state:'not_screenable',asOf:new Date(at).toISOString(),sourceUrl:usgsSourceUrl,events:[]};
+  if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat< -90||lat>90||lon< -180||lon>180)return {state:'not_screenable',asOf:new Date(at).toISOString(),sourceUrl:usgsSourceUrl,events:[]};
+  let invalidCount=0;const seen=new Set();
   const events=features.flatMap(feature=>{
     const p=feature?.properties,coordinates=feature?.geometry?.coordinates;
-    if(feature?.geometry?.type!=='Point'||!Array.isArray(coordinates))return [];
+    if(feature?.geometry?.type!=='Point'||!Array.isArray(coordinates)||coordinates.length<2){invalidCount++;return [];}
     const [pointLon,pointLat]=coordinates,occurred=p?.time,sourceUrl=eventUrl(p?.url);
-    if(typeof feature.id!=='string'||!sourceUrl||!Number.isFinite(pointLat)||!Number.isFinite(pointLon)||pointLat< -90||pointLat>90||pointLon< -180||pointLon>180||!Number.isFinite(occurred)||occurred>now+60000||now-occurred>7*24*HOUR||!Number.isFinite(p.mag)||p.mag<2.5)return [];
+    if(typeof feature.id!=='string'||!feature.id||seen.has(feature.id)||!sourceUrl||!Number.isFinite(pointLat)||!Number.isFinite(pointLon)||pointLat< -90||pointLat>90||pointLon< -180||pointLon>180||!Number.isFinite(occurred)||!Number.isFinite(new Date(occurred).getTime())||occurred>now+60000||!Number.isFinite(p.mag)||p.mag<0||p.mag>10||(p.updated!=null&&(!Number.isFinite(p.updated)||!Number.isFinite(new Date(p.updated).getTime())||p.updated>now+60000))){invalidCount++;return [];}
+    seen.add(feature.id);
+    if(now-occurred>7*24*HOUR||p.mag<2.5)return [];
     const distanceKm=Math.round(distance(lat,lon,pointLat,pointLon)*10)/10;
     if(distanceKm>250)return [];
     return [{sourceId:feature.id,sourceUrl,title:String(p.title||'USGS earthquake').slice(0,240),magnitude:p.mag,occurredAt:new Date(occurred).toISOString(),updatedAt:Number.isFinite(p.updated)?new Date(p.updated).toISOString():null,distanceKm,point:[pointLon,pointLat]}];
   }).sort((a,b)=>a.distanceKm-b.distanceKm||Date.parse(b.occurredAt)-Date.parse(a.occurredAt)).slice(0,3);
-  return {state:'current_snapshot',asOf:new Date(at).toISOString(),publisherAt:Number.isFinite(publisherAt)?new Date(publisherAt).toISOString():null,sourceUrl:usgsSourceUrl,events,interpretation:'Magnitude 2.5+ events in the bounded weekly USGS feed within 250 km of an unreviewed venue point. A nearby source point does not establish local shaking, damage, venue impact, or a threat.'};
+  return {state:invalidCount?'partial_source_data':'current_snapshot',invalidCount,asOf:new Date(at).toISOString(),publisherAt:Number.isFinite(publisherAt)?new Date(publisherAt).toISOString():null,sourceUrl:usgsSourceUrl,events,interpretation:'Magnitude 2.5+ events in the bounded weekly USGS feed within 250 km of an unreviewed venue point. A nearby source point does not establish local shaking, damage, venue impact, or a threat.'};
 }

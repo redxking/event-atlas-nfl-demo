@@ -21,7 +21,7 @@ import {selectWeatherContext} from './weather_relevance.js?v=expiry-1';
 import {summarizeCoverage} from './coverage_summary.js?v=20261010-9';
 import {seattleCallQueries,summarizeSeattleCalls,seattleCallsLayer,seattleCallsViewer} from './public_safety_relevance.js?v=20261010-1';
 import {arlingtonPoliceLayer,arlingtonAggregateQueries,summarizeArlingtonAggregate} from './arlington_police_aggregate.js?v=20261010-1';
-import {buildNflEventPicture} from './nfl_event_picture.js?v=national-integrity-1';
+import {buildNflEventPicture} from './nfl_event_picture.js?v=usgs-integrity-1';
 import {buildNflEvidenceBundle} from './nfl_evidence_bundle.js?v=environment-integrity-1';
 import {buildNflPublicReport} from './nfl_public_report.js?v=two-week-screening-1';
 import {buildNflRelationshipLedger} from './nfl_relationship_ledger.js?v=20261010-1';
@@ -44,7 +44,7 @@ import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v
 import {fetchNwsStationObservation} from './nws_observation.js?v=station-integrity-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
-import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';
+import {selectUsgsForGame} from './usgs_nfl.js?v=usgs-integrity-1';
 import {selectSeptaForGame,septaAlertsPage} from './septa_b_alerts.js?v=expiry-2';
 import {selectNjTransitRailForGame,njTransitRailPage} from './njtransit_event_rail.js?v=20261010-2';
 import {selectNj511ForGame,nj511EventsPage} from './nj511_events.js';
@@ -803,8 +803,8 @@ async function loadConditions(game,force=false){
       weather.alerts.map(({feature:item,candidate})=>`<div class="alert"><strong>${candidate?'<span class="time-match">TIME-ALIGNED NWS ALERT · REVIEW</span> ':''}${esc(item.properties?.event||'Alert')}</strong><br>${esc(item.properties?.severity||'Severity not supplied')} · ${esc(item.properties?.urgency||'Urgency not supplied')} · ${item.properties?.effective?esc(fmt(item.properties.effective)):'start not supplied'} to ${item.properties?.ends||item.properties?.expires?esc(fmt(item.properties.ends||item.properties.expires)):'end not supplied'} · ${link(item.properties?.['@id']||item.id,'NWS source')}</div>`).join(''))+
     `<p class="feed-state">NWS NEARBY STATION · ${result.observation?.state==='current_station_observation'?'OBSERVED '+esc(fmt(result.observation.observedAt)):'UNAVAILABLE OR STALE'}</p>`+
     (result.observation?.state==='current_station_observation'?`<p>${esc(result.observation.stationName)} · ${esc(result.observation.distanceKm)} km from venue candidate point · ${esc(result.observation.description||'description unavailable')} · ${result.observation.temperatureC==null?'temperature unavailable':esc(result.observation.temperatureC)+' °C'} · ${result.observation.windKmh==null?'wind unavailable':esc(result.observation.windKmh)+' km/h'} · ${result.observation.humidityPercent==null?'humidity unavailable':esc(result.observation.humidityPercent)+'% relative humidity'}. ${link(result.observation.sourceUrl,'Timestamped NWS record')}</p><p>Nearby station reading, not a stadium measurement or event impact.</p>`:`<p>${esc(result.observation?.reason||'Current station reading unavailable')}. No current venue condition can be inferred.</p>`)+
-    `<p class="feed-state">USGS EARTHQUAKES · ${usgsContext.state==='current_snapshot'?'RETRIEVED '+esc(fmt(usgsContext.asOf))+' · PAST SEVEN DAYS':'UNAVAILABLE OR NOT SCREENED'}</p>`+
-    (usgsContext.state!=='current_snapshot'?`<p>Current bounded USGS context unavailable. ${link(usgsContext.sourceUrl,'USGS feed')}</p>`:quakes.length?quakes.map(item=>`<p>${esc(humanText(item.title))} · magnitude ${esc(item.magnitude)} · ${esc(item.distanceKm)} km from candidate venue point · occurred ${esc(fmt(item.occurredAt))} · ${link(item.sourceUrl,'USGS record')}</p>`).join(''):'<p>No magnitude 2.5+ event returned within 250 km in this bounded weekly sample. This is not an all-clear.</p>')+
+    `<p class="feed-state">USGS EARTHQUAKES · ${['current_snapshot','partial_source_data'].includes(usgsContext.state)?(usgsContext.invalidCount?'PARTIAL SOURCE DATA · ':'')+'RETRIEVED '+esc(fmt(usgsContext.asOf))+' · PAST SEVEN DAYS':'UNAVAILABLE OR NOT SCREENED'}</p>`+
+    (!['current_snapshot','partial_source_data'].includes(usgsContext.state)?`<p>Current bounded USGS context unavailable. ${link(usgsContext.sourceUrl,'USGS feed')}</p>`:quakes.length?quakes.map(item=>`<p>${esc(humanText(item.title))} · magnitude ${esc(item.magnitude)} · ${esc(item.distanceKm)} km from candidate venue point · occurred ${esc(fmt(item.occurredAt))} · ${link(item.sourceUrl,'USGS record')}</p>`).join(''):usgsContext.invalidCount?'<p>No usable nearby record could be selected from this incomplete source sample. Verify the USGS feed directly.</p>':'<p>No magnitude 2.5+ event returned within 250 km in this bounded weekly sample. This is not an all-clear.</p>')+
     '<div id="forecast"><p>Checking the NWS hourly forecast window…</p></div>';
   loadForecast(game,requestSerial);
   }finally{if(conditionsPendingFor?.serial===requestSerial)conditionsPendingFor=null;if(selected===id&&requestSerial===conditionsRequestSerial&&button){button.disabled=false;button.textContent='Check public conditions now'}}
