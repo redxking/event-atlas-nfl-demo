@@ -143,3 +143,6 @@ body[data-workspace-view="event"] .detail>.read-threat-report{margin-bottom:12px
 /* The selected matchup supplies the event title; avoid a second generic masthead. */
 body[data-workspace-view="event"] .hero{display:none}
 body[data-workspace-view="event"] .workspace-nav{margin-top:20px}
+
+/* Keep the overlay inventory accessible without covering the stadium. */
+.event-map-panel .leaflet-control-layers-toggle{width:auto;height:auto;min-height:36px;padding:8px 12px;background-image:none;font:600 13px/20px system-ui,sans-serif;color:#172b42;text-decoration:none;white-space:nowrap}.event-map-panel .leaflet-control-layers-expanded{max-width:220px;max-height:300px;overflow-y:auto}.event-map-panel .leaflet-control-layers-list{margin:0}

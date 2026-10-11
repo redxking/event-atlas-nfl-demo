@@ -2,7 +2,7 @@ import {selectNtas} from './national_source_context.js?v=national-integrity-1';
 import {stopDemoTracking} from './demo_tracking.js?v=palette-2';
 import {renderEventNotifications} from './event_notifications.js';
 import {appendDemoOperationalFeeds,stopDemoReplay,getDemoReplaySnapshot} from './demo_operational_feeds.js?v=replay-report-1';
-import {installBriefingGuide} from './briefing_guide.js?v=guide-recovery-1';
+import {installBriefingGuide} from './briefing_guide.js?v=map-layers-1';
 import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=event-notifications-1';
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitoring-2';
@@ -13,7 +13,7 @@ import {createThreatReportButton,refreshThreatReport} from './scope_threat_repor
 import {initializeWorkspaceViews,showWorkspaceView,setEventNavigation} from './workspace_views.js?v=multi-events-1';
 import {renderDemoPeople} from './demo_people.js?v=no-download-1';
 import {createGeographicExplorer} from './geographic_explorer.js?v=environment-integrity-1';
-import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=palette-2';
+import {renderEventGeographicMap,renderEventConcerns} from './event_geographic_map.js?v=map-layers-1';
 import {attentionSummary,humanLabel,humanText} from './attention_summary.js?v=coverage-1';
 import {selectSofiContext,renderSofiContext} from './sofi_context.js';
 import {selectRoadContext} from './road_relevance.js?v=expiry-1';

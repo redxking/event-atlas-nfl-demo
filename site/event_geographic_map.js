@@ -19,7 +19,9 @@ export function renderEventGeographicMap(game,ground,airspace){
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map).on('tileerror',()=>{document.getElementById('event-map-tile-status').textContent='Street map unavailable. Boundary overlays remain visible; retry when connectivity returns.';});
   groundLayer=L.layerGroup().addTo(map);airLayer=L.layerGroup().addTo(map);venueLayer=L.layerGroup().addTo(map);
   concernLayer=L.layerGroup().addTo(map);
-  controls=L.control.layers(null,game.eventType&&game.eventType!=='nfl'?{'Event location':venueLayer}:{'Stadium outline':groundLayer,'FAA airspace':airLayer,'Stadium location':venueLayer},{collapsed:window.matchMedia('(max-width:600px)').matches}).addTo(map);
+  controls=L.control.layers(null,game.eventType&&game.eventType!=='nfl'?{'Event location':venueLayer}:{'Stadium outline':groundLayer,'FAA airspace':airLayer,'Stadium location':venueLayer},{collapsed:true}).addTo(map);
+  const layerToggle=controls.getContainer().querySelector('.leaflet-control-layers-toggle');
+  layerToggle.textContent='Map layers';layerToggle.setAttribute('aria-label','Map layers — show or hide map overlays');layerToggle.title='Map layers — show or hide overlays';
   controls.addOverlay(concernLayer,'Source concerns');
   L.control.scale({imperial:true,metric:true}).addTo(map);
   resizeObserver=new ResizeObserver(()=>map.invalidateSize());resizeObserver.observe(target);eventId=null;
@@ -47,7 +49,7 @@ export function renderEventConcerns(game,items){
 }
 function drawConcerns(game){
  let key=document.getElementById('event-map-key');if(!key){key=document.createElement('section');key.id='event-map-key';document.getElementById('event-geographic-map').after(key);}
- renderMapKey(key,eventKey({...keyOptions,concerns:concerns.length}),'Use the layer checkboxes to show or hide overlays. Tracking symbols appear only when positions are received or the demonstration is playing. Select a marker for its source and details. Colors describe record types and review needs, not a confirmed threat rating.');
+ renderMapKey(key,eventKey({...keyOptions,concerns:concerns.length}),'Open Map layers to show or hide overlays. Tracking symbols appear only when positions are received or the demonstration is playing. Select a marker for its source and details. Colors describe record types and review needs, not a confirmed threat rating.');
  concernLayer.clearLayers();
  for(const cue of concerns){
   const content=document.createElement('div');content.className='concern-map-popup';
