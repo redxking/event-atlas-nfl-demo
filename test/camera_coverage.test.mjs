@@ -85,3 +85,10 @@ test('public video links stay on their agency HLS hosts and camera IDs',()=>{
     }
   }
 });
+
+test('Caltrans coverage requires the venue district rather than another successful district',()=>{
+ const venues=[{id:'north',address:'Santa Clara, CA, USA',lat:37.4,lon:-121.9},{id:'south',address:'Inglewood, CA, USA',lat:33.95,lon:-118.35}];
+ const sources=[{id:'caltrans-d4',status:'failed'},{id:'caltrans-d7',status:'ok'}];
+ assert.deepEqual(selectCameraCoverage(venues,[],sources),{south:[]});
+ assert.deepEqual(selectCameraCoverage(venues,[],sources.map(s=>({...s,status:s.status==='ok'?'failed':'ok'}))),{north:[]});
+});

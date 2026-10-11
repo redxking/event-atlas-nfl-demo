@@ -273,3 +273,15 @@ test('Foxboro periods expire at assessment time even while the retrieved feed is
  assert.equal(picture.transitContext.alerts.length,1);assert.equal(picture.transitContext.alerts[0].eventWindowOverlap,false);
  assert.equal(transit.overlapCount,1);assert.equal(transit.alerts[0].eventWindowOverlap,true);
 });
+
+test('camera failures outrank held inventory and partial publishers remain a coverage gap',()=>{
+ const baltimore={...game,venue:{...game.venue,id:'baltimore',address:'Baltimore, MD, USA'}};
+ const source={id:'md-chart-cameras',status:'failed',url:'https://chart.maryland.gov/'};
+ const cameras={builtAt:new Date(now).toISOString(),sources:[source,{id:'md-imap-cameras',status:'ok'}],byVenue:{baltimore:[]}};
+ const partial=buildNflEventPicture(baltimore,{cameras},now);
+ assert.equal(partial.sources.find(s=>s.name==='Roadway cameras').state,'partial source data');assert.ok(partial.gaps.some(s=>/metadata coverage is partial/.test(s)));
+ cameras.sources[1].status='failed';const failed=buildNflEventPicture(baltimore,{cameras},now);
+ assert.equal(failed.sources.find(s=>s.name==='Roadway cameras').state,'source failed');assert.ok(failed.gaps.some(s=>/source failed/.test(s)));
+ cameras.sources[0].status=cameras.sources[1].status='ok';cameras.byVenue.baltimore={malformed:true};
+ assert.equal(buildNflEventPicture(baltimore,{cameras},now).sources.find(s=>s.name==='Roadway cameras').state,'source failed');
+});
