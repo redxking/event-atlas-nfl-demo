@@ -263,3 +263,13 @@ test('game briefing removes ended weather and roadway concerns without discardin
  assert.equal(picture.reviewQueue.items.filter(c=>['weather alert','road access'].includes(c.domain)).length,0);
  assert.ok(picture.sources.some(s=>s.name==='NWS point alerts'&&s.state==='checked'));
 });
+
+test('Foxboro periods expire at assessment time even while the retrieved feed is fresh',()=>{
+ const liveNow=Date.parse('2026-10-11T21:00:00Z');
+ const foxboro={...game,venue:{...game.venue,id:'3738'}};
+ const transit={state:'retrieved',checkedAt:liveNow-120000,screenable:true,overlapCount:1,alerts:[{id:'ended-between-checks',header:'Fixture transit notice',eventWindowOverlap:true,periods:[{start:'2026-10-11T19:00:00Z',end:new Date(liveNow-60000).toISOString()}],sourceUrl:'https://api-v3.mbta.com/alerts/fixture'}]};
+ const picture=buildNflEventPicture(foxboro,{transit},liveNow);
+ assert.equal(picture.cueCounts.transit,0);assert.equal(picture.transitContext.overlapCount,0);
+ assert.equal(picture.transitContext.alerts.length,1);assert.equal(picture.transitContext.alerts[0].eventWindowOverlap,false);
+ assert.equal(transit.overlapCount,1);assert.equal(transit.alerts[0].eventWindowOverlap,true);
+});
