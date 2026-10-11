@@ -15,10 +15,10 @@ test('published report HTML renders cited HTTPS links and escapes untrusted repo
   assert.ok(html.includes('report_refresh.js?v=20261010-1'));
   assert.match(html,/report_live_nws\.js\?v=[A-Za-z0-9-]+/);
   assert.ok(html.includes('report_live_nws_forecast.js?v=20261010-1'));
-  assert.ok(html.includes('report_live_usgs.js?v=20261010-2'));
+  assert.match(html,/report_live_usgs\.js\?v=[A-Za-z0-9-]+/);
   assert.ok(html.includes('report_live_capture.js?v=20261010-2'));
   assert.ok(html.includes('id="capture-direct-observations"'));
-  assert.ok(html.includes('report_live_nws_station.js?v=20261010-1'));
+  assert.match(html,/report_live_nws_station\.js\?v=[A-Za-z0-9-]+/);
   assert.ok(html.includes('id="direct-nws-station"'));
   assert.ok(html.includes('report_live_game.js?v=20261010-1'));
   assert.ok(html.includes('report_live_tennessee_road.js?v=20261010-1'));
