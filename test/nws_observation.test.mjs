@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {selectNwsStationObservation} from '../site/nws_observation.js';
+import {selectNwsStationObservation,fetchNwsStationObservation} from '../site/nws_observation.js';
 
 const now=Date.parse('2026-10-10T04:00:00Z');
 const venue={lat:44.50139,lon:-88.06222};
@@ -23,4 +23,27 @@ test('stale, remote, and mismatched records fail closed',()=>{
   assert.equal(selectNwsStationObservation(venue,stations,{KGRB:{...record(),id:'https://example.org/observation'}},now).state,'unavailable_or_stale');
   assert.equal(selectNwsStationObservation(venue,{features:[{...stations.features[0],geometry:{coordinates:[-90,44.5]}}]},{KGRB:record()},now).state,'unavailable_or_stale');
   assert.equal(selectNwsStationObservation(venue,stations,{KGRB:record('2026-10-10T04:05:00+00:00')},now).state,'unavailable_or_stale');
+});
+
+
+test('malformed station coordinates cannot throw or produce a usable reading',()=>{
+  for(const coordinates of [null,{},'not a point',[],[-88],[-88,100],[-200,44],[-88,NaN]]){
+    const invalid={features:[{...stations.features[0],geometry:{coordinates}}]};
+    assert.equal(selectNwsStationObservation(venue,invalid,{KGRB:record()},now).state,'unavailable_or_stale');
+  }
+  assert.equal(selectNwsStationObservation({...venue,lat:100},stations,{KGRB:record()},now).state,'unavailable_or_stale');
+});
+
+test('a malformed inventory entry does not suppress a valid nearby station',async()=>{
+  const inventory={features:[{...stations.features[0],geometry:{coordinates:{}}},...stations.features]};
+  assert.equal(selectNwsStationObservation(venue,inventory,{KGRB:record()},now).stationId,'KGRB');
+  const requested=[];
+  const fetchImpl=async url=>{
+    requested.push(url);
+    const payload=url.includes('/points/')?{properties:{observationStations:'https://api.weather.gov/gridpoints/GRB/1,1/stations'}}:url.endsWith('/stations')?inventory:record();
+    return {ok:true,headers:{get:()=>null},text:async()=>JSON.stringify(payload)};
+  };
+  assert.equal((await fetchNwsStationObservation(venue,{fetchImpl,now})).stationId,'KGRB');
+  assert.equal(requested.length,3);
+  assert.equal(requested[2],'https://api.weather.gov/stations/KGRB/observations/latest');
 });

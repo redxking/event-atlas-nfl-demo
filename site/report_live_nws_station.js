@@ -1,4 +1,4 @@
-import {fetchNwsStationObservation} from './nws_observation.js?v=20261010-1';
+import {fetchNwsStationObservation} from './nws_observation.js?v=station-integrity-1';
 
 const HOUR=3600000;
 

@@ -40,7 +40,7 @@ import {publicRoadVideoAgency,advancingMedia} from './camera_video.js?v=camera-p
 import {fl511EmbedUrl,fl511EmbedToolUrl} from './fl511_embed.js?v=20261010-2';
 import {failedSourcesForVenue} from './venue_source_scope.js?v=20261010-1';
 import {selectKickoffForecast,selectEventHourForecast} from './nws_forecast.js?v=20261010-1';
-import {fetchNwsStationObservation} from './nws_observation.js?v=20261010-1';
+import {fetchNwsStationObservation} from './nws_observation.js?v=station-integrity-1';
 import {selectSpcForGame} from './spc_outlook.js';
 import {selectWpcRainForGame} from './wpc_rain_outlook.js';
 import {selectUsgsForGame} from './usgs_nfl.js?v=20261010-1';
