@@ -1,6 +1,6 @@
 import {demoReplayBriefing} from './demo_operational_feeds.js?v=replay-report-1';
 import {selectScopeChanges} from './scope_changes.js?v=history-1';
-import {sourceCoverageGap,screeningPending} from './source_coverage.js?v=coverage-1';
+import {sourceCoverageGap,screeningPending} from './source_coverage.js?v=environment-integrity-1';
 import {concernIdentity} from './concern_location.js';
 import {humanText} from './attention_summary.js';
 import {demoPeopleForEvent} from './demo_people.js';

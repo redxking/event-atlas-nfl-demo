@@ -32,6 +32,11 @@ export function selectEonetForGame(game,snapshot,now=Date.now(),monitoringMode='
   if(monitoringMode!=='near_term_monitoring')return {state:'not_started',asOf:null,sourceUrl:eonetSourceUrl,events:[],interpretation:'Current natural-event points are not screened as context for games outside the near-term monitoring window.'};
   const at=time(snapshot?.builtAt),current=snapshot?.schema==='event-atlas.eonet-nfl.v1'&&snapshot.status==='ok'&&snapshot.sourceUrl===eonetSourceUrl&&Number.isFinite(at)&&at<=now+60000&&now-at<=12*HOUR;
   if(!current)return {state:'stale_or_unavailable',asOf:null,sourceUrl:eonetSourceUrl,events:[]};
-  const events=(snapshot.byVenue?.[game?.venue?.id]||[]).filter(item=>item&&nasaUrl(item.sourceUrl)&&Number.isFinite(item.distanceKm)&&item.distanceKm>=0&&item.distanceKm<=250&&Number.isFinite(time(item.sourceAt))&&time(item.sourceAt)<=now+2*HOUR&&now-time(item.sourceAt)<=7*24*HOUR).slice(0,5);
+  const venueMap=snapshot.byVenue;
+  if(!venueMap||typeof venueMap!=='object'||Array.isArray(venueMap))return {state:'stale_or_unavailable',asOf:null,sourceUrl:eonetSourceUrl,events:[]};
+  const records=Object.hasOwn(venueMap,game?.venue?.id)?venueMap[game.venue.id]:[];
+  if(!Array.isArray(records)||records.length>5)return {state:'stale_or_unavailable',asOf:null,sourceUrl:eonetSourceUrl,events:[]};
+  const events=records.filter(item=>item&&nasaUrl(item.sourceUrl)&&Number.isFinite(item.distanceKm)&&item.distanceKm>=0&&item.distanceKm<=250&&Number.isFinite(time(item.sourceAt))&&time(item.sourceAt)<=now+2*HOUR&&now-time(item.sourceAt)<=7*24*HOUR).slice(0,5);
+  if(events.length!==records.length)return {state:'stale_or_unavailable',asOf:null,sourceUrl:eonetSourceUrl,events:[]};
   return {state:'current_snapshot',asOf:snapshot.builtAt,sourceUrl:eonetSourceUrl,events,interpretation:snapshot.interpretation};
 }

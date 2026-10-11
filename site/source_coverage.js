@@ -7,7 +7,7 @@ export function sourceCoverageGap(source){
  if(/failed|error/.test(state))return 'Source check failed';
  if(/stale|not current/.test(state))return 'Current information is unavailable';
  if(/not yet (?:checked|loaded)|not started/.test(state))return 'Source check is pending';
- if(/no connector|no coverage|no connected|no source|unavailable|not screenable|cannot assess/.test(state))return 'Usable source coverage is unavailable';
+ if(/no connector|no coverage|no connected|no source|no current nearby station|unavailable|not screenable|cannot assess/.test(state))return 'Usable source coverage is unavailable';
  if(/outside.*(?:forecast|window)|outside forecast window|not screened outside/.test(state))return 'Source does not cover the event time';
  if(/no linked record|not verified|unverified|incomplete source alignment/.test(state))return 'Source linkage or verification is incomplete';
  if(state==='partial'||/partial source data/.test(state))return 'Only partial source data is available';

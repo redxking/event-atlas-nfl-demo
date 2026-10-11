@@ -23,6 +23,11 @@ export function selectNifcForGame(game,snapshot,now=Date.now(),mode='near_term_m
   if(mode!=='near_term_monitoring')return {state:'not_started',asOf:null,sourceUrl:nifcSource,events:[]};
   const at=Date.parse(snapshot?.builtAt);
   if(snapshot?.schema!=='event-atlas.nifc-wildfire.v1'||snapshot.status!=='ok'||snapshot.sourceUrl!==nifcSource||!Number.isFinite(at)||at>now+60000||now-at>12*HOUR)return {state:'stale_or_unavailable',asOf:null,sourceUrl:nifcSource,events:[]};
-  const events=(snapshot.byVenue?.[game?.venue?.id]||[]).filter(p=>Number.isInteger(p?.id)&&p.sourceUrl===`${nifcLayer}/${p.id}`&&Number.isFinite(p.distanceKm)&&p.distanceKm<=150&&Date.parse(p.updatedAt)<=now+HOUR&&now-Date.parse(p.updatedAt)<=3*DAY).slice(0,5);
+  const venueMap=snapshot.byVenue;
+  if(!venueMap||typeof venueMap!=='object'||Array.isArray(venueMap))return {state:'stale_or_unavailable',asOf:null,sourceUrl:nifcSource,events:[]};
+  const records=Object.hasOwn(venueMap,game?.venue?.id)?venueMap[game.venue.id]:[];
+  if(!Array.isArray(records)||records.length>5)return {state:'stale_or_unavailable',asOf:null,sourceUrl:nifcSource,events:[]};
+  const events=records.filter(p=>Number.isInteger(p?.id)&&p.sourceUrl===`${nifcLayer}/${p.id}`&&Number.isFinite(p.distanceKm)&&p.distanceKm>=0&&p.distanceKm<=150&&Date.parse(p.updatedAt)<=now+HOUR&&now-Date.parse(p.updatedAt)<=3*DAY).slice(0,5);
+  if(events.length!==records.length)return {state:'stale_or_unavailable',asOf:null,sourceUrl:nifcSource,events:[]};
   return {state:'current_snapshot',asOf:snapshot.builtAt,sourceUrl:nifcSource,events,interpretation:snapshot.interpretation};
 }

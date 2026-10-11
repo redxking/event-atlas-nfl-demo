@@ -1,4 +1,4 @@
-import {buildNifcSnapshot,selectNifcForGame,nifcLayer,nifcSource} from './nifc_wildfire.js?v=20261010-1';
+import {buildNifcSnapshot,selectNifcForGame,nifcLayer,nifcSource} from './nifc_wildfire.js?v=environment-integrity-1';
 
 const HOUR=3600000,DAY=24*HOUR;
 

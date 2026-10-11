@@ -34,7 +34,9 @@ export function selectAirnowForGame(game,snapshot,now=Date.now(),mode='near_term
   if(mode!=='near_term_monitoring')return {state:'not_started',asOf:null,sourceUrl:airnowDocs,observation:null};
   const at=Date.parse(snapshot?.builtAt),url=snapshot?.sourceUrl;
   if(snapshot?.schema!=='event-atlas.airnow-pm25.v1'||snapshot.status!=='ok'||!/^https:\/\/ofmpub\.epa\.gov\/rsig\/rsigserver\?/.test(url||'')||!Number.isFinite(at)||at>now+60000||now-at>12*HOUR)return {state:'stale_or_unavailable',asOf:null,sourceUrl:airnowDocs,observation:null};
+  if(!snapshot.byVenue||typeof snapshot.byVenue!=='object'||Array.isArray(snapshot.byVenue))return {state:'stale_or_unavailable',asOf:null,sourceUrl:airnowDocs,observation:null};
   const item=snapshot.byVenue?.[game?.venue?.id],age=now-Date.parse(item?.observedAt);
-  const valid=item&&item.sourceUrl===url&&/^\d{1,8}$/.test(item.stationId||'')&&Number.isFinite(item.distanceKm)&&item.distanceKm<=50&&Number.isFinite(item.pm25UgM3)&&item.pm25UgM3>=0&&item.pm25UgM3<=2000&&Number.isFinite(age)&&age>=-60000&&age<=4*HOUR;
+  const valid=item&&item.sourceUrl===url&&/^\d{1,8}$/.test(item.stationId||'')&&Number.isFinite(item.distanceKm)&&item.distanceKm>=0&&item.distanceKm<=50&&Number.isFinite(item.pm25UgM3)&&item.pm25UgM3>=0&&item.pm25UgM3<=2000&&Number.isFinite(age)&&age>=-60000&&age<=4*HOUR;
+  if(Object.hasOwn(snapshot.byVenue,game?.venue?.id)&&!valid)return {state:'stale_or_unavailable',asOf:snapshot.builtAt,sourceUrl:url,observation:null};
   return {state:valid?'current_station_observation':'no_current_nearby_station',asOf:snapshot.builtAt,sourceUrl:url,observation:valid?item:null,interpretation:snapshot.interpretation};
 }
