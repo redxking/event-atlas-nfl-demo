@@ -17,6 +17,15 @@ test('official club claims join only the exact game and current source check',()
   assert.equal(selectPackersGameRelease(game,{...snapshot,checkedAt:'2026-10-09T00:00:00Z'},now).state,'stale_or_unavailable');
 });
 
+test('club claims require a checked publisher and a possible publication clock',()=>{
+  const failed=snapshot.sources.map(s=>s.id==='event'?{...s,state:'failed'}:s);
+  assert.equal(selectPackersGameRelease(game,{...snapshot,sources:failed},now).state,'stale_or_unavailable');
+  const partial={...snapshot,status:'partial',sources:failed,claims:claims.filter(c=>c.sourceUrl===packersGameReleaseUrls.alumni)};
+  assert.equal(selectPackersGameRelease(game,partial,now).state,'partial_published_announcements');
+  const future=snapshot.sources.map(s=>({...s,publishedAt:'2026-10-11T00:00:00Z'}));
+  assert.equal(selectPackersGameRelease(game,{...snapshot,sources:future},now).state,'stale_or_unavailable');
+});
+
 test('partial and malformed announcement checks never become a complete club plan',()=>{
   assert.equal(selectPackersGameRelease(game,{...snapshot,status:'partial',claims:claims.slice(1)},now).state,'partial_published_announcements');
   assert.equal(selectPackersGameRelease(game,{...snapshot,claims:[...claims.slice(0,8),{...claims[8],sourceUrl:'https://unapproved.example'}]},now).state,'stale_or_unavailable');

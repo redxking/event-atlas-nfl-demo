@@ -2,9 +2,10 @@ export const cmpdOpenTrafficFeed='https://cmpdinfo.charlottenc.gov/api/v2.1/Traf
 const distance=(a,b,c,d)=>{const r=Math.PI/180;return 6371*Math.hypot((d-b)*r*Math.cos((a+c)*r/2),(c-a)*r)};
 
 export function summarizeCmpdOpenTraffic(records,venue,checkedAt){
-  if(!Array.isArray(records)||records.length>500||!Number.isFinite(checkedAt)||!Number.isFinite(venue?.lat)||!Number.isFinite(venue?.lon))throw Error('Bounded CMPD feed and venue point required');
+  if(!Array.isArray(records)||records.length>500||!Number.isFinite(checkedAt)||!Number.isFinite(new Date(checkedAt).getTime())||!Number.isFinite(venue?.lat)||!Number.isFinite(venue?.lon)||Math.abs(venue.lat)>90||Math.abs(venue.lon)>180)throw Error('Bounded CMPD feed and venue point required');
   let nearby=0,invalid=0,newestAt=null;
   for(const record of records){
+    if(!record||typeof record!=='object'||Array.isArray(record)){invalid++;continue}
     const lat=Number(record.lat),lon=Number(record.lon),at=Date.parse(record.publishedAt);
     if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<34.5||lat>36||lon< -81.8||lon> -79.5||!Number.isFinite(at)||at>checkedAt+60000){invalid++;continue}
     if(distance(venue.lat,venue.lon,lat,lon)<=5){nearby++;if(!newestAt||at>newestAt)newestAt=at}
