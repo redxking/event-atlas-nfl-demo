@@ -6,7 +6,7 @@ export const briefingTourSteps=[
  {title:'Set the events you are briefing',target:'.geo-controls',scene:'overview',text:'Use From, Through and Event type to define your briefing. The map, counts and report follow this scope. The NFL demonstration covers the next two weeks of U.S. games.'},
  {title:'Move from region to venue',target:'.geo-selection',scene:'overview',text:'Choose a FEMA region, then a state and venue. Each selection replaces the overview with that area’s events and concerns. At a venue, select a game and use Open game briefing. The breadcrumbs let you return to any previous level.'},
  {title:'Read the report for this area',target:'#map-panel .read-threat-report',scene:'overview',text:'Read threat report rolls up the selected area’s material findings, affected games, evidence, information gaps and decision options. Shared publisher records are counted once. Review source coverage before interpreting an absence of findings.'},
- {title:'Find and select a game',target:'#games',scene:'events',text:'Search or filter this list to find a game. Each card shows kickoff, stadium and whether a source concern needs review. Select a card to open that game’s briefing. The next steps use your selected NFL game, or the first NFL game in the current list.'},
+ {title:'Find and select a game',target:'#games',scene:'events',text:'Search or filter this list to find a game. Each card shows kickoff, stadium and whether a source concern needs review. Select a card to open that game’s briefing. The next steps use your selected NFL game, or the first NFL game in the current list. If no NFL game matches, the guide resets date, event-type, search and week filters to recover an available NFL game.'},
  {title:'Use the breadcrumbs',target:'.workspace-nav',scene:'event',text:'This trail shows the event’s region, state and venue. Select a previous level to return to its rollup. Back to events returns to the list. You can explore an event without losing the route back to the national picture.'},
  {title:'Understand the event map',target:'#event-geographic-map',scene:'event',tab:'map',text:'This street map shows the stadium, available source-located concerns and published airspace context. Use Stadium view or Show full airspace to change the extent. Aircraft and vessel positions appear when their feeds are connected; a missing identity prompts verification, not a conclusion of hostile intent.'},
  {title:'Read the map key',target:'#event-map-key',scene:'event',tab:'map',text:'Match each marker’s shape, color and line style to this key. Stadium outlines are community-mapped geometry, not approved security perimeters. Older FAA snapshots have a different line style. Fictional tracking examples are labeled separately from received observations.'},
@@ -24,12 +24,12 @@ const visible=element=>Boolean(element?.isConnected&&element.getClientRects().le
 
 export function installBriefingGuide(){
  const trigger=document.getElementById('briefing-guide-open');if(!trigger)return;
- let index=0,panel,spotlight,observer,target,frame,preparing=false;
+ let index=0,panel,spotlight,observer,target,frame,preparing=false,stepReady=true,recoveryAttempted=false;
  const view=name=>{if(document.body.dataset.workspaceView!==name)showWorkspaceView(name);};
  const ensureEvent=()=>{
   if(document.querySelector('.game.selected[data-id^="nfl:"]')&&document.querySelector('#detail .event-view-tabs')){view('event');return true;}
   view('events');let game=document.querySelector('.game[data-id^="nfl:"]');
-  if(!game){view('overview');const type=document.querySelector('[aria-label="Event type"]');if(type&&type.value!=='nfl'){type.value='nfl';type.dispatchEvent(new Event('change'));}view('events');game=document.querySelector('.game[data-id^="nfl:"]');}
+  if(!game&&!recoveryAttempted){recoveryAttempted=true;view('overview');const type=document.querySelector('[aria-label="Event type"]');if(type){type.value='nfl';type.dispatchEvent(new Event('change'));}view('events');for(const [id,event] of [['search','input'],['week','change']]){const control=document.getElementById(id);if(control&&control.value){control.value='';control.dispatchEvent(new Event(event,{bubbles:true}));}}game=document.querySelector('.game[data-id^="nfl:"]');}
   if(!game)return false;game.click();return Boolean(document.querySelector('#detail .event-view-tabs'));
  };
  const prepare=()=>{
@@ -42,7 +42,7 @@ export function installBriefingGuide(){
  };
  const position=()=>{
   if(!panel)return;const step=briefingTourSteps[index];target=document.querySelector(step.target);
-  if(!visible(target)){spotlight.hidden=true;panel.querySelector('.tour-availability').textContent='This section is not available yet. Wait for the event data, or return to the previous step.';return;}
+  if(!stepReady||!visible(target)){spotlight.hidden=true;panel.querySelector('.tour-availability').textContent='This section is not available yet. Wait for the event data, or return to the previous step.';return;}
   spotlight.hidden=false;panel.querySelector('.tour-availability').textContent='';
   const r=target.getBoundingClientRect(),width=document.documentElement.clientWidth,height=window.innerHeight;
   const left=Math.max(4,r.left-5),top=Math.max(4,r.top-5),right=Math.min(width-4,r.right+5),bottom=Math.min(height-4,r.bottom+5);
@@ -61,7 +61,7 @@ export function installBriefingGuide(){
  const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(position);};
  const close=()=>{cancelAnimationFrame(frame);observer?.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('scroll',schedule,true);document.removeEventListener('keydown',keys);panel?.remove();spotlight?.remove();panel=spotlight=target=null;trigger.setAttribute('aria-expanded','false');trigger.focus({preventScroll:true});};
  const render=()=>{
-  prepare();const step=briefingTourSteps[index];panel.replaceChildren();
+  stepReady=prepare();const step=briefingTourSteps[index];panel.replaceChildren();
   const progress=node('p',`Step ${index+1} of ${briefingTourSteps.length}`);progress.className='tour-progress';progress.setAttribute('aria-live','polite');
   const heading=node('h2',step.title);heading.id='briefing-tour-title';
   const availability=node('p');availability.className='tour-availability';availability.setAttribute('role','status');
@@ -74,11 +74,11 @@ export function installBriefingGuide(){
  };
  const keys=event=>{if(event.key==='Escape'){event.preventDefault();close();}else if(panel?.contains(event.target)&&event.key==='ArrowRight'&&index<briefingTourSteps.length-1){event.preventDefault();index++;render();}else if(panel?.contains(event.target)&&event.key==='ArrowLeft'&&index){event.preventDefault();index--;render();}};
  trigger.setAttribute('aria-expanded','false');trigger.onclick=()=>{
-  if(panel){close();return;}index=0;view('overview');[...document.querySelectorAll('.geo-controls button')].find(button=>button.textContent==='National view')?.click();
+  if(panel){close();return;}index=0;recoveryAttempted=false;stepReady=true;view('overview');[...document.querySelectorAll('.geo-controls button')].find(button=>button.textContent==='National view')?.click();
   spotlight=node('div');spotlight.className='briefing-tour-spotlight';spotlight.setAttribute('aria-hidden','true');
   panel=node('section');panel.className='briefing-tour-panel';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','false');panel.setAttribute('aria-labelledby','briefing-tour-title');
   document.body.append(spotlight,panel);trigger.setAttribute('aria-expanded','true');render();
-  observer=new MutationObserver(()=>{if(preparing||!panel)return;if(!visible(document.querySelector(briefingTourSteps[index].target))&&briefingTourSteps[index].scene==='event'&&document.querySelector('.game[data-id^="nfl:"]'))prepare();schedule();});observer.observe(document.getElementById('main-content'),{childList:true,subtree:true});
+  observer=new MutationObserver(()=>{if(preparing||!panel)return;if((!stepReady||!visible(document.querySelector(briefingTourSteps[index].target)))&&briefingTourSteps[index].scene==='event'&&document.querySelector('.game[data-id^="nfl:"]'))stepReady=prepare();schedule();});observer.observe(document.getElementById('main-content'),{childList:true,subtree:true});
   window.addEventListener('resize',schedule);window.addEventListener('scroll',schedule,true);document.addEventListener('keydown',keys);
  };
 }
