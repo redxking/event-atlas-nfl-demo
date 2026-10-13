@@ -60,13 +60,14 @@ export function installBriefingGuide(){
  };
  const schedule=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(position);};
  const close=()=>{cancelAnimationFrame(frame);observer?.disconnect();window.removeEventListener('resize',schedule);window.removeEventListener('scroll',schedule,true);document.removeEventListener('keydown',keys);panel?.remove();spotlight?.remove();panel=spotlight=target=null;trigger.setAttribute('aria-expanded','false');trigger.focus({preventScroll:true});};
+ const finish=()=>{close();view('overview');};
  const render=()=>{
   stepReady=prepare();const step=briefingTourSteps[index];panel.replaceChildren();
   const progress=node('p',`Step ${index+1} of ${briefingTourSteps.length}`);progress.className='tour-progress';progress.setAttribute('aria-live','polite');
   const heading=node('h2',step.title);heading.id='briefing-tour-title';
   const availability=node('p');availability.className='tour-availability';availability.setAttribute('role','status');
   const controls=node('div');controls.className='tour-actions';const previous=node('button','Previous');previous.type='button';previous.disabled=index===0;previous.onclick=()=>{index--;render();};
-  const next=node('button',index===briefingTourSteps.length-1?'Finish walkthrough':'Next');next.type='button';next.className='tour-next';next.onclick=()=>{if(index===briefingTourSteps.length-1)close();else{index++;render();}};
+  const next=node('button',index===briefingTourSteps.length-1?'Finish walkthrough':'Next');next.type='button';next.className='tour-next';next.onclick=()=>{if(index===briefingTourSteps.length-1)finish();else{index++;render();}};
   const exit=node('button','Close guide');exit.type='button';exit.onclick=close;
   controls.append(previous,next,exit);const content=node('div');content.className='tour-content';content.append(progress,heading,node('p',step.text),availability);panel.append(content,controls);
   target=document.querySelector(step.target);if(visible(target))target.scrollIntoView({block:'start',behavior:'instant'});

@@ -2,7 +2,7 @@ import {selectNtas} from './national_source_context.js?v=national-integrity-1';
 import {stopDemoTracking} from './demo_tracking.js?v=palette-2';
 import {renderEventNotifications} from './event_notifications.js';
 import {appendDemoOperationalFeeds,stopDemoReplay,getDemoReplaySnapshot} from './demo_operational_feeds.js?v=replay-report-1';
-import {installBriefingGuide} from './briefing_guide.js?v=map-layers-1';
+import {installBriefingGuide} from './briefing_guide.js?v=walkthrough-finish-1';
 import {installEventWorkspaceTabs} from './event_workspace_tabs.js?v=operations-rail-1';
 import {renderEventMonitoringPlan} from './event_monitoring_plan.js?v=event-monitoring-2';
 import {stopPublicEventMonitor} from './public_event_monitor.js?v=event-monitoring-2';
